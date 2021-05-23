@@ -2,3 +2,5 @@
 /build
 .secret
 package-lock.json
+.env
+yarn.lock

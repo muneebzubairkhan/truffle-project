@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "migrate": "truffle migrate --network bscTestnet --reset && truffle run verify USDT --network bscTestnet"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
     "@truffle/hdwallet-provider": "^1.2.3",
+    "dotenv": "^10.0.0",
     "hdwallet": "^0.7.3",
     "truffle-plugin-verify": "^0.5.8"
   }
