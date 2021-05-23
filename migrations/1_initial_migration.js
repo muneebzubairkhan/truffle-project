@@ -1,5 +1,7 @@
 const Migrations = artifacts.require("Migrations");
+const Rupees = artifacts.require("Rupees");
 
-module.exports = function (deployer) {
-  deployer.deploy(Migrations);
+module.exports = async (deployer) => {
+  await deployer.deploy(Migrations);
+  await deployer.deploy(Rupees);
 };
