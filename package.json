@@ -7,7 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "migrate": "truffle migrate --network bscTestnet --reset && truffle run verify USDT --network bscTestnet"
+    "start": "truffle migrate --network ropsten --reset && truffle run verify ARI --network ropsten",
+    "migrate": "truffle migrate --network bscTestnet --reset && truffle run verify ARI --network bscTestnet"
   },
   "keywords": [],
   "author": "",

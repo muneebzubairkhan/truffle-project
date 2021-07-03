@@ -1,0 +1,71 @@
+yarn start
+
+yarn run v1.22.5
+warning ../../../package.json: No license field
+$ truffle migrate --network ropsten --reset && truffle run verify ARI --network ropsten
+
+Compiling your contracts...
+===========================
+> Compiling ./contracts/ARI.sol
+> Artifacts written to /home/muneeb/proj/history put all to github/SimpleERC20/build/contracts
+> Compiled successfully using:
+   - solc: 0.8.0+commit.c7dfd78e.Emscripten.clang
+
+
+
+Starting migrations...
+======================
+> Network name:    'ropsten'
+> Network id:      3
+> Block gas limit: 29970678 (0x1c950f6)
+
+
+1_initial_migration.js
+======================
+
+   Replacing 'Migrations'
+   ----------------------
+   > transaction hash:    0x582a4334b6b9261ebb7f3f99b18c945372d2be5cc72da99ac7ab4caf512def69
+   > Blocks: 1            Seconds: 34
+   > contract address:    0x92111542b94DF8c51EC9e4cAC1Fd4218B3115018
+   > block number:        10558952
+   > block timestamp:     1625279342
+   > account:             0xcF01971DB0CAB2CBeE4A8C21BB7638aC1FA1c38c
+   > balance:             0.96005184
+   > gas used:            163988 (0x28094)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00327976 ETH
+
+
+   Replacing 'ARI'
+   ---------------
+   > transaction hash:    0x29d56b3425f45bef9d650e2f7e58b8dc11c2223d70f844328f217aae47a58fd7
+   > Blocks: 1            Seconds: 25
+   > contract address:    0x1b635073820Ac4c652E20A9fC9Bddabf2319B689
+   > block number:        10558953
+   > block timestamp:     1625279397
+   > account:             0xcF01971DB0CAB2CBeE4A8C21BB7638aC1FA1c38c
+   > balance:             0.9459082
+   > gas used:            707182 (0xaca6e)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.01414364 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:           0.0174234 ETH
+
+
+Summary
+=======
+> Total deployments:   2
+> Final cost:          0.0174234 ETH
+
+
+Verifying ARI
+Pass - Verified: https://ropsten.etherscan.io/address/0x1b635073820Ac4c652E20A9fC9Bddabf2319B689#contracts
+Successfully verified 1 contract(s).
+Done in 117.81s.

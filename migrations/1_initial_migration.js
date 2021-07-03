@@ -1,7 +1,7 @@
 const Migrations = artifacts.require("Migrations");
-const USDT = artifacts.require("USDT");
+const ARI = artifacts.require("ARI");
 
 module.exports = async (deployer) => {
   await deployer.deploy(Migrations);
-  await deployer.deploy(USDT);
+  await deployer.deploy(ARI);
 };
