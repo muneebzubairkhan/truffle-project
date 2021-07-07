@@ -13,12 +13,11 @@ contract Presale is Ownable {
 
     constructor(
         IERC20 _token,
-        IERC20 _usdt,
-        address _wallet
+        IERC20 _usdt
     ) {
         token = _token;
         usdt = _usdt;
-        wallet = _wallet;
+        wallet = msg.sender;
     }
 
     function buyTokens(uint256 _tokens) public {

@@ -1,6 +1,6 @@
-const USDT = artifacts.require("USDT");
 const ARI = artifacts.require("ARI");
 const Presale = artifacts.require("Presale");
+const USDT = artifacts.require("USDT");
 
 contract("Presale", async ([tokenOwner, wallet, client, usdtOwner]) => {
   // make it like real test case, input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens
