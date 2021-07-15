@@ -7,9 +7,10 @@
     "test": "test"
   },
   "scripts": {
-    "start": "truffle migrate --network ropsten --reset && truffle run verify ARI Presale --network ropsten",
-    "start1": "truffle migrate --network rinkeby --reset && truffle run verify ARI Presale --network rinkeby",
-    "migrate": "truffle migrate --network bscTestnet --reset && truffle run verify ARI Presale --network bscTestnet"
+    "start": "truffle migrate --network rinkeby --reset && truffle run verify ARI Presale --network rinkeby",
+    "start1": "truffle migrate --network ropsten --reset && truffle run verify ARI Presale --network ropsten",
+    "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify ARI Presale --network mainnet",
+    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify ARI Presale --network bscTestnet"
   },
   "keywords": [],
   "author": "",

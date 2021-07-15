@@ -4,6 +4,12 @@ const Presale = artifacts.require("Presale");
 const USDT = artifacts.require("USDT");
 
 module.exports = async (deployer) => {
+  await ropsten(deployer);
+  // await rinkeby(deployer);
+  // await ethMainnet(deployer);
+};
+
+const rinkeby = async (deployer) => {
   await deployer.deploy(Migrations);
 
   const token = await deployer.deploy(ARI);
@@ -15,7 +21,40 @@ module.exports = async (deployer) => {
   const tokensForPresale = web3.utils.toWei("250000000");
   await token.transfer(presale.address, tokensForPresale);
 
-  console.log("token", token.address);
-  console.log("usdt", usdt.address);
+  console.log("ari token", token.address);
   console.log("presale", presale.address);
+  console.log("usdt", usdt.address);
+};
+
+const ethMainnet = async (deployer) => {
+  await deployer.deploy(Migrations);
+
+  const token = await deployer.deploy(ARI);
+  // const token = await ARI.at(" ");
+  const usdt = await USDT.at("0xdac17f958d2ee523a2206206994597c13d831ec7");
+
+  const presale = await deployer.deploy(Presale, token.address, usdt.address);
+  const tokensForPresale = web3.utils.toWei("250000000");
+  await token.transfer(presale.address, tokensForPresale);
+
+  console.log("ari token", token.address);
+  console.log("presale", presale.address);
+  console.log("usdt", usdt.address);
+};
+
+const ropsten = async (deployer) => {
+  await deployer.deploy(Migrations);
+
+  const token = await deployer.deploy(ARI);
+  // const usdt = await deployer.deploy(USDT);
+  // const token = await ARI.at("0x2F2C69A56c33FEa5750627C352a7A59bBFB43302");
+  const usdt = await USDT.at(" ");
+
+  const presale = await deployer.deploy(Presale, token.address, usdt.address);
+  const tokensForPresale = web3.utils.toWei("250000000");
+  await token.transfer(presale.address, tokensForPresale);
+
+  console.log("ari token", token.address);
+  console.log("presale", presale.address);
+  console.log("usdt", usdt.address);
 };
