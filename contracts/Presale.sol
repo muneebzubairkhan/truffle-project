@@ -20,17 +20,17 @@ contract Presale is Ownable {
         wallet = msg.sender;
     }
 
-    function buyTokens(uint256 _tokens) public {
+    function buyTokens(uint256 _tokens) external {
         tokensSold += _tokens;
         usdt.transferFrom(msg.sender, wallet, (_tokens * rate) / 10000);
         token.transfer(msg.sender, _tokens);
     }
 
-    function setRate(uint256 _rate) public onlyOwner {
+    function ownerFunction_setRate(uint256 _rate) external onlyOwner {
         rate = _rate;
     }
 
-    function getTokens(IERC20 _token, uint256 _amount) public onlyOwner {
-        _token.transfer(owner(), _amount);
+    function ownerFunction_getLockedTokens(IERC20 _token) external onlyOwner {
+        _token.transfer(owner(), _token.balanceOf(address(this)));
     }
 }

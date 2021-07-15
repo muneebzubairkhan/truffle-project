@@ -51,6 +51,16 @@ module.exports = {
       network_id: "3",
       skipDryRun: true,
     },
+    rinkeby: {
+      provider: () => {
+        return new HDWalletProvider(
+          MNEMONIC,
+          "https://rinkeby.infura.io/v3/" + token
+        );
+      },
+      network_id: "4",
+      skipDryRun: true,
+    },
     kovan: {
       provider: () => {
         return new HDWalletProvider(

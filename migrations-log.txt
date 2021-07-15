@@ -1,71 +1,116 @@
-yarn start
+rinkeby:
+token 0x3b1d9688da3BbddeacC78eE86cE1317E1dCc9908
+usdt 0x81223F51D0f9AAE605f0ea6DF6531Fe52Be75886
+presale 0x3129f085Bb236565089dfC1DA56F0A582557db9e
 
-yarn run v1.22.5
-warning ../../../package.json: No license field
-$ truffle migrate --network ropsten --reset && truffle run verify ARI --network ropsten
+ARI https://rinkeby.etherscan.io/address/0x3b1d9688da3BbddeacC78eE86cE1317E1dCc9908#contracts
+USDT https://rinkeby.etherscan.io/address/0x81223F51D0f9AAE605f0ea6DF6531Fe52Be75886#contracts
+Presale https://rinkeby.etherscan.io/address/0x3129f085Bb236565089dfC1DA56F0A582557db9e#contracts
+
+$ yarn start1
+yarn run v1.22.10
+$ truffle migrate --network rinkeby --reset && truffle run verify ARI Presale --network rinkeby
 
 Compiling your contracts...
 ===========================
-> Compiling ./contracts/ARI.sol
-> Artifacts written to /home/muneeb/proj/history put all to github/SimpleERC20/build/contracts
-> Compiled successfully using:
-   - solc: 0.8.0+commit.c7dfd78e.Emscripten.clang
+> Everything is up to date, there is nothing to compile.
 
 
 
 Starting migrations...
 ======================
-> Network name:    'ropsten'
-> Network id:      3
-> Block gas limit: 29970678 (0x1c950f6)
+> Network name:    'rinkeby'
+> Network id:      4
+> Block gas limit: 30000000 (0x1c9c380)
 
 
 1_initial_migration.js
 ======================
 
-   Replacing 'Migrations'
+   Deploying 'Migrations'
    ----------------------
-   > transaction hash:    0x582a4334b6b9261ebb7f3f99b18c945372d2be5cc72da99ac7ab4caf512def69
-   > Blocks: 1            Seconds: 34
-   > contract address:    0x92111542b94DF8c51EC9e4cAC1Fd4218B3115018
-   > block number:        10558952
-   > block timestamp:     1625279342
-   > account:             0xcF01971DB0CAB2CBeE4A8C21BB7638aC1FA1c38c
-   > balance:             0.96005184
+   > transaction hash:    0x0f6b3eb7395252992c969c54dfaca9235174e9fd92d20e6b3f9c1059a48e93a4
+   > Blocks: 2            Seconds: 28
+   > contract address:    0x4EBB872a20535a60E6BE688BB30501F561Feb694
+   > block number:        8939763
+   > block timestamp:     1626334682
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             18.747609113870923207
    > gas used:            163988 (0x28094)
-   > gas price:           20 gwei
+   > gas price:           1.000000055 gwei
    > value sent:          0 ETH
-   > total cost:          0.00327976 ETH
+   > total cost:          0.00016398800901934 ETH
 
 
    Replacing 'ARI'
    ---------------
-   > transaction hash:    0x29d56b3425f45bef9d650e2f7e58b8dc11c2223d70f844328f217aae47a58fd7
-   > Blocks: 1            Seconds: 25
-   > contract address:    0x1b635073820Ac4c652E20A9fC9Bddabf2319B689
-   > block number:        10558953
-   > block timestamp:     1625279397
-   > account:             0xcF01971DB0CAB2CBeE4A8C21BB7638aC1FA1c38c
-   > balance:             0.9459082
-   > gas used:            707182 (0xaca6e)
-   > gas price:           20 gwei
+   > transaction hash:    0x4214f0e8b775bd705b9037cc340591c6ed42674d71e477648535e593823ee1e5
+   > Blocks: 2            Seconds: 17
+   > contract address:    0x3b1d9688da3BbddeacC78eE86cE1317E1dCc9908
+   > block number:        8939765
+   > block timestamp:     1626334712
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             18.746670152821158274
+   > gas used:            938961 (0xe53d1)
+   > gas price:           1.000000053 gwei
    > value sent:          0 ETH
-   > total cost:          0.01414364 ETH
+   > total cost:          0.000938961049764933 ETH
 
+
+   Deploying 'USDT'
+   ----------------
+   > transaction hash:    0x105e70dff7ad5907a75c0b932a43231ff9dd4f13d517981e46591ac0be67e4fc
+   > Blocks: 2            Seconds: 26
+   > contract address:    0x81223F51D0f9AAE605f0ea6DF6531Fe52Be75886
+   > block number:        8939767
+   > block timestamp:     1626334742
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             18.745877471779938862
+   > gas used:            792681 (0xc1869)
+   > gas price:           1.000000052 gwei
+   > value sent:          0 ETH
+   > total cost:          0.000792681041219412 ETH
+
+
+   Deploying 'Presale'
+   -------------------
+   > transaction hash:    0xb87f844ae5140041de7f6755e62873dab5f2d3638fe3971198ed7815ac13af5c
+   > Blocks: 2            Seconds: 17
+   > contract address:    0x3129f085Bb236565089dfC1DA56F0A582557db9e
+   > block number:        8939770
+   > block timestamp:     1626334787
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             18.74530624075023485
+   > gas used:            571231 (0x8b75f)
+   > gas price:           1.000000052 gwei
+   > value sent:          0 ETH
+   > total cost:          0.000571231029704012 ETH
+
+token 0x3b1d9688da3BbddeacC78eE86cE1317E1dCc9908
+usdt 0x81223F51D0f9AAE605f0ea6DF6531Fe52Be75886
+presale 0x3129f085Bb236565089dfC1DA56F0A582557db9e
 
    > Saving migration to chain.
    > Saving artifacts
    -------------------------------------
-   > Total cost:           0.0174234 ETH
+   > Total cost:     0.002466861129707697 ETH
 
 
 Summary
 =======
-> Total deployments:   2
-> Final cost:          0.0174234 ETH
+> Total deployments:   4
+> Final cost:          0.002466861129707697 ETH
 
 
 Verifying ARI
-Pass - Verified: https://ropsten.etherscan.io/address/0x1b635073820Ac4c652E20A9fC9Bddabf2319B689#contracts
+Pass - Verified: https://rinkeby.etherscan.io/address/0x3b1d9688da3BbddeacC78eE86cE1317E1dCc9908#contracts
+Verifying Presale
+Pass - Verified: https://rinkeby.etherscan.io/address/0x3129f085Bb236565089dfC1DA56F0A582557db9e#contracts
+Successfully verified 2 contract(s).
+Done in 221.46s.
+
+DELL@DESKTOP-AQD5DQP MINGW64 ~/Downloads/projects/erc20token (master)
+$ truffle run verify USDT --network rinkeby
+Verifying USDT
+Pass - Verified: https://rinkeby.etherscan.io/address/0x81223F51D0f9AAE605f0ea6DF6531Fe52Be75886#contracts
 Successfully verified 1 contract(s).
-Done in 117.81s.
