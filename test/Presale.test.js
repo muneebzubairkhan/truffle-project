@@ -59,6 +59,11 @@ contract(
         "usdt walletDev: ",
         web3.utils.fromWei((await usdt.balanceOf(walletDev)).toString())
       );
+
+      console.log(
+        "await presale.tokensSold(): ",
+        web3.utils.fromWei((await presale.tokensSold()).toString())
+      );
     });
   }
 );
