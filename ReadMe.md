@@ -1,3 +1,9 @@
+### Deployed to ETH Mainnet
+Presale https://etherscan.io/address/0x7b58c75cb67030221720e0b92c8b658164079add#code
+
+Token https://etherscan.io/address/0x31dfd905c9162f172c711cab91f6d580a088ae6f
+
+
 ### Client reuirements
 
 Client on fiverr, May 23, 3:59 PM
