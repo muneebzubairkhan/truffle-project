@@ -3,10 +3,29 @@ const ARI = artifacts.require("ARI");
 const Presale = artifacts.require("Presale");
 const USDT = artifacts.require("USDT");
 
-module.exports = async (deployer) => {
-  await ropsten(deployer);
+module.exports = async (deployer, network, accounts) => {
+  await localDeploy(deployer, accounts);
+  // await ropsten(deployer);
   // await rinkeby(deployer);
   // await ethMainnet(deployer);
+};
+
+const localDeploy = async (deployer, [_, client, owner, dev]) => {
+  await deployer.deploy(Migrations);
+
+  const token = await deployer.deploy(ARI, owner);
+  const usdt = await deployer.deploy(USDT);
+  const presale = await deployer.deploy(
+    Presale,
+    token.address,
+    usdt.address,
+    owner,
+    dev
+  );
+
+  console.log("ari token", token.address);
+  console.log("presale", presale.address);
+  console.log("usdt", usdt.address);
 };
 
 const rinkeby = async (deployer) => {
