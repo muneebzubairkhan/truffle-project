@@ -12,7 +12,7 @@ contract(
       const usdt = await USDT.new({ from: usdtOwner });
 
       // this line will not happen in real life
-      await usdt.transfer(client, web3.utils.toWei("100"), { from: usdtOwner }); // give 100$ to client
+      await usdt.transfer(client, web3.utils.toWei("1000"), { from: usdtOwner }); // give 100$ to client
 
       const presale = await Presale.new(
         token.address,

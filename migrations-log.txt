@@ -1,3 +1,8 @@
+Rinkeby: // we were facing high gas problem in func buyTokens() in Presale.sol
+ARI https://rinkeby.etherscan.io/address/0x77470c56e56e4D039118Cfc1bB5558eaa82E5775
+Presale https://rinkeby.etherscan.io/address/0x7DEb59738c86CA3BE4a49a1f29E839e4551eB256
+USDT https://rinkeby.etherscan.io/address/0x81223F51D0f9AAE605f0ea6DF6531Fe52Be75886
+
 rinkeby:
 token 0x3b1d9688da3BbddeacC78eE86cE1317E1dCc9908
 usdt 0x81223F51D0f9AAE605f0ea6DF6531Fe52Be75886
