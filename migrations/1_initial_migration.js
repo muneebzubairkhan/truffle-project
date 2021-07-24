@@ -4,9 +4,9 @@ const Presale = artifacts.require("Presale");
 const USDT = artifacts.require("USDT");
 
 module.exports = async (deployer, network, accounts) => {
-  // await localDeploy(deployer, accounts);
+  await localDeploy(deployer, accounts);
   // await ropsten(deployer);
-  await rinkeby(deployer, accounts);
+  // await rinkeby(deployer, accounts);
   // await ethMainnet(deployer);
 };
 
