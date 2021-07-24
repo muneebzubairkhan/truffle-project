@@ -7,7 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "start": "truffle migrate --network rinkeby --reset && truffle run verify ARI Presale --network rinkeby",
+    "start": "truffle migrate --network bscTestnet --reset && truffle run verify ARI Presale --network bscTestnet",
+    "start2": "truffle migrate --network rinkeby --reset && truffle run verify ARI Presale --network rinkeby",
     "start1": "truffle migrate --network ropsten --reset && truffle run verify ARI Presale --network ropsten",
     "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify ARI Presale --network mainnet",
     "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify ARI Presale --network bscTestnet"
@@ -17,6 +18,7 @@
   "license": "ISC",
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
+    "@pancakeswap/pancake-swap-lib": "^0.0.4",
     "@truffle/hdwallet-provider": "^1.2.2",
     "dotenv": "^10.0.0",
     "eth-gas-reporter": "^0.2.22",

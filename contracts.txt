@@ -1,4 +1,18 @@
+
+
+BSC Mainnet:
+
+USDT https://bscscan.com/address/0x55d398326f99059ff775485246999027b3197955#code
+
+
+BSC Testnet:
+USDT https://testnet.bscscan.com/address/0xFee8edD4C9161677D331d00247AB5078704C77f2#contracts
+ARI  https://testnet.bscscan.com/address/0x94768F3bf6be71D8E2920491E7148C25F0614642#contracts
+Presale https://testnet.bscscan.com/address/0x4D141cC576004A8186f858Aa150dD130A0857d16#contracts
+
+
 Rinkeby: // we were facing high gas problem in func buyTokens() in Presale.sol
+// the error was due to a require statement in transferFrom() in USDT on eth mainnet
 ARI https://rinkeby.etherscan.io/address/0x77470c56e56e4D039118Cfc1bB5558eaa82E5775
 Presale https://rinkeby.etherscan.io/address/0x7DEb59738c86CA3BE4a49a1f29E839e4551eB256
 USDT https://rinkeby.etherscan.io/address/0x81223F51D0f9AAE605f0ea6DF6531Fe52Be75886

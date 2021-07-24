@@ -1,26 +1,23 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+pragma solidity ^0.6.2;
+import "@pancakeswap/pancake-swap-lib/contracts/access/Ownable.sol";
+import "@pancakeswap/pancake-swap-lib/contracts/token/BEP20/IBEP20.sol";
 
 // functions: setRate, buyTokens...
 contract Presale is Ownable {
-    using SafeERC20 for IERC20;
-
-    IERC20 public token;
-    IERC20 public usdt;
+    IBEP20 public token;
+    IBEP20 public usdt;
     uint128 public tokensSold = 0;
     uint128 public rate = 3000; // 0.3 = 3000, 0.45 = 4500, 0.69 = 6900 // 0.3 USDT = 1 ARI
     address public walletOwner;
     address public walletDev;
 
     constructor(
-        IERC20 _token,
-        IERC20 _usdt,
+        IBEP20 _token,
+        IBEP20 _usdt,
         address _walletOwner,
         address _walletDev
-    ) {
+    ) public {
         token = _token;
         usdt = _usdt;
         walletOwner = _walletOwner;
@@ -42,7 +39,7 @@ contract Presale is Ownable {
         rate = _rate;
     }
 
-    function ownerFunction_getLockedTokens(IERC20 _token) external onlyOwner {
+    function ownerFunction_getLockedTokens(IBEP20 _token) external onlyOwner {
         _token.transfer(owner(), _token.balanceOf(address(this)));
     }
 }
