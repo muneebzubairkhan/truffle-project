@@ -9,7 +9,8 @@ contract ARI is Ownable, BEP20 {
     uint256 constant TOTAL_SUPPLY = 1_000_000_000 ether;
 
     constructor(address _walletOwner) public BEP20(NAME, SYMBOL) {
-        _mint(_walletOwner, TOTAL_SUPPLY);
+        _mint(msg.sender, TOTAL_SUPPLY);
+        transferOwnership(_walletOwner);
     }
 
     function ownerFunction_getLockedTokens(IBEP20 _token) external onlyOwner {

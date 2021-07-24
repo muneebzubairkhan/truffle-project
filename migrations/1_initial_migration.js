@@ -4,7 +4,8 @@ const Presale = artifacts.require("Presale");
 const USDT = artifacts.require("USDT");
 
 module.exports = async (deployer, network, accounts) => {
-  await bscTestnet(deployer, accounts);
+  await bscMainnet(deployer, accounts);
+  // await bscTestnet(deployer, accounts);
   // await localDeploy(deployer, accounts);
   // await ropsten(deployer);
   // await rinkeby(deployer, accounts);
@@ -29,6 +30,31 @@ const localDeploy = async (deployer, [_, client, owner, dev]) => {
   console.log("usdt", usdt.address);
 };
 
+const bscMainnet = async (deployer, accounts) => {
+  await deployer.deploy(Migrations);
+
+  const walletOwner = "0x8f56641a9EaBF983ab78fF90A83f1AE79F92B4ea";
+  const walletDev = "0x9Fc0fB02B1c2429065b5e75E008F4bC220730A13";
+
+  const token = await deployer.deploy(ARI, walletOwner);
+  const usdt = await USDT.at("0x55d398326f99059ff775485246999027b3197955");
+
+  const presale = await deployer.deploy(
+    Presale,
+    token.address,
+    usdt.address,
+    walletOwner,
+    walletDev
+  );
+  const tokensForPresale = web3.utils.toWei("250000000");
+  const tokensForOthers = web3.utils.toWei("750000000");
+  await token.transfer(presale.address, tokensForPresale);
+  await token.transfer(walletOwner, tokensForOthers);
+
+  console.log("ari token", token.address);
+  console.log("presale", presale.address);
+  console.log("usdt", usdt.address);
+};
 
 const bscTestnet = async (deployer, accounts) => {
   await deployer.deploy(Migrations);

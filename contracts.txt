@@ -1,7 +1,8 @@
 
 
 BSC Mainnet:
-
+ARI https://bscscan.com/address/0x9c5CC63E979D30B8d12eCd95df79b6c99A483ee6#code
+Presale https://bscscan.com/address/0xcd9C8172e228171170117c209DaDA585fea540Ca#code
 USDT https://bscscan.com/address/0x55d398326f99059ff775485246999027b3197955#code
 
 
@@ -26,9 +27,114 @@ ARI https://rinkeby.etherscan.io/address/0x3b1d9688da3BbddeacC78eE86cE1317E1dCc9
 USDT https://rinkeby.etherscan.io/address/0x81223F51D0f9AAE605f0ea6DF6531Fe52Be75886#contracts
 Presale https://rinkeby.etherscan.io/address/0x3129f085Bb236565089dfC1DA56F0A582557db9e#contracts
 
+
+
+
+==========================================================================
+
+yarn startBscMainnet
+yarn run v1.22.5
+warning ../../../package.json: No license field
+$ truffle migrate --network bscMainnet --reset && truffle run verify ARI Presale --network bscMainnet
+
+Compiling your contracts...
+===========================
+> Compiling ./contracts/ARI.sol
+> Artifacts written to /home/muneeb/proj/history put all to github/SimpleERC20/build/contracts
+> Compiled successfully using:
+   - solc: 0.6.2+commit.bacdbe57.Emscripten.clang
+
+
+
+Starting migrations...
+======================
+> Network name:    'bscMainnet'
+> Network id:      56
+> Block gas limit: 70747442 (0x4378532)
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > transaction hash:    0x5d05c9a091809862307ada40e76537987a06b18bced311fd0702eb2b4c26596b
+   > Blocks: 4            Seconds: 13
+   > contract address:    0xE723F37Ae54F0cb3468B6e277Fd9837B639DB0C6
+   > block number:        9436739
+   > block timestamp:     1627129176
+   > account:             0x0001b26FCA71557c2Ae50A4bC91DBf94a44127B1
+   > balance:             0.18374635438783865
+   > gas used:            153706 (0x2586a)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00307412 ETH
+
+
+   Deploying 'ARI'
+   ---------------
+   > transaction hash:    0xf2c33d7a88636b76c8b7efdde10ecede7dbc8205bf0567c96f69232f618fb4ef
+   > Blocks: 3            Seconds: 9
+   > contract address:    0x9c5CC63E979D30B8d12eCd95df79b6c99A483ee6
+   > block number:        9436745
+   > block timestamp:     1627129195
+   > account:             0x0001b26FCA71557c2Ae50A4bC91DBf94a44127B1
+   > balance:             0.16213001438783865
+   > gas used:            1080817 (0x107df1)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.02161634 ETH
+
+
+   Deploying 'Presale'
+   -------------------
+   > transaction hash:    0xda6e4a6f43fff33771605d8408c80805a00f241183fa8540c5eb22a44172f1d1
+   > Blocks: 3            Seconds: 9
+   > contract address:    0xcd9C8172e228171170117c209DaDA585fea540Ca
+   > block number:        9436753
+   > block timestamp:     1627129219
+   > account:             0x0001b26FCA71557c2Ae50A4bC91DBf94a44127B1
+   > balance:             0.14910491438783865
+   > gas used:            651255 (0x9eff7)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0130251 ETH
+
+ari token 0x9c5CC63E979D30B8d12eCd95df79b6c99A483ee6
+presale 0xcd9C8172e228171170117c209DaDA585fea540Ca
+usdt 0x55d398326f99059fF775485246999027B3197955
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.03771556 ETH
+
+
+Summary
+=======
+> Total deployments:   3
+> Final cost:          0.03771556 ETH
+
+
+Verifying ARI
+Pass - Verified: https://bscscan.com/address/0x9c5CC63E979D30B8d12eCd95df79b6c99A483ee6#contracts
+Verifying Presale
+Pass - Verified: https://bscscan.com/address/0xcd9C8172e228171170117c209DaDA585fea540Ca#contracts
+Successfully verified 2 contract(s).
+Done in 138.11s.
+
+
+
+
+
+
+==================================================================================
+
+
 $ yarn start1
 yarn run v1.22.10
 $ truffle migrate --network rinkeby --reset && truffle run verify ARI Presale --network rinkeby
+
 
 Compiling your contracts...
 ===========================
