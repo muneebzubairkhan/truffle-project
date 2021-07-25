@@ -1,20 +1,19 @@
 {
   "name": "simple-erc20",
   "version": "1.0.0",
+  "license": "MIT",
   "description": "",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "start": "truffle migrate --network rinkeby --reset && truffle run verify ARI Presale --network rinkeby",
-    "start1": "truffle migrate --network ropsten --reset && truffle run verify ARI Presale --network ropsten",
-    "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify ARI Presale --network mainnet",
-    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify ARI Presale --network bscTestnet"
+    "start": "yarn startBscTestnet",
+    "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify DogeBTC --network bscMainnet",
+    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify DogeBTC --network bscTestnet"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
   "dependencies": {
     "@openzeppelin/contracts": "^4.1.0",
     "@truffle/hdwallet-provider": "^1.2.2",

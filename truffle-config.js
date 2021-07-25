@@ -20,6 +20,8 @@ module.exports = {
         );
       },
       network_id: "97",
+      gas: 2000000, //from ganache-cli output
+      // gasPrice: 20000000, //From ganache-cli output
     },
 
     bscMainnet: {
