@@ -1686,47 +1686,47 @@ contract DogeBTC is ERC20, Ownable {
     );
 
     constructor() ERC20("DogeBTC", "DogeBTC") {
-        // uint256 _dividendRewardsFee = 10;
-        // uint256 _marketingFee = 5;
+        uint256 _dividendRewardsFee = 10;
+        uint256 _marketingFee = 5;
 
-        // dividendRewardsFee = _dividendRewardsFee;
-        // marketingFee = _marketingFee;
-        // totalFees = _dividendRewardsFee.add(_marketingFee);
+        dividendRewardsFee = _dividendRewardsFee;
+        marketingFee = _marketingFee;
+        totalFees = _dividendRewardsFee.add(_marketingFee);
 
-        // // dividendTracker = new DogeBTCDividendTracker();
+        dividendTracker = new DogeBTCDividendTracker();
 
-        // buyBackWallet = 0x0001b26FCA71557c2Ae50A4bC91DBf94a44127B1;
+        buyBackWallet = 0x0001b26FCA71557c2Ae50A4bC91DBf94a44127B1;
 
         // // IPancakeRouter02 _uniswapV2Router = IPancakeRouter02(
         // //     0x10ED43C718714eb63d5aA57B78B54704E256024E
         // // );
-        // // IPancakeRouter02 _uniswapV2Router = IPancakeRouter02(
-        // //     0xD99D1c33F9fC3444f8101754aBC46c52416550D1
-        // // );
+        IPancakeRouter02 _uniswapV2Router = IPancakeRouter02(
+            0xD99D1c33F9fC3444f8101754aBC46c52416550D1
+        );
 
         // // Create a uniswap pair for this new token
-        // // address _uniswapV2Pair = IPancakeFactory(_uniswapV2Router.factory())
-        // // .createPair(address(this), _uniswapV2Router.WETH());
+        address _uniswapV2Pair = IPancakeFactory(_uniswapV2Router.factory())
+        .createPair(address(this), _uniswapV2Router.WETH());
 
-        // // uniswapV2Router = _uniswapV2Router;
-        // // uniswapV2Pair = _uniswapV2Pair;
+        uniswapV2Router = _uniswapV2Router;
+        uniswapV2Pair = _uniswapV2Pair;
 
-        // // _setAutomatedMarketMakerPair(_uniswapV2Pair, true);
+        _setAutomatedMarketMakerPair(_uniswapV2Pair, true);
 
         // // exclude from receiving dividends
-        // dividendTracker.excludeFromDividends(address(dividendTracker));
-        // dividendTracker.excludeFromDividends(address(this));
-        // // dividendTracker.excludeFromDividends(address(_uniswapV2Router));
+        dividendTracker.excludeFromDividends(address(dividendTracker));
+        dividendTracker.excludeFromDividends(address(this));
+        dividendTracker.excludeFromDividends(address(_uniswapV2Router));
 
         // // exclude from paying fees or having max transaction amount
-        // excludeFromFees(buyBackWallet, true);
-        // excludeFromFees(address(this), true);
+        excludeFromFees(buyBackWallet, true);
+        excludeFromFees(address(this), true);
 
         // /*
         //     _mint is an internal function in ERC20.sol that is only called here,
         //     and CANNOT be called ever again
         // */
-        // _mint(owner(), 100000000000 * (10**18));
+        _mint(owner(), 100000000000 * (10**18));
     }
 
     receive() external payable {}
