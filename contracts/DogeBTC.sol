@@ -1161,7 +1161,7 @@ contract DividendPayingToken is
 ///////// Interfaces ///////////
 ////////////////////////////////
 
-interface IPancakeFactory {
+interface IUniswapV2Factory {
     event PairCreated(
         address indexed token0,
         address indexed token1,
@@ -1300,7 +1300,7 @@ interface IUniswapV2Pair {
     function initialize(address, address) external;
 }
 
-interface IPancakeRouter01 {
+interface IUniswapV2Router01 {
     function factory() external pure returns (address);
 
     function WETH() external pure returns (address);
@@ -1459,7 +1459,7 @@ interface IPancakeRouter01 {
         returns (uint256[] memory amounts);
 }
 
-interface IPancakeRouter02 is IPancakeRouter01 {
+interface IUniswapV2Router02 is IUniswapV2Router01 {
     function removeLiquidityETHSupportingFeeOnTransferTokens(
         address token,
         uint256 liquidity,
@@ -1588,11 +1588,11 @@ library IterableMapping {
 contract DogeBTC is ERC20, Ownable {
     using SafeMath for uint256;
 
-    IPancakeRouter02 public uniswapV2Router;
-    address public uniswapV2Pair;
+    IUniswapV2Router02 public uniswapV2Router;
+    address public immutable uniswapV2Pair;
 
-    address public _dividendToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // Binance-Peg BTCB
-    address public deadAddress =
+    address public _dividendToken = 0x10e0BC6EBCf6B07D2c8457C806AbCf8Fa0bDA2b7; // Binance-Peg BTCB
+    address public immutable deadAddress =
         0x000000000000000000000000000000000000dEaD;
 
     bool private swapping;
@@ -1611,7 +1611,7 @@ contract DogeBTC is ERC20, Ownable {
 
     uint256 public dividendRewardsFee;
     uint256 public marketingFee;
-    uint256 public  totalFees;
+    uint256 public immutable totalFees;
 
     // sells have fees of 12 and 6 (10 * 1.2 and 5 * 1.2)
     uint256 public sellFeeIncreaseFactor = 120;
@@ -1695,17 +1695,13 @@ contract DogeBTC is ERC20, Ownable {
 
         dividendTracker = new DogeBTCDividendTracker();
 
-        buyBackWallet = 0x0001b26FCA71557c2Ae50A4bC91DBf94a44127B1;
+        buyBackWallet = 0xd9a94b853364670C395E9e5f6DD6FDD70d72F2DB;
 
-        // // IPancakeRouter02 _uniswapV2Router = IPancakeRouter02(
-        // //     0x10ED43C718714eb63d5aA57B78B54704E256024E
-        // // );
-        IPancakeRouter02 _uniswapV2Router = IPancakeRouter02(
+        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
             0xD99D1c33F9fC3444f8101754aBC46c52416550D1
         );
-
-        // // Create a uniswap pair for this new token
-        address _uniswapV2Pair = IPancakeFactory(_uniswapV2Router.factory())
+        // Create a uniswap pair for this new token
+        address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
         .createPair(address(this), _uniswapV2Router.WETH());
 
         uniswapV2Router = _uniswapV2Router;
@@ -1713,19 +1709,19 @@ contract DogeBTC is ERC20, Ownable {
 
         _setAutomatedMarketMakerPair(_uniswapV2Pair, true);
 
-        // // exclude from receiving dividends
+        // exclude from receiving dividends
         dividendTracker.excludeFromDividends(address(dividendTracker));
         dividendTracker.excludeFromDividends(address(this));
         dividendTracker.excludeFromDividends(address(_uniswapV2Router));
 
-        // // exclude from paying fees or having max transaction amount
+        // exclude from paying fees or having max transaction amount
         excludeFromFees(buyBackWallet, true);
         excludeFromFees(address(this), true);
 
-        // /*
-        //     _mint is an internal function in ERC20.sol that is only called here,
-        //     and CANNOT be called ever again
-        // */
+        /*
+            _mint is an internal function in ERC20.sol that is only called here,
+            and CANNOT be called ever again
+        */
         _mint(owner(), 100000000000 * (10**18));
     }
 
@@ -1736,6 +1732,7 @@ contract DogeBTC is ERC20, Ownable {
         onlyOwner
     {
         presaleAddress = _presaleAddress;
+        dividendTracker.excludeFromDividends(_presaleAddress);
         excludeFromFees(_presaleAddress, true);
 
         dividendTracker.excludeFromDividends(_routerAddress);
@@ -1859,7 +1856,7 @@ contract DogeBTC is ERC20, Ownable {
             "DogeBTC: The router already has that address"
         );
         emit UpdateUniswapV2Router(newAddress, address(uniswapV2Router));
-        uniswapV2Router = IPancakeRouter02(newAddress);
+        uniswapV2Router = IUniswapV2Router02(newAddress);
     }
 
     function excludeFromFees(address account, bool excluded) public onlyOwner {
@@ -2256,7 +2253,7 @@ contract DogeBTCDividendTracker is DividendPayingToken, Ownable {
     mapping(address => uint256) public lastClaimTimes;
 
     uint256 public claimWait;
-    uint256 public  minimumTokenBalanceForDividends;
+    uint256 public immutable minimumTokenBalanceForDividends;
 
     event ExcludeFromDividends(address indexed account);
     event ClaimWaitUpdated(uint256 indexed newValue, uint256 indexed oldValue);
