@@ -2,8 +2,8 @@ var HDWalletProvider = require("@truffle/hdwallet-provider");
 require("dotenv").config();
 const MNEMONIC = process.env.MNEMONIC;
 const token = process.env.INFURA_TOKEN;
-const etherscanKey = process.env.ETHERSCAN_KEY;
-//
+const etherscanKey = process.env.BSCSCAN_KEY;
+
 module.exports = {
   networks: {
     development: {
@@ -20,7 +20,7 @@ module.exports = {
         );
       },
       network_id: "97",
-      gas: 2000000, //from ganache-cli output
+      gas: 4000000, //from ganache-cli output
       // gasPrice: 20000000, //From ganache-cli output
     },
 

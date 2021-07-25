@@ -941,7 +941,7 @@ contract DividendPayingToken is
     uint256 internal magnifiedDividendPerShare;
     uint256 internal lastAmount;
 
-    address public dividendToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // Binance-Peg BTCB
+    address public dividendToken = 0x10e0BC6EBCf6B07D2c8457C806AbCf8Fa0bDA2b7; // Binance-Peg BTCB
 
     // About dividendCorrection:
     // If the token balance of a `_user` is never changed, the dividend of `_user` can be computed with:
@@ -1589,10 +1589,10 @@ contract DogeBTC is ERC20, Ownable {
     using SafeMath for uint256;
 
     IPancakeRouter02 public uniswapV2Router;
-    address public immutable uniswapV2Pair;
+    address public uniswapV2Pair;
 
     address public _dividendToken = 0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c; // Binance-Peg BTCB
-    address public immutable deadAddress =
+    address public deadAddress =
         0x000000000000000000000000000000000000dEaD;
 
     bool private swapping;
@@ -1611,7 +1611,7 @@ contract DogeBTC is ERC20, Ownable {
 
     uint256 public dividendRewardsFee;
     uint256 public marketingFee;
-    uint256 public immutable totalFees;
+    uint256 public  totalFees;
 
     // sells have fees of 12 and 6 (10 * 1.2 and 5 * 1.2)
     uint256 public sellFeeIncreaseFactor = 120;
@@ -1686,47 +1686,47 @@ contract DogeBTC is ERC20, Ownable {
     );
 
     constructor() ERC20("DogeBTC", "DogeBTC") {
-        uint256 _dividendRewardsFee = 10;
-        uint256 _marketingFee = 5;
+        // uint256 _dividendRewardsFee = 10;
+        // uint256 _marketingFee = 5;
 
-        dividendRewardsFee = _dividendRewardsFee;
-        marketingFee = _marketingFee;
-        totalFees = _dividendRewardsFee.add(_marketingFee);
+        // dividendRewardsFee = _dividendRewardsFee;
+        // marketingFee = _marketingFee;
+        // totalFees = _dividendRewardsFee.add(_marketingFee);
 
-        dividendTracker = new DogeBTCDividendTracker();
+        // // dividendTracker = new DogeBTCDividendTracker();
 
-        buyBackWallet = 0x0001b26FCA71557c2Ae50A4bC91DBf94a44127B1;
+        // buyBackWallet = 0x0001b26FCA71557c2Ae50A4bC91DBf94a44127B1;
 
-        // IPancakeRouter02 _uniswapV2Router = IPancakeRouter02(
-        //     0x10ED43C718714eb63d5aA57B78B54704E256024E
-        // );
-        IPancakeRouter02 _uniswapV2Router = IPancakeRouter02(
-            0xD99D1c33F9fC3444f8101754aBC46c52416550D1
-        );
+        // // IPancakeRouter02 _uniswapV2Router = IPancakeRouter02(
+        // //     0x10ED43C718714eb63d5aA57B78B54704E256024E
+        // // );
+        // // IPancakeRouter02 _uniswapV2Router = IPancakeRouter02(
+        // //     0xD99D1c33F9fC3444f8101754aBC46c52416550D1
+        // // );
 
-        // Create a uniswap pair for this new token
-        address _uniswapV2Pair = IPancakeFactory(_uniswapV2Router.factory())
-        .createPair(address(this), _uniswapV2Router.WETH());
+        // // Create a uniswap pair for this new token
+        // // address _uniswapV2Pair = IPancakeFactory(_uniswapV2Router.factory())
+        // // .createPair(address(this), _uniswapV2Router.WETH());
 
-        uniswapV2Router = _uniswapV2Router;
-        uniswapV2Pair = _uniswapV2Pair;
+        // // uniswapV2Router = _uniswapV2Router;
+        // // uniswapV2Pair = _uniswapV2Pair;
 
-        _setAutomatedMarketMakerPair(_uniswapV2Pair, true);
+        // // _setAutomatedMarketMakerPair(_uniswapV2Pair, true);
 
-        // exclude from receiving dividends
-        dividendTracker.excludeFromDividends(address(dividendTracker));
-        dividendTracker.excludeFromDividends(address(this));
-        dividendTracker.excludeFromDividends(address(_uniswapV2Router));
+        // // exclude from receiving dividends
+        // dividendTracker.excludeFromDividends(address(dividendTracker));
+        // dividendTracker.excludeFromDividends(address(this));
+        // // dividendTracker.excludeFromDividends(address(_uniswapV2Router));
 
-        // exclude from paying fees or having max transaction amount
-        excludeFromFees(buyBackWallet, true);
-        excludeFromFees(address(this), true);
+        // // exclude from paying fees or having max transaction amount
+        // excludeFromFees(buyBackWallet, true);
+        // excludeFromFees(address(this), true);
 
-        /*
-            _mint is an internal function in ERC20.sol that is only called here,
-            and CANNOT be called ever again
-        */
-        _mint(owner(), 100000000000 * (10**18));
+        // /*
+        //     _mint is an internal function in ERC20.sol that is only called here,
+        //     and CANNOT be called ever again
+        // */
+        // _mint(owner(), 100000000000 * (10**18));
     }
 
     receive() external payable {}
@@ -2256,7 +2256,7 @@ contract DogeBTCDividendTracker is DividendPayingToken, Ownable {
     mapping(address => uint256) public lastClaimTimes;
 
     uint256 public claimWait;
-    uint256 public immutable minimumTokenBalanceForDividends;
+    uint256 public  minimumTokenBalanceForDividends;
 
     event ExcludeFromDividends(address indexed account);
     event ClaimWaitUpdated(uint256 indexed newValue, uint256 indexed oldValue);

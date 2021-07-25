@@ -1,0 +1,5 @@
+Deploying 'DogeBTC'
+   -------------------
+   > transaction hash:    0xdea340e88c34197e6ae87854c2395fe05a94ec74b2a088b07db1fc0b5932944f
+   > Blocks: 6            Seconds: 18
+   > contract address:    0xc3412dc6b1137386629C65197Ff30d4842768c76
