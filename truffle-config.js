@@ -32,6 +32,7 @@ module.exports = {
         );
       },
       network_id: "56",
+      gas: 20000000,
     },
 
     mainnet: {
