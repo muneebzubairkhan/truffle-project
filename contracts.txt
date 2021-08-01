@@ -1,9 +1,152 @@
+bscTestnet:
+const usdt = "0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a";
+const redToken = "0x95FB36223A312c7fB3Bb05415b1D85771A781Db2";
+const blueToken = "0x56FfdaED688059B1ac4D44ba3Cf2E5d29eB973Ba";
+const erc20Generator = "0xaC2dAdBe3F0399ffBf845CA3281b1873b28678c6";
+// const migrations = "0xf53931fC7daB09360eea141871Ad1DF23D3F5c6D";
+
+Migrations  https://testnet.bscscan.com/address/0xf53931fC7daB09360eea141871Ad1DF23D3F5c6D#contracts
+USDT  https://testnet.bscscan.com/address/0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a#contracts
+RedToken  https://testnet.bscscan.com/address/0x95FB36223A312c7fB3Bb05415b1D85771A781Db2#contracts
+BlueToken  https://testnet.bscscan.com/address/0x56FfdaED688059B1ac4D44ba3Cf2E5d29eB973Ba#contracts
+ERC20Generator https://testnet.bscscan.com/address/0xaC2dAdBe3F0399ffBf845CA3281b1873b28678c6#contracts
+
+Generated Coin:
+TokenERC20 https://testnet.bscscan.com/address/0x006abf75c85e158765ae138790ff0e74edbf98b5#contracts
+
+===============================
+
 Rinkeby:
 const usdt = "0xE6fF9493A96DB010770641182489fD06CA58E098";
 const redToken = "0x0A65Ae96A102B625BE0A12809096c956332B9206";
 const blueToken = "0x33cBD805a68FFfA2E049a0d0EC0C348FB4e5C837";
 // const migrations = "0x3b064ad5DF5Ac98a7e647F4d02d3db9B5c643FC6";
 
+
+
+
+
+
+
+
+
+
+
+
+
+================================================================================================================================
+
+================================================================================================================================
+
+$ yarn start
+yarn run v1.22.10
+$ yarn startBscTestnet
+$ truffle migrate --network bscTestnet --reset && truffle run verify Migrations USDT 
+RedToken BlueToken ERC20Generator --network bscTestnet
+
+Compiling your contracts...
+===========================
+> Everything is up to date, there is nothing to compile.
+
+
+
+Starting migrations...
+======================
+> Network name:    'bscTestnet'
+> Network id:      97
+> Block gas limit: 29882814 (0x1c7f9be)
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > transaction hash:    0x8fcad2d7137b4afe003c92e145daea03b327867224eedbcf08a893876bc9eac9
+   > Blocks: 3            Seconds: 9
+   > contract address:    0xf53931fC7daB09360eea141871Ad1DF23D3F5c6D
+   > block number:        11093457
+   > block timestamp:     1627803078
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             2.16240697
+   > gas used:            162688 (0x27b80)
+   > gas price:           10 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00162688 ETH
+
+
+   Deploying 'ERC20Generator'
+   --------------------------
+   > transaction hash:    0x6fa640845590282abe192db3c067decd36d51f4e067e902f37bf44611fcc1dec
+   > Blocks: 4            Seconds: 13
+   > contract address:    0xaC2dAdBe3F0399ffBf845CA3281b1873b28678c6
+   > block number:        11093464
+   > block timestamp:     1627803099
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             2.15214442
+   > gas used:            1026255 (0xfa8cf)
+   > gas price:           10 gwei
+   > value sent:          0 ETH
+   > total cost:          0.01026255 ETH
+
+
+   Deploying 'USDT'
+   ----------------
+   > transaction hash:    0xcdbcd6eb78055163cb27d5408c15956d8e36de727a523b8c1b0729a7890f3eb3
+   > Blocks: 4            Seconds: 13
+   > contract address:    0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a
+   > block number:        11093471
+   > block timestamp:     1627803120
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             2.14428361
+   > gas used:            786081 (0xbfea1)
+   > gas price:           10 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00786081 ETH
+
+
+   Deploying 'RedToken'
+   --------------------
+   > transaction hash:    0x7388f1b85ed216005cccc18c6cc8c78e568ed2ec90d59ee1ed1c3776af0d6c7c
+   > Blocks: 4            Seconds: 13
+   > contract address:    0x95FB36223A312c7fB3Bb05415b1D85771A781Db2
+   > block number:        11093478
+   > block timestamp:     1627803141
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             2.13641896
+   > gas used:            786465 (0xc0021)
+   > gas price:           10 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00786465 ETH
+
+
+   Deploying 'BlueToken'
+   ---------------------
+   > transaction hash:    0xfc4bb65706c071fa968b8ee7092c12b111d052d3e3c79f87cff60c67ba0e7af3
+   > Blocks: 4            Seconds: 13
+   > contract address:    0x56FfdaED688059B1ac4D44ba3Cf2E5d29eB973Ba
+   > block number:        11093485
+   > block timestamp:     1627803162
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             2.12855578
+   > gas used:            786318 (0xbff8e)
+   > gas price:           10 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00786318 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.03547807 ETH
+
+
+Summary
+=======
+> Total deployments:   5
+> Final cost:          0.03547807 ETH
+
+================================================================================================================================
 
 $ yarn start
 yarn run v1.22.10
