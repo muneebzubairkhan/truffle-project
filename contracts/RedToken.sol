@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract USDT is ERC20("USDT", "USDT") {
+contract RedToken is ERC20("Red Token", "RED") {
     uint256 _1000_coins = 1000 * 1e18;
 
     constructor() {

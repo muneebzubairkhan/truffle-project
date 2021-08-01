@@ -1,0 +1,108 @@
+Rinkeby:
+const usdt = "0xE6fF9493A96DB010770641182489fD06CA58E098";
+const redToken = "0x0A65Ae96A102B625BE0A12809096c956332B9206";
+const blueToken = "0x33cBD805a68FFfA2E049a0d0EC0C348FB4e5C837";
+// const migrations = "0x3b064ad5DF5Ac98a7e647F4d02d3db9B5c643FC6";
+
+
+$ yarn start
+yarn run v1.22.10
+$ yarn startRinkeby
+$ truffle migrate --network rinkeby --reset && truffle run verify USDT RedToken BlueToken --network rinkeby
+
+Compiling your contracts...
+===========================
+> Everything is up to date, there is nothing to compile.
+
+
+
+Starting migrations...
+======================
+> Network name:    'rinkeby'
+> Network id:      4
+> Block gas limit: 29970705 (0x1c95111)
+
+
+1_initial_migration.js
+======================
+
+   Replacing 'Migrations'
+   ----------------------
+   > transaction hash:    0xc6e3d0b4a561e710bebb233f670d30652b8b65c9de7f129439abce0cd37c4211
+   > Blocks: 2            Seconds: 21
+   > contract address:    0x3b064ad5DF5Ac98a7e647F4d02d3db9B5c643FC6
+   > block number:        9037410
+   > block timestamp:     1627800425
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             32.79581138179763501
+   > gas used:            163988 (0x28094)
+   > gas price:           1.000000008 gwei
+   > value sent:          0 ETH
+   > total cost:          0.000163988001311904 ETH
+
+
+   Deploying 'USDT'
+   ----------------
+   > transaction hash:    0xb1516dd5fcf8e6832820f1f283f5e166d952e5b0ecc3e7b6cd448abd59c5fec1
+   > Blocks: 1            Seconds: 9
+   > contract address:    0xE6fF9493A96DB010770641182489fD06CA58E098
+   > block number:        9037411
+   > block timestamp:     1627800440
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             32.795018700791293562
+   > gas used:            792681 (0xc1869)
+   > gas price:           1.000000008 gwei
+   > value sent:          0 ETH
+   > total cost:          0.000792681006341448 ETH
+
+
+   Deploying 'RedToken'
+   --------------------
+   > transaction hash:    0x235e88176ebd8da4f74638ff44a4f399169fa5961971de84d5490411a9060e6e
+   > Blocks: 2            Seconds: 21
+   > contract address:    0x0A65Ae96A102B625BE0A12809096c956332B9206
+   > block number:        9037413
+   > block timestamp:     1627800471
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             32.794225635784949042
+   > gas used:            793065 (0xc19e9)
+   > gas price:           1.000000008 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00079306500634452 ETH
+
+
+   Deploying 'BlueToken'
+   ---------------------
+   > transaction hash:    0x1d4df227aed0417ce744fdd8f6f9506e983a98df9ade4fec5cffe5403437f1af
+   > Blocks: 2            Seconds: 21
+   > contract address:    0x33cBD805a68FFfA2E049a0d0EC0C348FB4e5C837
+   > block number:        9037415
+   > block timestamp:     1627800500
+   > account:             0xc18E78C0F67A09ee43007579018b2Db091116B4C
+   > balance:             32.793432717778605698
+   > gas used:            792918 (0xc1956)
+   > gas price:           1.000000008 gwei
+   > value sent:          0 ETH
+   > total cost:          0.000792918006343344 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:     0.002542652020341216 ETH
+
+
+Summary
+=======
+> Total deployments:   4
+> Final cost:          0.002542652020341216 ETH
+
+
+Verifying USDT
+Pass - Verified: https://rinkeby.etherscan.io/address/0xE6fF9493A96DB010770641182489fD06CA58E098#contracts
+Verifying RedToken
+Pass - Verified: https://rinkeby.etherscan.io/address/0x0A65Ae96A102B625BE0A12809096c956332B9206#contracts
+Verifying BlueToken
+Pass - Verified: https://rinkeby.etherscan.io/address/0x33cBD805a68FFfA2E049a0d0EC0C348FB4e5C837#contracts
+Successfully verified 3 contract(s).
+Done in 180.28s.
