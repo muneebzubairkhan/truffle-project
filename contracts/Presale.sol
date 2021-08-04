@@ -10,15 +10,16 @@ contract Presale is Ownable {
 
     IERC20 public tokenX; // People will buy tokenX
     IERC20 public buyingToken; // People will give buyingToken and get tokenX in return
-    uint public tokenXSold = 0;
-    uint public rate; // 3 = 3 000 000 000 000 000 000, 0.3 = 3 00 000 000 000 000 000 // 0.3 buyingToken = 1 TokenX
+    uint256 public tokenXSold = 0;
+    uint256 public rate; // 3 = 3 000 000 000 000 000 000, 0.3 = 3 00 000 000 000 000 000 // 0.3 buyingToken = 1 TokenX
     address public walletOwner;
-    address public walletDev;
+
+    event RateChanged(uint256 _newRate);
 
     constructor(
         IERC20 _tokenX,
         IERC20 _buyingToken,
-        uint _rate,
+        uint256 _rate,
         address _walletOwner
     ) {
         tokenX = _tokenX;
@@ -29,15 +30,16 @@ contract Presale is Ownable {
     }
 
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
-    function buyTokens(uint _tokens) external {
+    function buyTokens(uint256 _tokens) external {
         tokenXSold += _tokens;
-        uint price = (_tokens * rate ) / 1e18;
+        uint256 price = (_tokens * rate) / 1e18;
         buyingToken.transferFrom(msg.sender, walletOwner, price);
         tokenX.transfer(msg.sender, _tokens);
     }
 
-    function ownerFunction_setRate(uint _rate) external onlyOwner {
+    function ownerFunction_setRate(uint256 _rate) external onlyOwner {
         rate = _rate;
+        emit RateChanged(_rate);
     }
 
     function ownerFunction_getLockedTokens(IERC20 _token) external onlyOwner {
@@ -48,4 +50,4 @@ contract Presale is Ownable {
 // be ware of ownerships and mint to proper owners
 // as different factory calling will be used
 
-// 
+// mention comments see sir written contract
