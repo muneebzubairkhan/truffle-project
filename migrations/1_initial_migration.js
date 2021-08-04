@@ -5,7 +5,7 @@ const BlueToken = artifacts.require("BlueToken");
 const ERC20Generator = artifacts.require("ERC20Generator");
 
 module.exports = async (deployer, network, accounts) => {
-  await defaultDeploy(deployer, accounts);
+  // await defaultDeploy(deployer, accounts);
   // await rinkeby(deployer, accounts);
   // await ethMainnet(deployer);
 };
