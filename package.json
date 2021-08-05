@@ -8,9 +8,13 @@
   },
   "scripts": {
     "start": "yarn startBscTestnet",
-    "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify Migrations USDT RedToken BlueToken ERC20Generator --network rinkeby",
-    "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify Migrations USDT RedToken BlueToken ERC20Generator --network mainnet",
-    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify Migrations USDT RedToken BlueToken ERC20Generator --network bscTestnet"
+    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify Migrations PresaleFactory Presale --network bscTestnet",
+    "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify Migrations PresaleFactory Presale --network bscMainnet",
+    "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify Migrations PresaleFactory Presale --network rinkeby",
+    "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify Migrations USDT RedToken BlueToken ERC20Generator TokenERC20 --network mainnet",
+    "contracts": "Migrations USDT RedToken BlueToken ERC20Generator TokenERC20",
+    "m": "truffle migrate --reset",
+    "s": "yarn start"
   },
   "keywords": [],
   "author": "",

@@ -6,11 +6,12 @@ contract ERC20Generator {
     IERC20[] public erc20s;
 
     function createERC20(
+        address _owner,
         string memory _name,
         string memory _symbol,
         uint256 _totalSupply
     ) external {
-        IERC20 erc20 = new TokenERC20(_name, _symbol, _totalSupply);
+        IERC20 erc20 = new TokenERC20(_owner, _name, _symbol, _totalSupply);
         erc20s.push(erc20);
     }
 

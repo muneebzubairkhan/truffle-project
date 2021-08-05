@@ -1,15 +1,37 @@
+const presaleFactory = "0xf37eCb5874001423251e2312294808891c3Dc2cf";
+const presale = "0x72c2924CC86b8Df8EAF203f092D20F5a86009275";
+// const migrations = "0x674Ceb0dE134F34b08e375A07E6A4D1C19bF957e";
+
+PresaleFactory https://testnet.bscscan.com/address/0xf37eCb5874001423251e2312294808891c3Dc2cf#contracts
+Presale https://testnet.bscscan.com/address/0x72c2924CC86b8Df8EAF203f092D20F5a86009275#contracts
+// Migrations https://testnet.bscscan.com/address/0x674Ceb0dE134F34b08e375A07E6A4D1C19bF957e#contracts
+
+
+
+
+
+
+
+
+
+
+
+
 bscTestnet:
 const usdt = "0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a";
 const redToken = "0x95FB36223A312c7fB3Bb05415b1D85771A781Db2";
 const blueToken = "0x56FfdaED688059B1ac4D44ba3Cf2E5d29eB973Ba";
-const erc20Generator = "0xaC2dAdBe3F0399ffBf845CA3281b1873b28678c6";
-// const migrations = "0xf53931fC7daB09360eea141871Ad1DF23D3F5c6D";
+const erc20Token = "0xA830394f6B977e7722fb910Ac9F2618f59A2C566";
+const erc20Generator = "0xFBD93Fa8Fb055b591697c9901B86409f21b66e03";
+// const migrations = "0xA664629f9F6840496339904Ff06bdee6D3CAdFb2";
+// const owner = "0xc18E78C0F67A09ee43007579018b2Db091116B4C";
 
-Migrations  https://testnet.bscscan.com/address/0xf53931fC7daB09360eea141871Ad1DF23D3F5c6D#contracts
+Migrations https://rinkeby.etherscan.io/address/0xA664629f9F6840496339904Ff06bdee6D3CAdFb2#contracts
 USDT  https://testnet.bscscan.com/address/0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a#contracts
 RedToken  https://testnet.bscscan.com/address/0x95FB36223A312c7fB3Bb05415b1D85771A781Db2#contracts
 BlueToken  https://testnet.bscscan.com/address/0x56FfdaED688059B1ac4D44ba3Cf2E5d29eB973Ba#contracts
-ERC20Generator https://testnet.bscscan.com/address/0xaC2dAdBe3F0399ffBf845CA3281b1873b28678c6#contracts
+ERC20Generator https://rinkeby.etherscan.io/address/0xFBD93Fa8Fb055b591697c9901B86409f21b66e03#contracts
+TokenERC20 https://rinkeby.etherscan.io/address/0xA830394f6B977e7722fb910Ac9F2618f59A2C566#contracts
 
 Generated Coin:
 TokenERC20 https://testnet.bscscan.com/address/0x006abf75c85e158765ae138790ff0e74edbf98b5#contracts

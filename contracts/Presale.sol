@@ -56,16 +56,7 @@ contract Presale is Ownable {
         tokenX.transfer(msg.sender, _tokens); // try with _msgsender on truufle test and ethgas reporter
     }
 
-    function ownerFunction_getLockedTokens(IERC20 _token) external onlyOwner {
-        _token.transfer(owner(), _token.balanceOf(address(this)));
-    }
-
-    function ownerFunction_setRate(uint256 _rate) external onlyOwner {
-        rate = _rate;
-        emit RateChanged(_rate);
-    }
-
-    function addMultipleToWhitelist(address[] memory _addresses)
+    function ownerFunction_addMultipleToWhitelist(address[] memory _addresses)
         external
         onlyOwner
     {
@@ -74,18 +65,22 @@ contract Presale is Ownable {
         }
     }
 
-    function removeMultipleFromWhitelist(address[] memory _addresses)
-        external
-        onlyOwner
-    {
+    function ownerFunction_removeMultipleFromWhitelist(
+        address[] memory _addresses
+    ) external onlyOwner {
         for (uint256 i = 0; i < _addresses.length; i++) {
             isWhitelisted[_addresses[i]] = false;
         }
     }
 
-    // function thisContractIsMadeBy_TheHash.io() external returns(memory string) {
-    //     return "Hi if you want to develop a smart contract you can contact on telegram @thinkmuneeb";
-    // }
+    function ownerFunction_setRate(uint256 _rate) external onlyOwner {
+        rate = _rate;
+        emit RateChanged(_rate);
+    }
+
+    function ownerFunction_unlockTokens(IERC20 _token) external onlyOwner {
+        _token.transfer(owner(), _token.balanceOf(address(this)));
+    }
 }
 
 // update variables by owner of tokenX and shieldNetwork
@@ -93,3 +88,7 @@ contract Presale is Ownable {
 // as different factory calling will be used
 // natspec annotations, author Muneeb Khan
 // mention comments see sir written contract
+
+// function thisContractIsMadeBy_TheHash.io() external returns(memory string) {
+//     return "Hi if you want to develop a smart contract you can contact on telegram @thinkmuneeb";
+// }
