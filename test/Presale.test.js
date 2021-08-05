@@ -20,7 +20,9 @@ contract(
         tokenX.address, // People will buy tokenX
         usdt.address, // People will give buyingToken or USDT and get tokenX in return
         toWei("0.3"), // rate
-        walletOwner,
+        walletOwner, // presale owner
+        false, //_onlyWhitelistedAllowed
+        "0", // _amountHoldTokenXToBuyTokenX
         {
           from: tokenOwner,
         }
