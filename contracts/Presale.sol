@@ -45,6 +45,10 @@ contract Presale is Ownable {
                 "You should become whitelisted to continue."
             );
         }
+        require(
+            amountTokenXToBuyTokenX >= tokenX.balanceOf(msg.sender),
+            "You should have more amount of tokens."
+        );
 
         tokenXSold += _tokens;
         uint256 price = (_tokens * rate) / 1e18;
