@@ -3,52 +3,68 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./Locker.sol";
 
 // functions: setRate, buyTokens...
+// Presale is Locker
 contract Presale is Ownable {
     using SafeERC20 for IERC20;
 
+    IERC20 public buyingToken =
+        IERC20(0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a); // People will give BUSD or buyingToken and get tokenX in return
     IERC20 public tokenX; // People will buy tokenX
-    IERC20 public buyingToken; // People will give buyingToken and get tokenX in return
+    Locker public tokenXLocker;
+    Locker public tokenXLPLocker;
     uint256 public tokenXSold = 0;
     uint256 public rate; // 3 = 3 000 000 000 000 000 000, 0.3 = 3 00 000 000 000 000 000 // 0.3 buyingToken = 1 TokenX
     uint256 public amountTokenXToBuyTokenX;
     address public walletOwner;
+    address public parentCompany;
 
     mapping(address => bool) isWhitelisted;
     bool public onlyWhitelistedAllowed;
+    bool public presaleIsApproved = false;
+    bool public presaleIsGenuine = true;
 
     event RateChanged(uint256 _newRate);
 
     constructor(
         IERC20 _tokenX,
-        IERC20 _buyingToken,
+        IERC20 _lpTokenX,
         uint256 _rate,
         address _walletOwner,
+        address _parentCompany,
         bool _onlyWhitelistedAllowed,
-        uint256 _amountTokenXToBuyTokenX
+        uint256 _amountTokenXToBuyTokenX,
+        uint256 _unlockAtTime
     ) {
         tokenX = _tokenX;
-        buyingToken = _buyingToken;
         rate = _rate;
         walletOwner = _walletOwner;
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
         amountTokenXToBuyTokenX = _amountTokenXToBuyTokenX;
+        parentCompany = _parentCompany;
+
+        tokenXLocker = new Locker(_tokenX, _walletOwner, _unlockAtTime);
+        tokenXLPLocker = new Locker(_lpTokenX, _walletOwner, _unlockAtTime);
         transferOwnership(_walletOwner);
     }
 
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
     function buyTokens(uint256 _tokens) external {
+        require(presaleIsApproved, "Presale is not approved.");
+        require(presaleIsGenuine, "Presale is marked as spam.");
+        require(
+            amountTokenXToBuyTokenX >= tokenX.balanceOf(msg.sender),
+            "You should have more amount of tokens."
+        );
+
         if (onlyWhitelistedAllowed) {
             require(
                 isWhitelisted[msg.sender],
                 "You should become whitelisted to continue."
             );
         }
-        require(
-            amountTokenXToBuyTokenX >= tokenX.balanceOf(msg.sender),
-            "You should have more amount of tokens."
-        );
 
         tokenXSold += _tokens;
         uint256 price = (_tokens * rate) / 1e18;
@@ -56,39 +72,71 @@ contract Presale is Ownable {
         tokenX.transfer(msg.sender, _tokens); // try with _msgsender on truufle test and ethgas reporter
     }
 
-    function ownerFunction_addMultipleToWhitelist(address[] memory _addresses)
-        external
-        onlyOwner
-    {
-        for (uint256 i = 0; i < _addresses.length; i++) {
-            isWhitelisted[_addresses[i]] = true;
-        }
-    }
-
-    function ownerFunction_removeMultipleFromWhitelist(
-        address[] memory _addresses
+    /// @dev pass true to add to whitelist, pass false to remove from whitelist
+    function ownerFunction_editWhitelist(
+        address[] memory _addresses,
+        bool _approve
     ) external onlyOwner {
         for (uint256 i = 0; i < _addresses.length; i++) {
-            isWhitelisted[_addresses[i]] = false;
+            isWhitelisted[_addresses[i]] = _approve;
         }
     }
 
-    function ownerFunction_setRate(uint256 _rate) external onlyOwner {
+    function onlyOwnerFunction_setRate(uint256 _rate) external onlyOwner {
         rate = _rate;
         emit RateChanged(_rate);
     }
 
-    function ownerFunction_unlockTokens(IERC20 _token) external onlyOwner {
-        _token.transfer(owner(), _token.balanceOf(address(this)));
+    function onlyParentCompanyFunction_setPresaleIsApproved(
+        bool _presaleIsApproved
+    ) public {
+        require(
+            msg.sender == parentCompany,
+            "You must be parent company to edit value of presaleIsApproved."
+        );
+        presaleIsApproved = _presaleIsApproved;
+    }
+
+    function onlyParentCompanyFunction_setPresaleIsGenuine(
+        bool _presaleIsGenuine
+    ) public {
+        require(
+            msg.sender == parentCompany,
+            "You must be parent company to edit value of presaleIsApproved."
+        );
+        presaleIsGenuine = _presaleIsGenuine;
     }
 }
 
-// update variables by owner of tokenX and shieldNetwork
-// be ware of ownerships and mint to proper owners
-// as different factory calling will be used
-// natspec annotations, author Muneeb Khan
-// mention comments see sir written contract
 
-// function thisContractIsMadeBy_TheHash.io() external returns(memory string) {
-//     return "Hi if you want to develop a smart contract you can contact on telegram @thinkmuneeb";
-// }
+/*
+notes:
+
+first implemet core logic
+// nonreentrant modifier ? I think its only need in case external calls are not at end
+
+update variables by owner of tokenX and shieldNetwork
+be ware of ownerships and mint to proper owners
+as different factory calling will be used
+natspec annotations, author Muneeb Khan
+mention comments see sir written contract
+
+function thisContractIsMadeBy_TheHash.io() external returns(memory string) {
+    return "Hi if you want to develop a smart contract you can contact on telegram @thinkmuneeb";
+}
+
+cosmetics
+function ownerFunction_unlockTokens(IERC20 _token) external onlyOwner {
+    _token.transfer(owner(), _token.balanceOf(address(this)));
+}
+fallback send eth to owner
+can send erc721 erc1155 to owner
+
+getWhitelist addresses  method?
+presaleIsApproved = false; get approval after changing rate ?
+
+
+// when I do something crazy in code I feel that it will be caught in auidt. or I need to fix it. Or use some other api.
+        // i.e lock token in wallet at time of its creation in single go
+        
+*/
