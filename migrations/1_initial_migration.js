@@ -1,11 +1,12 @@
 const Migrations = artifacts.require("Migrations");
-// const USDT = artifacts.require("USDT");
-// const RedToken = artifacts.require("RedToken");
-// const BlueToken = artifacts.require("BlueToken");
-// const ERC20Generator = artifacts.require("ERC20Generator");
-// const TokenERC20 = artifacts.require("TokenERC20");
-const PresaleFactory = artifacts.require("PresaleFactory");
+
+const ERC20Token = artifacts.require("ERC20Token");
+const ERC20TokenFactory = artifacts.require("ERC20TokenFactory");
+
 const Presale = artifacts.require("Presale");
+const PresaleFactory = artifacts.require("PresaleFactory");
+
+const Locker = artifacts.require("Locker");
 
 module.exports = async (deployer, network, accounts) => {
   await defaultDeploy(deployer, accounts);
@@ -13,49 +14,51 @@ module.exports = async (deployer, network, accounts) => {
   // await ethMainnet(deployer);
 };
 
-const defaultDeploy = async (deployer, [owner, client, dev]) => {
+const defaultDeploy = async (deployer, [client, dev, owner]) => {
   await deployer.deploy(Migrations);
-
-  const presaleFactory = await deployer.deploy(PresaleFactory);
-
-  const _tokenX = "0x95FB36223A312c7fB3Bb05415b1D85771A781Db2",
-    _buyingToken = "0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a",
-    _rate = toWei("0.2"),
-    _walletOwner = "0xc18E78C0F67A09ee43007579018b2Db091116B4C",
-    _onlyWhitelistedAllowed = false,
-    _amountTokenXToBuyTokenX = toWei("0");
 
   const presale = await deployer.deploy(
     Presale,
-    _tokenX,
-    _buyingToken,
-    _rate,
-    _walletOwner,
-    _onlyWhitelistedAllowed,
-    _amountTokenXToBuyTokenX
+    (_tokenX = "0x95FB36223A312c7fB3Bb05415b1D85771A781Db2"),
+    (_lpTokenX = "0x95FB36223A312c7fB3Bb05415b1D85771A781Db2"),
+    (_rate = toWei("0.2")),
+    (_walletOwner = "0xc18E78C0F67A09ee43007579018b2Db091116B4C"),
+    (_parentCompany = owner),
+    (_onlyWhitelistedAllowed = false),
+    (_amountTokenXToBuyTokenX = toWei("0")),
+    (_unlockAtTime = "" + Date.now())
+  );
+  const presaleFactory = await deployer.deploy(
+    PresaleFactory,
+    (_parentCompany = owner)
   );
 
-  // const erc20Generator = await deployer.deploy(ERC20Generator);
-  // const erc20Token = await deployer.deploy(
-  //   TokenERC20,
-  //   owner,
-  //   "USDC",
-  //   "USDC",
-  //   toWei("10000")
-  // );
-  // const usdt = await deployer.deploy(USDT);
-  // const redToken = await deployer.deploy(RedToken);
-  // const blueToken = await deployer.deploy(BlueToken);
+  const erc20Token = await deployer.deploy(
+    ERC20Token,
+    owner,
+    "BUSD",
+    "BUSD",
+    toWei("10000")
+  );
+  const erc20TokenFactory = await deployer.deploy(ERC20TokenFactory);
 
-  console.log("bscTestnet:");
-  // console.log(`const usdt = "${usdt.address}";`);
-  // console.log(`const redToken = "${redToken.address}";`);
-  // console.log(`const blueToken = "${blueToken.address}";`);
-  // console.log(`const erc20Token = "${erc20Token.address}";`);
-  // console.log(`const erc20Generator = "${erc20Generator.address}";`);
-  console.log(`const presaleFactory = "${presaleFactory.address}";`);
-  console.log(`const presale = "${presale.address}";`);
-  console.log(`// const migrations = "${Migrations.address}";`);
+  const locker = await deployer.deploy(
+    Locker,
+    erc20Token.address,
+    owner,
+    Date.now()
+  );
+
+  const fs = require("fs");
+  let res = "// bscTestnet:\n";
+  res += wrapper({ locker });
+  res += wrapper({ erc20Token });
+  res += wrapper({ erc20TokenFactory });
+  res += wrapper({ presale });
+  res += wrapper({ presaleFactory });
+  // res += wrapper({ Migrations });
+
+  fs.writeFile("latestContracts.js", res, console.log);
 };
 
 const rinkeby = async (deployer, accounts) => {};
@@ -63,3 +66,13 @@ const rinkeby = async (deployer, accounts) => {};
 const ethMainnet = async (deployer) => {};
 
 const toWei = web3.utils.toWei;
+
+// send variable in input as {someVariable}
+const wrapper = (obj) => {
+  const [varName] = Object.keys(obj);
+  return `const ${varName} = new web.eth.Contract(JSON.parse('${JSON.stringify(
+    obj[varName].abi
+  )}'), "${obj[varName].address}");\n\n`;
+};
+
+const hour = 60 * 60 * 1000;

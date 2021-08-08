@@ -8,14 +8,15 @@
   },
   "scripts": {
     "start": "yarn startBscTestnet",
-    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify Migrations PresaleFactory Presale --network bscTestnet",
-    "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify Migrations PresaleFactory Presale --network bscMainnet",
-    "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify Migrations PresaleFactory Presale --network rinkeby",
-    "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify Migrations USDT RedToken BlueToken ERC20Generator TokenERC20 --network mainnet",
-    "migrate": "truffle migrate --reset",
     "compile": "truffle compile",
-    "contracts": "Migrations USDT RedToken BlueToken ERC20Generator TokenERC20"
+    "ganache-cli": "ganache-cli",
+    "migrate": "truffle migrate --reset",
+    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify %npm_package_contractsSelected% --network bscTestnet",
+    "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify %npm_package_contractsSelected% --network bscMainnet",
+    "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify %npm_package_contractsSelected% --network rinkeby",
+    "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify %npm_package_contractsSelected% --network mainnet"
   },
+  "contractsSelected": "Migrations ERC20Token ERC20TokenFactory Presale PresaleFactory Locker",
   "keywords": [],
   "author": "",
   "license": "ISC",
