@@ -97,7 +97,7 @@ const makeContractObject = (obj) => {
 
 const makeExplorerLink = (obj) => {
   const [varName] = Object.keys(obj);
-  return `// ${varName} https://testnet.bscscan.com/address/${obj[varName].address}/#contracts\n`;
+  return `// ${varName} https://testnet.bscscan.com/address/${obj[varName].address}/#contracts\n\n`;
 };
 
 const hour = 60 * 60 * 1000;

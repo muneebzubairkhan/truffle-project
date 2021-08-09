@@ -6,19 +6,26 @@ contract PresaleFactory is Ownable {
     Presale[] public presales;
     IERC20 public busd;
 
+    /// @notice people can see if a presale belongs to this factory or not
+    mapping(address => bool) public belongThisFactory;
+
     constructor(address _parentCompany, IERC20 _busd) {
         busd = _busd;
         transferOwnership(_parentCompany);
     }
 
+    /// @dev users can create an ICO for erc20 from this function
     function createERC20(
         IERC20 _tokenX,
         IERC20 _lpTokenX,
         uint256 _rate,
-        address _walletOwner,
-        bool _onlyWhitelistedAllowed,
+        uint256 _tokenXToLock,
+        uint256 _lpTokenXToLock,
+        uint256 _tokenXToSell,
+        uint256 _unlockAtTime,
         uint256 _amountTokenXToBuyTokenX,
-        uint256 _unlockAtTime
+        address _walletOwner,
+        bool _onlyWhitelistedAllowed
     ) external {
         Presale presale = new Presale(
             _tokenX,
@@ -31,12 +38,65 @@ contract PresaleFactory is Ownable {
             _amountTokenXToBuyTokenX,
             _unlockAtTime
         );
+
+        belongThisFactory[address(presale)] = true;
         presales.push(presale);
+
+        _tokenX.transferFrom(
+            msg.sender,
+            address(presale.tokenXLocker()),
+            _tokenXToLock
+        );
+        _lpTokenX.transferFrom(
+            msg.sender,
+            address(presale.lpTokenXLocker()),
+            _lpTokenXToLock
+        );
+        _tokenX.transferFrom(msg.sender, address(presale), _tokenXToSell);
     }
 
     function getPresales() external view returns (Presale[] memory) {
         return presales;
     }
+
+    function getPresales(uint256 _index, uint256 _amountToFetch)
+        external
+        view
+        returns (Presale[] memory)
+    {
+        if (_index >= presales.length) return new Presale[](0);
+
+        uint256 goto = _index + _amountToFetch;
+        uint256 stopAt = goto >= presales.length ? presales.length : goto;
+
+        Presale[] memory selectedPresales = new Presale[](goto - _index);
+        for (uint256 i = _index; i < stopAt; i++) {
+            selectedPresales[i] = (presales[i]);
+        }
+        return selectedPresales;
+    }
+
+    function getPresalesWithApproveFilter(
+        uint256 _index,
+        uint256 _amountToFetch,
+        bool presaleIsApproved
+    ) external view returns (Presale[] memory) {
+        if (_index >= presales.length) return new Presale[](0);
+
+        uint256 goto = _index + _amountToFetch;
+        uint256 stopAt = goto >= presales.length ? presales.length : goto;
+
+        Presale[] memory selectedPresales = new Presale[](goto - _index);
+        for (uint256 i = _index; i < stopAt; i++) {
+            Presale p = presales[i];
+            if (presaleIsApproved == p.presaleIsApproved()) {
+                selectedPresales[i] = presales[i];
+            }
+        }
+        return selectedPresales;
+    }
+
+    // see that 10 size array returns what on 3 elems in it, function getStopPoint private returns (uint256) {}
 }
 
 /*
@@ -52,20 +112,6 @@ write multiple presales...
 Plus more...
 
 
-function getPresales(uint256 _index, uint256 _amountToFetch)
-        external
-        view
-        returns (address[] memory)
-    {
-        address[] memory selectedPresales = new address[](_amountToFetch);
-        for (
-            uint256 i = _index;
-            i < presales.length && i < _index + _amountToFetch;
-            i++
-        ) {
-            selectedPresales[i] = (presales[i]);
-        }
-        return selectedPresales;
-    }
+
 
 */

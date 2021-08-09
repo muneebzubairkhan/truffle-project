@@ -13,10 +13,11 @@ contract Presale is Ownable {
     IERC20 public busd; // People will give BUSD or buyingToken and get tokenX in return
     IERC20 public tokenX; // People will buy tokenX
     Locker public tokenXLocker;
-    Locker public tokenXLPLocker;
+    Locker public lpTokenXLocker;
     uint256 public tokenXSold = 0;
     uint256 public rate; // 3 = 3 000 000 000 000 000 000, 0.3 = 3 00 000 000 000 000 000 // 0.3 busd = 1 TokenX
     uint256 public amountTokenXToBuyTokenX;
+    uint8 public tier = 1;
     address public walletOwner;
     address public parentCompany;
     address public factory;
@@ -24,9 +25,11 @@ contract Presale is Ownable {
     mapping(address => bool) isWhitelisted;
     bool public onlyWhitelistedAllowed;
     bool public presaleIsApproved = false;
-    bool public presaleIsGenuine = true;
+    bool public presaleBlacklisted = false;
+    bool public presaleAboutToClose = false;
 
     event RateChanged(uint256 _newRate);
+    event PresaleClosed();
 
     constructor(
         IERC20 _tokenX,
@@ -49,19 +52,19 @@ contract Presale is Ownable {
         parentCompany = _parentCompany;
 
         tokenXLocker = new Locker(_tokenX, _walletOwner, _unlockAtTime);
-        tokenXLPLocker = new Locker(_lpTokenX, _walletOwner, _unlockAtTime);
+        lpTokenXLocker = new Locker(_lpTokenX, _walletOwner, _unlockAtTime);
         transferOwnership(_walletOwner);
     }
 
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
     function buyTokens(uint256 _tokens) external {
         require(
-            presaleIsApproved,
-            "Presale is not approved by the parent network."
+            !presaleBlacklisted,
+            "Presale is marked as spam by the parent network."
         );
         require(
-            presaleIsGenuine,
-            "Presale is marked as spam by the parent network."
+            presaleIsApproved,
+            "Presale is not approved by the parent network."
         );
         require(
             tokenX.balanceOf(msg.sender) >= amountTokenXToBuyTokenX,
@@ -96,6 +99,12 @@ contract Presale is Ownable {
         emit RateChanged(_rate);
     }
 
+    function onlyOwnerFunction_disbandPresale() external onlyOwner {
+        presaleAboutToClose = presaleAboutToClose;
+
+        emit PresaleClosed();
+    }
+
     function onlyParentCompanyFunction_editPresaleIsApproved(
         bool _presaleIsApproved
     ) public {
@@ -106,14 +115,22 @@ contract Presale is Ownable {
         presaleIsApproved = _presaleIsApproved;
     }
 
-    function onlyParentCompanyFunction_editPresaleIsGenuine(
-        bool _presaleIsGenuine
+    function onlyParentCompanyFunction_editPresaleBlacklisted(
+        bool _presaleBlacklisted
     ) public {
         require(
             msg.sender == parentCompany,
-            "You must be parent company to edit value of presaleIsApproved."
+            "You must be parent company to edit value of presaleBlacklisted."
         );
-        presaleIsGenuine = _presaleIsGenuine;
+        presaleBlacklisted = _presaleBlacklisted;
+    }
+
+    function onlyParentCompanyFunction_editTier(uint8 _tier) public {
+        require(
+            msg.sender == parentCompany,
+            "You must be parent company to edit value of tier."
+        );
+        tier = _tier;
     }
 }
 
