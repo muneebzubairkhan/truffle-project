@@ -19,6 +19,7 @@ contract Presale is Ownable {
     uint256 public amountTokenXToBuyTokenX;
     address public walletOwner;
     address public parentCompany;
+    address public factory;
 
     mapping(address => bool) isWhitelisted;
     bool public onlyWhitelistedAllowed;
@@ -40,6 +41,7 @@ contract Presale is Ownable {
     ) {
         tokenX = _tokenX;
         busd = _busd;
+        factory = msg.sender; // only trust those presales who address exist in factory contract
         rate = _rate;
         walletOwner = _walletOwner;
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
@@ -53,10 +55,16 @@ contract Presale is Ownable {
 
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
     function buyTokens(uint256 _tokens) external {
-        require(presaleIsApproved, "Presale is not approved.");
-        require(presaleIsGenuine, "Presale is marked as spam.");
         require(
-            amountTokenXToBuyTokenX >= tokenX.balanceOf(msg.sender),
+            presaleIsApproved,
+            "Presale is not approved by the parent network."
+        );
+        require(
+            presaleIsGenuine,
+            "Presale is marked as spam by the parent network."
+        );
+        require(
+            tokenX.balanceOf(msg.sender) >= amountTokenXToBuyTokenX,
             "You should have more amount of tokens."
         );
 
@@ -88,7 +96,7 @@ contract Presale is Ownable {
         emit RateChanged(_rate);
     }
 
-    function onlyParentCompanyFunction_setPresaleIsApproved(
+    function onlyParentCompanyFunction_editPresaleIsApproved(
         bool _presaleIsApproved
     ) public {
         require(
@@ -98,7 +106,7 @@ contract Presale is Ownable {
         presaleIsApproved = _presaleIsApproved;
     }
 
-    function onlyParentCompanyFunction_setPresaleIsGenuine(
+    function onlyParentCompanyFunction_editPresaleIsGenuine(
         bool _presaleIsGenuine
     ) public {
         require(
@@ -108,7 +116,6 @@ contract Presale is Ownable {
         presaleIsGenuine = _presaleIsGenuine;
     }
 }
-
 
 /*
 notes:

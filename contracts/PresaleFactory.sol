@@ -4,15 +4,16 @@ import "./Presale.sol";
 
 contract PresaleFactory is Ownable {
     Presale[] public presales;
+    IERC20 public busd;
 
-    constructor(address _parentCompany) {
+    constructor(address _parentCompany, IERC20 _busd) {
+        busd = _busd;
         transferOwnership(_parentCompany);
     }
 
     function createERC20(
         IERC20 _tokenX,
         IERC20 _lpTokenX,
-        IERC20 _busd,
         uint256 _rate,
         address _walletOwner,
         bool _onlyWhitelistedAllowed,
@@ -22,7 +23,7 @@ contract PresaleFactory is Ownable {
         Presale presale = new Presale(
             _tokenX,
             _lpTokenX,
-            _busd,
+            busd,
             _rate,
             _walletOwner,
             owner(),
@@ -40,11 +41,12 @@ contract PresaleFactory is Ownable {
 
 /*
 notes:
-
+getAddresIsTrustedOrNot
+get trusted presales
+get approved presales
 get presales of a specific person
 get presales with unlock liquidity request
 get presale which wan to be approved
-get approved presales
 get locked amount of a presale, (compare run time total vs save total on each transaction)
 write multiple presales...
 Plus more...

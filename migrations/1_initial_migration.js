@@ -9,6 +9,7 @@ const PresaleFactory = artifacts.require("PresaleFactory");
 const Locker = artifacts.require("Locker");
 
 module.exports = async (deployer, network, accounts) => {
+  console.log("network: ", network);
   await defaultDeploy(deployer, network, accounts);
   // await rinkeby(deployer, accounts);
   // await ethMainnet(deployer);
@@ -16,26 +17,29 @@ module.exports = async (deployer, network, accounts) => {
 
 const defaultDeploy = async (deployer, network, [client, dev, owner]) => {
   await deployer.deploy(Migrations);
+  let busd, tokenX;
 
-  // const busd = await deployer.deploy(
-  //   ERC20Token,
-  //   owner,
-  //   "BUSD",
-  //   "BUSD",
-  //   toWei("10000")
-  // );
-  // const tokenX = await deployer.deploy(
-  //   ERC20Token,
-  //   owner,
-  //   "Red Token",
-  //   "RED",
-  //   toWei("10000")
-  // );
-  const busdAddress = "0xec828b4305be12B9B3E8F584FCE8ACDCc56c86E7";
-  const tokenXAddress = "0x95FB36223A312c7fB3Bb05415b1D85771A781Db2";
-  const busd = await ERC20Token.at(busdAddress);
-  const tokenX = await ERC20Token.at(tokenXAddress);
-
+  if (network === "development") {
+    busd = await deployer.deploy(
+      ERC20Token,
+      owner,
+      "BUSD",
+      "BUSD",
+      toWei("10000")
+    );
+    tokenX = await deployer.deploy(
+      ERC20Token,
+      owner,
+      "Red Token",
+      "RED",
+      toWei("10000")
+    );
+  } else {
+    const busdAddress = "0xec828b4305be12B9B3E8F584FCE8ACDCc56c86E7";
+    const tokenXAddress = "0x95FB36223A312c7fB3Bb05415b1D85771A781Db2";
+    busd = await ERC20Token.at(busdAddress);
+    tokenX = await ERC20Token.at(tokenXAddress);
+  }
   // const erc20TokenFactory = await deployer.deploy(ERC20TokenFactory);
 
   const presale = await deployer.deploy(
@@ -52,7 +56,8 @@ const defaultDeploy = async (deployer, network, [client, dev, owner]) => {
   );
   const presaleFactory = await deployer.deploy(
     PresaleFactory,
-    (_parentCompany = owner)
+    (_parentCompany = owner),
+    busd.address
   );
 
   const locker = await deployer.deploy(Locker, busd.address, owner, Date.now());
