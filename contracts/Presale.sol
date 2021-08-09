@@ -10,13 +10,12 @@ import "./Locker.sol";
 contract Presale is Ownable {
     using SafeERC20 for IERC20;
 
-    IERC20 public buyingToken =
-        IERC20(0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a); // People will give BUSD or buyingToken and get tokenX in return
+    IERC20 public busd; // People will give BUSD or buyingToken and get tokenX in return
     IERC20 public tokenX; // People will buy tokenX
     Locker public tokenXLocker;
     Locker public tokenXLPLocker;
     uint256 public tokenXSold = 0;
-    uint256 public rate; // 3 = 3 000 000 000 000 000 000, 0.3 = 3 00 000 000 000 000 000 // 0.3 buyingToken = 1 TokenX
+    uint256 public rate; // 3 = 3 000 000 000 000 000 000, 0.3 = 3 00 000 000 000 000 000 // 0.3 busd = 1 TokenX
     uint256 public amountTokenXToBuyTokenX;
     address public walletOwner;
     address public parentCompany;
@@ -31,6 +30,7 @@ contract Presale is Ownable {
     constructor(
         IERC20 _tokenX,
         IERC20 _lpTokenX,
+        IERC20 _busd,
         uint256 _rate,
         address _walletOwner,
         address _parentCompany,
@@ -39,6 +39,7 @@ contract Presale is Ownable {
         uint256 _unlockAtTime
     ) {
         tokenX = _tokenX;
+        busd = _busd;
         rate = _rate;
         walletOwner = _walletOwner;
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
@@ -68,7 +69,7 @@ contract Presale is Ownable {
 
         tokenXSold += _tokens;
         uint256 price = (_tokens * rate) / 1e18;
-        buyingToken.transferFrom(msg.sender, walletOwner, price);
+        busd.transferFrom(msg.sender, walletOwner, price);
         tokenX.transfer(msg.sender, _tokens); // try with _msgsender on truufle test and ethgas reporter
     }
 

@@ -12,6 +12,7 @@ contract PresaleFactory is Ownable {
     function createERC20(
         IERC20 _tokenX,
         IERC20 _lpTokenX,
+        IERC20 _busd,
         uint256 _rate,
         address _walletOwner,
         bool _onlyWhitelistedAllowed,
@@ -21,6 +22,7 @@ contract PresaleFactory is Ownable {
         Presale presale = new Presale(
             _tokenX,
             _lpTokenX,
+            _busd,
             _rate,
             _walletOwner,
             owner(),
@@ -39,6 +41,7 @@ contract PresaleFactory is Ownable {
 /*
 notes:
 
+get presales of a specific person
 get presales with unlock liquidity request
 get presale which wan to be approved
 get approved presales

@@ -9,18 +9,40 @@ const PresaleFactory = artifacts.require("PresaleFactory");
 const Locker = artifacts.require("Locker");
 
 module.exports = async (deployer, network, accounts) => {
-  await defaultDeploy(deployer, accounts);
+  await defaultDeploy(deployer, network, accounts);
   // await rinkeby(deployer, accounts);
   // await ethMainnet(deployer);
 };
 
-const defaultDeploy = async (deployer, [client, dev, owner]) => {
+const defaultDeploy = async (deployer, network, [client, dev, owner]) => {
   await deployer.deploy(Migrations);
+
+  // const busd = await deployer.deploy(
+  //   ERC20Token,
+  //   owner,
+  //   "BUSD",
+  //   "BUSD",
+  //   toWei("10000")
+  // );
+  // const tokenX = await deployer.deploy(
+  //   ERC20Token,
+  //   owner,
+  //   "Red Token",
+  //   "RED",
+  //   toWei("10000")
+  // );
+  const busdAddress = "0xec828b4305be12B9B3E8F584FCE8ACDCc56c86E7";
+  const tokenXAddress = "0x95FB36223A312c7fB3Bb05415b1D85771A781Db2";
+  const busd = await ERC20Token.at(busdAddress);
+  const tokenX = await ERC20Token.at(tokenXAddress);
+
+  // const erc20TokenFactory = await deployer.deploy(ERC20TokenFactory);
 
   const presale = await deployer.deploy(
     Presale,
     (_tokenX = "0x95FB36223A312c7fB3Bb05415b1D85771A781Db2"),
     (_lpTokenX = "0x95FB36223A312c7fB3Bb05415b1D85771A781Db2"),
+    busd.address,
     (_rate = toWei("0.2")),
     (_walletOwner = "0xc18E78C0F67A09ee43007579018b2Db091116B4C"),
     (_parentCompany = owner),
@@ -33,32 +55,25 @@ const defaultDeploy = async (deployer, [client, dev, owner]) => {
     (_parentCompany = owner)
   );
 
-  const erc20Token = await deployer.deploy(
-    ERC20Token,
-    owner,
-    "BUSD",
-    "BUSD",
-    toWei("10000")
-  );
-  const erc20TokenFactory = await deployer.deploy(ERC20TokenFactory);
+  const locker = await deployer.deploy(Locker, busd.address, owner, Date.now());
 
-  const locker = await deployer.deploy(
-    Locker,
-    erc20Token.address,
-    owner,
-    Date.now()
-  );
-
+  // todo later improve it, i.e take explorer as input
   const fs = require("fs");
   let res = "// bscTestnet:\n";
-  res += wrapper({ locker });
-  res += wrapper({ erc20Token });
-  res += wrapper({ erc20TokenFactory });
-  res += wrapper({ presale });
-  res += wrapper({ presaleFactory });
-  // res += wrapper({ Migrations });
+  res += makeExplorerLink({ locker });
+  res += makeExplorerLink({ busd });
+  res += makeExplorerLink({ tokenX });
+  res += makeExplorerLink({ presale });
+  res += makeExplorerLink({ presaleFactory });
+  res += makeExplorerLink({ Migrations });
+  res += "//=========================\n\n";
+  res += makeContractObject({ locker });
+  res += makeContractObject({ busd });
+  res += makeContractObject({ tokenX });
+  res += makeContractObject({ presale });
+  res += makeContractObject({ presaleFactory });
 
-  fs.writeFile("latestContracts.js", res, console.log);
+  fs.writeFile("smart-contracts.js", res, console.log);
 };
 
 const rinkeby = async (deployer, accounts) => {};
@@ -68,11 +83,17 @@ const ethMainnet = async (deployer) => {};
 const toWei = web3.utils.toWei;
 
 // send variable in input as {someVariable}
-const wrapper = (obj) => {
+const makeContractObject = (obj) => {
   const [varName] = Object.keys(obj);
-  return `const ${varName} = new web.eth.Contract(JSON.parse('${JSON.stringify(
+  return `export const ${varName} = new web.eth.Contract(JSON.parse('${JSON.stringify(
     obj[varName].abi
-  )}'), "${obj[varName].address}");\n\n`;
+  )}'), "${obj[varName].address}");\n`;
+};
+
+const makeExplorerLink = (obj) => {
+  const [varName] = Object.keys(obj);
+  return `// ${varName} https://testnet.bscscan.com/address/${obj[varName].address}/#contracts\n`;
 };
 
 const hour = 60 * 60 * 1000;
+7;
