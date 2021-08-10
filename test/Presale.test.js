@@ -3,7 +3,7 @@ const Presale = artifacts.require("Presale");
 const USDT = artifacts.require("USDT");
 
 contract(
-  "Presale",
+  "Presale Generator",
   async ([_, tokenOwner, walletOwner, walletDev, , client, usdtOwner]) => {
     // make it like real test case, input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens
     it("input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens.", async () => {

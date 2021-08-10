@@ -96,6 +96,46 @@ contract PresaleFactory is Ownable {
         return selectedPresales;
     }
 
+    function getPresalesWithAboutToCloseFilter(
+        uint256 _index,
+        uint256 _amountToFetch,
+        bool presaleAppliedForClosing
+    ) external view returns (Presale[] memory) {
+        if (_index >= presales.length) return new Presale[](0);
+
+        uint256 goto = _index + _amountToFetch;
+        uint256 stopAt = goto >= presales.length ? presales.length : goto;
+
+        Presale[] memory selectedPresales = new Presale[](goto - _index);
+        for (uint256 i = _index; i < stopAt; i++) {
+            Presale p = presales[i];
+            if (presaleAppliedForClosing == p.presaleAppliedForClosing()) {
+                selectedPresales[i] = presales[i];
+            }
+        }
+        return selectedPresales;
+    }
+
+    function getPresalesWithSpecificTier(
+        uint256 _index,
+        uint256 _amountToFetch,
+        uint8 _tier
+    ) external view returns (Presale[] memory) {
+        if (_index >= presales.length) return new Presale[](0);
+
+        uint256 goto = _index + _amountToFetch;
+        uint256 stopAt = goto >= presales.length ? presales.length : goto;
+
+        Presale[] memory selectedPresales = new Presale[](goto - _index);
+        for (uint256 i = _index; i < stopAt; i++) {
+            Presale p = presales[i];
+            if (_tier == p.tier()) {
+                selectedPresales[i] = presales[i];
+            }
+        }
+        return selectedPresales;
+    }
+
     // see that 10 size array returns what on 3 elems in it, function getStopPoint private returns (uint256) {}
 }
 

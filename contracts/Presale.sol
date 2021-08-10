@@ -17,6 +17,7 @@ contract Presale is Ownable {
     uint256 public tokenXSold = 0;
     uint256 public rate; // 3 = 3 000 000 000 000 000 000, 0.3 = 3 00 000 000 000 000 000 // 0.3 busd = 1 TokenX
     uint256 public amountTokenXToBuyTokenX;
+    uint256 public presaleClosedAt = type(uint256).max;
     uint8 public tier = 1;
     address public walletOwner;
     address public parentCompany;
@@ -25,8 +26,7 @@ contract Presale is Ownable {
     mapping(address => bool) isWhitelisted;
     bool public onlyWhitelistedAllowed;
     bool public presaleIsApproved = false;
-    bool public presaleBlacklisted = false;
-    bool public presaleAboutToClose = false;
+    bool public presaleAppliedForClosing = false;
 
     event RateChanged(uint256 _newRate);
     event PresaleClosed();
@@ -58,10 +58,7 @@ contract Presale is Ownable {
 
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
     function buyTokens(uint256 _tokens) external {
-        require(
-            !presaleBlacklisted,
-            "Presale is marked as spam by the parent network."
-        );
+        require(block.timestamp < presaleClosedAt, "Presale is closed.");
         require(
             presaleIsApproved,
             "Presale is not approved by the parent network."
@@ -99,9 +96,13 @@ contract Presale is Ownable {
         emit RateChanged(_rate);
     }
 
-    function onlyOwnerFunction_disbandPresale() external onlyOwner {
-        presaleAboutToClose = presaleAboutToClose;
-
+    function onlyOwnerFunction_closePresale(uint8 _months) external onlyOwner {
+        require(
+            _months >= 1 && _months <= 3,
+            "Presale closing period can be 1 to 3 months."
+        );
+        presaleAppliedForClosing = presaleAppliedForClosing;
+        presaleClosedAt = block.timestamp + _months * 30 days;
         emit PresaleClosed();
     }
 
@@ -113,16 +114,6 @@ contract Presale is Ownable {
             "You must be parent company to edit value of presaleIsApproved."
         );
         presaleIsApproved = _presaleIsApproved;
-    }
-
-    function onlyParentCompanyFunction_editPresaleBlacklisted(
-        bool _presaleBlacklisted
-    ) public {
-        require(
-            msg.sender == parentCompany,
-            "You must be parent company to edit value of presaleBlacklisted."
-        );
-        presaleBlacklisted = _presaleBlacklisted;
     }
 
     function onlyParentCompanyFunction_editTier(uint8 _tier) public {
