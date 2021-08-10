@@ -10,7 +10,7 @@ const Locker = artifacts.require("Locker");
 
 module.exports = async (deployer, network, accounts) => {
   console.log("network: ", network);
-  await defaultDeploy(deployer, network, accounts);
+  //await defaultDeploy(deployer, network, accounts);
   // await rinkeby(deployer, accounts);
   // await ethMainnet(deployer);
 };

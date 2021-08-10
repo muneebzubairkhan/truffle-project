@@ -1,63 +1,107 @@
-const RedToken = artifacts.require("RedToken");
+const ERC20Token = artifacts.require("ERC20Token");
 const Presale = artifacts.require("Presale");
-const USDT = artifacts.require("USDT");
 
 contract(
   "Presale Generator",
-  async ([_, tokenOwner, walletOwner, walletDev, , client, usdtOwner]) => {
+  async ([
+    _,
+    tokenXOwner,
+    tokenBUSDOwner,
+    tokenLpOwner,
+    walletOwner,
+    walletDev,
+    client,
+    usdtOwner,
+    parentCompany,
+    presaleOwner,
+  ]) => {
     // make it like real test case, input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens
     it("input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens.", async () => {
       // Variables Init {
-      const tokenX = await RedToken.new({ from: tokenOwner });
-      const usdt = await USDT.new({ from: usdtOwner });
+      const tokenX = await ERC20Token.new(
+        tokenXOwner,
+        "tokenX",
+        "tokenX",
+        toWei("10000"),
+        { from: tokenXOwner }
+      );
+
+      // LP TOKEN OWNER
+
+      const lpToken = await ERC20Token.new(
+        tokenLpOwner,
+        "tokenlp",
+        "tokenlp",
+        toWei("1000"),
+        { from: tokenLpOwner }
+      );
+      const busd = await ERC20Token.new(
+        tokenBUSDOwner,
+        "BUSD",
+        "BUSD",
+        toWei("1000"),
+        { from: tokenBUSDOwner }
+      );
 
       // this line will not happen in real life
-      await usdt.transfer(client, toWei("1000"), {
-        from: usdtOwner,
+      await busd.transfer(client, toWei("100"), {
+        from: tokenBUSDOwner,
       }); // give 100$ to client
 
       const presale = await Presale.new(
         tokenX.address, // People will buy tokenX
-        usdt.address, // People will give buyingToken or USDT and get tokenX in return
-        toWei("0.3"), // rate
+        lpToken.address, // People will give buyingToken or USDT and get tokenX in return
+        busd.address,
+        toWei("0.2"), // rate 0.2 busd = 1 tokenX
         walletOwner, // presale owner
+        parentCompany,
         false, //_onlyWhitelistedAllowed
         "0", // _amountHoldTokenXToBuyTokenX
+        Date.now(),
         {
-          from: tokenOwner,
+          from: presaleOwner,
         }
       );
 
-      const tokensForPresale = toWei("1000");
+      const tokensForPresale = toWei("1000"); // it is just a variable
       await tokenX.transfer(presale.address, tokensForPresale, {
-        from: tokenOwner,
+        from: tokenXOwner,
       });
 
-      // }
       console.log(
-        "BEFORE token client",
+        "BEFORE tokenX client",
         fromWei((await tokenX.balanceOf(client)).toString())
       );
       console.log(
-        "usdt client",
-        fromWei((await usdt.balanceOf(client)).toString())
+        "busd client",
+        fromWei((await busd.balanceOf(client)).toString())
       );
+      ///todo lp
 
-      await usdt.approve(presale.address, MAX_INT, { from: client });
+      // console.log(
+      //   "ERC20token client",
+      //   fromWei((await ERC20Token.balanceOf(client)).toString())
+      // );
+
+      await busd.approve(presale.address, MAX_INT, { from: client });
+      await presale.onlyParentCompanyFunction_editPresaleIsApproved(true, {
+        from: parentCompany,
+      });
+
       await presale.buyTokens(toWei("100"), { from: client });
-
+      // assert.equal();
       console.log(
         "AFTER token client",
         fromWei((await tokenX.balanceOf(client)).toString())
       );
       console.log(
         "usdt client",
-        fromWei((await usdt.balanceOf(client)).toString())
+        fromWei((await busd.balanceOf(client)).toString())
       );
 
       console.log(
         "usdt walletOwner: ",
-        fromWei((await usdt.balanceOf(walletOwner)).toString())
+        fromWei((await busd.balanceOf(walletOwner)).toString())
       );
 
       console.log(
