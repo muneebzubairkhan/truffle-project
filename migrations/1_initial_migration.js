@@ -14,13 +14,13 @@ const defaultDeploy = async (deployer, [_, client, owner, dev]) => {
   await deployer.deploy(Migrations);
 
   const erc20Generator = await deployer.deploy(ERC20Generator);
-  const usdt = await deployer.deploy(USDT);
-  const redToken = await deployer.deploy(RedToken);
-  const blueToken = await deployer.deploy(BlueToken);
+  // const usdt = await deployer.deploy(USDT);
+  // const redToken = await deployer.deploy(RedToken);
+  // const blueToken = await deployer.deploy(BlueToken);
 
-  console.log(`const usdt = "${usdt.address}";`);
-  console.log(`const redToken = "${redToken.address}";`);
-  console.log(`const blueToken = "${blueToken.address}";`);
+  // console.log(`const usdt = "${usdt.address}";`);
+  // console.log(`const redToken = "${redToken.address}";`);
+  // console.log(`const blueToken = "${blueToken.address}";`);
   console.log(`const erc20Generator = "${erc20Generator.address}";`); 
   console.log(`// const migrations = "${Migrations.address}";`);
 };

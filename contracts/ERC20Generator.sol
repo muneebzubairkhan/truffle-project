@@ -10,7 +10,7 @@ contract ERC20Generator {
         string memory _symbol,
         uint256 _totalSupply
     ) external {
-        IERC20 erc20 = new TokenERC20(_name, _symbol, _totalSupply);
+        IERC20 erc20 = new TokenERC20(msg.sender, _name, _symbol, _totalSupply);
         erc20s.push(erc20);
     }
 

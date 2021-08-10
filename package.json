@@ -7,8 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "start": "yarn startBscTestnet",
-    "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify Migrations USDT RedToken BlueToken ERC20Generator --network rinkeby",
+    "start": "yarn startRinkeby",
+    "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify ERC20Generator --network rinkeby",
     "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify Migrations USDT RedToken BlueToken ERC20Generator --network mainnet",
     "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify Migrations USDT RedToken BlueToken ERC20Generator --network bscTestnet"
   },
