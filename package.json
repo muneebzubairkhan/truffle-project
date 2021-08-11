@@ -15,7 +15,8 @@
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify %npm_package_selectedContracts% --network bscMainnet",
     "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify %npm_package_selectedContracts% --network rinkeby",
     "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify %npm_package_selectedContracts% --network mainnet",
-    "verify": "truffle run verify %npm_package_selectedContracts% --network bscTestnet"
+    "verify": "truffle run verify %npm_package_selectedContracts% --network bscTestnet",
+    "test": "truffle test"
   },
   "selectedContracts": "Migrations Presale PresaleFactory Locker",
   "allContracts": "Migrations ERC20Token ERC20TokenFactory Presale PresaleFactory Locker",
