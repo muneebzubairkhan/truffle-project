@@ -10,7 +10,7 @@ const Locker = artifacts.require("Locker");
 
 module.exports = async (deployer, network, accounts) => {
   console.log("network: ", network);
-  //await defaultDeploy(deployer, network, accounts);
+  await defaultDeploy(deployer, network, accounts);
   // await rinkeby(deployer, accounts);
   // await ethMainnet(deployer);
 };
@@ -102,3 +102,10 @@ const makeExplorerLink = (obj) => {
 
 const hour = 60 * 60 * 1000;
 7;
+
+
+/*
+
+https://www.ovhcloud.com/it/bare-metal/hosting/?xtor=SEC-13-GOO-[it_int_2020_ovh_baremetal_undefinite_sale_acquisition_srch_offensive()]-[496561848614]-S-[]&gclid=CjwKCAjwsNiIBhBdEiwAJK4khscOu7d1CLdsfI1qBuqc0alOdNY6SwO4pBmfVHZ8rZtrepmAPKawtxoCNt0QAvD_BwE
+
+*/

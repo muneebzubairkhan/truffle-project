@@ -20,6 +20,7 @@ module.exports = {
         );
       },
       network_id: "97",
+      skipDryRun: true,
     },
 
     bscMainnet: {
