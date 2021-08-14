@@ -2,8 +2,12 @@ var HDWalletProvider = require("@truffle/hdwallet-provider");
 require("dotenv").config();
 const MNEMONIC = process.env.MNEMONIC;
 const token = process.env.INFURA_TOKEN;
-const etherscanKey = process.env.BSCSCAN_KEY;
-// const etherscanKey = process.env.ETHERSCAN_KEY;
+const etherscanKey =
+  process.env.DEPLOY_NETWORK === "bscTestnet" ||
+  process.env.DEPLOY_NETWORK === "bscMainnet"
+    ? process.env.BSCSCAN_KEY
+    : process.env.ETHERSCAN_KEY;
+
 module.exports = {
   networks: {
     development: {
@@ -20,7 +24,9 @@ module.exports = {
         );
       },
       network_id: "97",
-      skipDryRun: true,
+      // skipDryRun: true,
+      gas: 30000000, //from ganache-cli output
+      gasPrice: 20000000000, //1,000,000,000 From ganache-cli output
     },
 
     bscMainnet: {

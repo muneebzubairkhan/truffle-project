@@ -8,6 +8,7 @@
   },
   "scripts": {
     "start": "yarn startBscTestnet",
+    "startInnovate": "truffle migrate --network %(grep DEPLOY_NETWORK .env)% --reset && truffle run verify %npm_package_selectedContracts% --network $(grep DEPLOY_NETWORK .env)",
     "compile": "truffle compile",
     "ganache-cli": "ganache-cli",
     "migrate": "truffle migrate --reset",
