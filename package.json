@@ -12,11 +12,11 @@
     "compile": "truffle compile",
     "ganache-cli": "ganache-cli",
     "migrate": "truffle migrate --reset",
-    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify %npm_package_selectedContracts% --network bscTestnet",
+    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify %npm_package_selectedContracts% --network bscMainnet",
     "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify %npm_package_selectedContracts% --network rinkeby",
     "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify %npm_package_selectedContracts% --network mainnet",
-    "verify": "truffle run verify %npm_package_selectedContracts% --network bscTestnet",
+    "verify": "truffle run verify Migrations Presale PresaleFactory Locker --network rinkeby",
     "test": "truffle test"
   },
   "selectedContracts": "Migrations Presale PresaleFactory Locker",
