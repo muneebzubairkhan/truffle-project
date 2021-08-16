@@ -66,14 +66,30 @@ contract PresaleFactory is Ownable {
     {
         if (_index >= presales.length) return new Presale[](0);
 
-        uint256 goto = _index + _amountToFetch;
-        uint256 stopAt = goto >= presales.length ? presales.length : goto;
-
-        Presale[] memory selectedPresales = new Presale[](goto - _index);
-        for (uint256 i = _index; i < stopAt; i++) {
-            selectedPresales[i] = (presales[i]);
+        Presale[] memory selectedPresales = new Presale[](_amountToFetch);
+        uint256 selectedCount = 0;
+        uint256 selectedPresalesI = 0;
+        for (
+            uint256 i = _index;
+            i < _index + _amountToFetch; // && i < presales.length;
+            i++
+        ) {
+            selectedPresales[selectedPresalesI] = presales[i];
+            if (address(presales[i]) != address(0)) selectedCount++;
+            selectedPresalesI++;
         }
-        return selectedPresales;
+
+        Presale[] memory resPresales = new Presale[](selectedCount);
+        uint256 resPresalesI = 0;
+        // traverse in selectedPresales to get only addresses that are not 0x0
+        for (uint256 i = 0; i < _amountToFetch; i++) {
+            if (address(selectedPresales[i]) != address(0)) {
+                resPresales[resPresalesI] = selectedPresales[i];
+                resPresalesI++;
+            }
+        }
+
+        return resPresales;
     }
 
     function getPresalesWithApproveFilter(

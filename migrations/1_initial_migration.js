@@ -10,13 +10,13 @@ const Locker = artifacts.require('Locker');
 
 module.exports = async (deployer, network, accounts) => {
   console.log('network: ', network);
+  await deployer.deploy(Migrations);
   await defaultDeploy(deployer, network, accounts);
   // await rinkeby(deployer, accounts);
   // await ethMainnet(deployer);
 };
 
 const defaultDeploy = async (deployer, network, [client, dev, owner]) => {
-  await deployer.deploy(Migrations);
   let busd, tokenX;
 
   if (network === 'bscTestnet') {
