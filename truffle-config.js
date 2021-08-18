@@ -24,19 +24,19 @@ module.exports = {
     // the api limit is used
     //
     //
-    bscTestnet: {
-      provider: () => {
-        return new HDWalletProvider(
-          MNEMONIC,
-          'https://data-seed-prebsc-1-s2.binance.org:8545'
-          // 'https://data-seed-prebsc-1-s1.binance.org:8545'
-        );
-      },
-      network_id: '97'
-      // skipDryRun: true,
-      // gas: 30000000, //from ganache-cli output
-      // gasPrice: 20000000000 //1,000,000,000 From ganache-cli output
-    },
+    // bscTestnet: {
+    //   provider: () => {
+    //     return new HDWalletProvider(
+    //       MNEMONIC,
+    //       'https://data-seed-prebsc-1-s2.binance.org:8545'
+    //       // 'https://data-seed-prebsc-1-s1.binance.org:8545'
+    //     );
+    //   },
+    //   network_id: '97'
+    //   // skipDryRun: true,
+    //   // gas: 30000000, //from ganache-cli output
+    //   // gasPrice: 20000000000 //1,000,000,000 From ganache-cli output
+    // },
 
     // bscMainnet: {
     //   provider: () => {
@@ -92,7 +92,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: '0.8.0',
+      version: '0.8.7',
       settings: {
         optimizer: {
           enabled: true,

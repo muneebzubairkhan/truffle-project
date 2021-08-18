@@ -17,11 +17,17 @@ module.exports = async (deployer, network, accounts) => {
 };
 
 const defaultDeploy = async (deployer, network, [client, dev, owner]) => {
-  let busd, tokenX;
+  let busd, tokenX, lpTokenAddress;
 
   if (network === 'bscTestnet') {
     const busdAddress = '0xec828b4305be12B9B3E8F584FCE8ACDCc56c86E7';
     const tokenXAddress = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2';
+    busd = await ERC20Token.at(busdAddress);
+    tokenX = await ERC20Token.at(tokenXAddress);
+  }
+  if (network === 'rinkeby') {
+    const busdAddress = '0x60D4f85E9C78e01c3378fc15cbd222009EC9A4Dd';
+    const tokenXAddress = '0x7eC6d1aEB55AE52364B0F6Ff47Ef4fe109eeC6eE';
     busd = await ERC20Token.at(busdAddress);
     tokenX = await ERC20Token.at(tokenXAddress);
   } else {

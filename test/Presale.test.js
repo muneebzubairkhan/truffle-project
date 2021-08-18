@@ -12,7 +12,6 @@ contract(
     walletOwner,
     walletDev,
     client,
-    usdtOwner,
     parentCompany,
     presaleOwner
   ]) => {
@@ -55,7 +54,7 @@ contract(
         from: tokenBUSDOwner
       }); // give 100$ to client
 
-      const presale = await presaleFactory.createERC20(
+      await presaleFactory.createERC20Presale(
         tokenX.address, // People will buy tokenX
         lpToken.address, // People will give buyingToken or USDT and get tokenX in return
         toWei('0.2'), // rate 0.2 busd = 1 tokenX
@@ -71,10 +70,9 @@ contract(
         }
       );
 
-      const tokensForPresale = toWei('1000'); // it is just a variable
-      await tokenX.transfer(presale.address, tokensForPresale, {
-        from: tokenXOwner
-      });
+      const presale = await Presale.at(
+        await presaleFactory.presaleOf(tokenX.address)
+      );
 
       console.log(
         'BEFORE tokenX client',
@@ -96,19 +94,21 @@ contract(
         from: parentCompany
       });
 
-      await presale.buyTokens(toWei('100'), { from: client });
+      // compare balances, assert
+
+      // await presale.buyTokens(toWei('100'), { from: client });
       // assert.equal();
       console.log(
         'AFTER token client',
         fromWei((await tokenX.balanceOf(client)).toString())
       );
       console.log(
-        'usdt client',
+        'busd client',
         fromWei((await busd.balanceOf(client)).toString())
       );
 
       console.log(
-        'usdt walletOwner: ',
+        'busd walletOwner: ',
         fromWei((await busd.balanceOf(walletOwner)).toString())
       );
 

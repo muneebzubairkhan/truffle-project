@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.7;
 import "./ERC20Token.sol";
 
 contract ERC20TokenFactory {
@@ -18,5 +18,4 @@ contract ERC20TokenFactory {
     function getERC20s() external view returns (IERC20[] memory) {
         return erc20s;
     }
-    
 }

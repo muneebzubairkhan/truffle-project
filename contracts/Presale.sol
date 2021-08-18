@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -51,8 +51,16 @@ contract Presale is Ownable {
         amountTokenXToBuyTokenX = _amountTokenXToBuyTokenX;
         parentCompany = _parentCompany;
 
-        tokenXLocker = new Locker(_tokenX, _presaleEarningWallet, _unlockAtTime);
-        lpTokenXLocker = new Locker(_lpTokenX, _presaleEarningWallet, _unlockAtTime);
+        tokenXLocker = new Locker(
+            _tokenX,
+            _presaleEarningWallet,
+            _unlockAtTime
+        );
+        lpTokenXLocker = new Locker(
+            _lpTokenX,
+            _presaleEarningWallet,
+            _unlockAtTime
+        );
         transferOwnership(_presaleEarningWallet);
     }
 

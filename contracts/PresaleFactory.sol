@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.7;
 import "./Presale.sol";
 
 contract PresaleFactory is Ownable {
@@ -8,6 +8,7 @@ contract PresaleFactory is Ownable {
 
     /// @notice people can see if a presale belongs to this factory or not
     mapping(address => bool) public belongThisFactory;
+    mapping(IERC20 => Presale) public presaleOf;
 
     constructor(address _parentCompany, IERC20 _busd) {
         busd = _busd;
@@ -15,7 +16,7 @@ contract PresaleFactory is Ownable {
     }
 
     /// @dev users can create an ICO for erc20 from this function
-    function createERC20(
+    function createERC20Presale(
         IERC20 _tokenX,
         IERC20 _lpTokenX,
         uint256 _rate,
@@ -40,6 +41,7 @@ contract PresaleFactory is Ownable {
         );
 
         belongThisFactory[address(presale)] = true;
+        presaleOf[_tokenX] = presale;
         presales.push(presale);
 
         _tokenX.transferFrom(
