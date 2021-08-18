@@ -11,6 +11,14 @@ contract DAPP {
         item.owner = msg.sender;
     }
 
+    // white paper, pptx, video
+    // game erc1155 raccoons
+    // leteer head
+    // co pro advnce pending
+    //
+    // ddk
+    // shild lanch
+
     function settransactionHash(
         string memory _itemID,
         string memory _transactionHash
