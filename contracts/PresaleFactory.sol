@@ -24,7 +24,7 @@ contract PresaleFactory is Ownable {
         uint256 _tokenXToSell,
         uint256 _unlockAtTime,
         uint256 _amountTokenXToBuyTokenX,
-        address _walletOwner,
+        address _presaleEarningWallet,
         bool _onlyWhitelistedAllowed
     ) external {
         Presale presale = new Presale(
@@ -32,7 +32,7 @@ contract PresaleFactory is Ownable {
             _lpTokenX,
             busd,
             _rate,
-            _walletOwner,
+            _presaleEarningWallet,
             owner(),
             _onlyWhitelistedAllowed,
             _amountTokenXToBuyTokenX,

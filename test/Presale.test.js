@@ -1,5 +1,6 @@
 const ERC20Token = artifacts.require('ERC20Token');
 const Presale = artifacts.require('Presale');
+const PresaleFactory = artifacts.require('PresaleFactory');
 
 contract(
   'Presale Generator',
@@ -16,8 +17,9 @@ contract(
     presaleOwner
   ]) => {
     // make it like real test case, input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens
-    it('input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens.', async () => {
-      // Variables Init {
+    it('Create Presale Factory, Make Presale, call buyTokens(100) and see ', async () => {
+      // Variables Init
+      // token X
       const tokenX = await ERC20Token.new(
         tokenXOwner,
         'tokenX',
@@ -26,8 +28,7 @@ contract(
         { from: tokenXOwner }
       );
 
-      // LP TOKEN OWNER
-
+      // LP TOKEN
       const lpToken = await ERC20Token.new(
         tokenLpOwner,
         'tokenlp',
@@ -44,21 +45,27 @@ contract(
         { from: tokenBUSDOwner }
       );
 
+      const presaleFactory = await PresaleFactory.new(
+        parentCompany,
+        busd.address
+      );
+
       // this line will not happen in real life
       await busd.transfer(client, toWei('100'), {
         from: tokenBUSDOwner
       }); // give 100$ to client
 
-      const presale = await Presale.new(
+      const presale = await presaleFactory.createERC20(
         tokenX.address, // People will buy tokenX
         lpToken.address, // People will give buyingToken or USDT and get tokenX in return
-        busd.address,
         toWei('0.2'), // rate 0.2 busd = 1 tokenX
+        '0', // _tokenXToLock
+        '0', // _lpTokenXToLock
+        '0', // _tokenXToSell
+        '0', // _unlockAtTime
+        '0', // _amountTokenXToBuyTokenX
         walletOwner, // presale owner
-        parentCompany,
         false, //_onlyWhitelistedAllowed
-        '0', // _amountHoldTokenXToBuyTokenX
-        Date.now(),
         {
           from: presaleOwner
         }

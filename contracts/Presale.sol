@@ -19,7 +19,7 @@ contract Presale is Ownable {
     uint256 public amountTokenXToBuyTokenX;
     uint256 public presaleClosedAt = type(uint256).max;
     uint8 public tier = 1;
-    address public walletOwner;
+    address public presaleEarningWallet;
     address public parentCompany;
     address public factory;
 
@@ -36,7 +36,7 @@ contract Presale is Ownable {
         IERC20 _lpTokenX,
         IERC20 _busd,
         uint256 _rate,
-        address _walletOwner,
+        address _presaleEarningWallet,
         address _parentCompany,
         bool _onlyWhitelistedAllowed,
         uint256 _amountTokenXToBuyTokenX,
@@ -46,14 +46,14 @@ contract Presale is Ownable {
         busd = _busd;
         factory = msg.sender; // only trust those presales who address exist in factory contract
         rate = _rate;
-        walletOwner = _walletOwner;
+        presaleEarningWallet = _presaleEarningWallet;
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
         amountTokenXToBuyTokenX = _amountTokenXToBuyTokenX;
         parentCompany = _parentCompany;
 
-        tokenXLocker = new Locker(_tokenX, _walletOwner, _unlockAtTime);
-        lpTokenXLocker = new Locker(_lpTokenX, _walletOwner, _unlockAtTime);
-        transferOwnership(_walletOwner);
+        tokenXLocker = new Locker(_tokenX, _presaleEarningWallet, _unlockAtTime);
+        lpTokenXLocker = new Locker(_lpTokenX, _presaleEarningWallet, _unlockAtTime);
+        transferOwnership(_presaleEarningWallet);
     }
 
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
@@ -77,7 +77,7 @@ contract Presale is Ownable {
 
         tokenXSold += _tokens;
         uint256 price = (_tokens * rate) / 1e18;
-        busd.transferFrom(msg.sender, walletOwner, price);
+        busd.transferFrom(msg.sender, presaleEarningWallet, price);
         tokenX.transfer(msg.sender, _tokens); // try with _msgsender on truufle test and ethgas reporter
     }
 
