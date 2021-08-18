@@ -11,7 +11,7 @@ contract(
     tokenLpOwner,
     walletOwner,
     walletDev,
-    client,
+    clientOfTokenX,
     parentCompany,
     presaleOwner
   ]) => {
@@ -32,7 +32,7 @@ contract(
         tokenLpOwner,
         'tokenlp',
         'tokenlp',
-        toWei('1000'),
+        toWei('10000000'),
         { from: tokenLpOwner }
       );
 
@@ -40,7 +40,7 @@ contract(
         tokenBUSDOwner,
         'BUSD',
         'BUSD',
-        toWei('1000'),
+        toWei('10000000'),
         { from: tokenBUSDOwner }
       );
 
@@ -50,17 +50,31 @@ contract(
       );
 
       // this line will not happen in real life
-      await busd.transfer(client, toWei('100'), {
+      await busd.transfer(clientOfTokenX, toWei('10000'), {
         from: tokenBUSDOwner
-      }); // give 100$ to client
+      }); // give 100$ to client to buy token X
+
+      await lpToken.transfer(presaleOwner, toWei('10000'), {
+        from: tokenLpOwner
+      }); // give 100$ to client to buy token X
+      await tokenX.transfer(presaleOwner, toWei('10000'), {
+        from: tokenXOwner
+      }); // give 100$ to client to buy token X
+
+      await lpToken.approve(presaleFactory.address, MAX_INT, {
+        from: presaleOwner
+      });
+      await tokenX.approve(presaleFactory.address, MAX_INT, {
+        from: presaleOwner
+      });
 
       await presaleFactory.createERC20Presale(
         tokenX.address, // People will buy tokenX
         lpToken.address, // People will give buyingToken or USDT and get tokenX in return
-        toWei('0.2'), // rate 0.2 busd = 1 tokenX
-        '0', // _tokenXToLock
-        '0', // _lpTokenXToLock
-        '0', // _tokenXToSell
+        toWei('0.2'), // rate 0.2 busd = 1 tokenX, 20 BUSD= 100 Token X
+        toWei('100'), // _tokenXToLock
+        toWei('100'), // _lpTokenXToLock
+        toWei('100'), // _tokenXToSell
         '0', // _unlockAtTime
         '0', // _amountTokenXToBuyTokenX
         walletOwner, // presale owner
@@ -74,37 +88,38 @@ contract(
         await presaleFactory.presaleOf(tokenX.address)
       );
 
+      await busd.approve(presale.address, MAX_INT, { from: clientOfTokenX });
+
       console.log(
         'BEFORE tokenX client',
-        fromWei((await tokenX.balanceOf(client)).toString())
+        fromWei((await tokenX.balanceOf(clientOfTokenX)).toString())
       );
       console.log(
         'busd client',
-        fromWei((await busd.balanceOf(client)).toString())
+        fromWei((await busd.balanceOf(clientOfTokenX)).toString())
       );
-      ///todo lp
 
+      ///todo lp
       // console.log(
       //   "ERC20token client",
       //   fromWei((await ERC20Token.balanceOf(client)).toString())
       // );
 
-      await busd.approve(presale.address, MAX_INT, { from: client });
       await presale.onlyParentCompanyFunction_editPresaleIsApproved(true, {
         from: parentCompany
       });
 
       // compare balances, assert
 
-      // await presale.buyTokens(toWei('100'), { from: client });
+      await presale.buyTokens(toWei('100'), { from: clientOfTokenX });
       // assert.equal();
       console.log(
         'AFTER token client',
-        fromWei((await tokenX.balanceOf(client)).toString())
+        fromWei((await tokenX.balanceOf(clientOfTokenX)).toString())
       );
       console.log(
         'busd client',
-        fromWei((await busd.balanceOf(client)).toString())
+        fromWei((await busd.balanceOf(clientOfTokenX)).toString())
       );
 
       console.log(

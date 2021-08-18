@@ -73,7 +73,13 @@ contract Presale is Ownable {
         );
         require(
             tokenX.balanceOf(msg.sender) >= amountTokenXToBuyTokenX,
-            "You should have more amount of tokens."
+            "You need to hold tokens to buy them from presale."
+        );
+
+        uint256 price = (_tokens * rate) / 1e18;
+        require(
+            busd.balanceOf(msg.sender) >= price,
+            "You have less BUSD available."
         );
 
         if (onlyWhitelistedAllowed) {
@@ -84,7 +90,6 @@ contract Presale is Ownable {
         }
 
         tokenXSold += _tokens;
-        uint256 price = (_tokens * rate) / 1e18;
         busd.transferFrom(msg.sender, presaleEarningWallet, price);
         tokenX.transfer(msg.sender, _tokens); // try with _msgsender on truufle test and ethgas reporter
     }
