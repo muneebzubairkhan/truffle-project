@@ -9,8 +9,8 @@
   },
   "scripts": {
     "start": "yarn startBscTestnet",
-    "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify DogeBTC --network bscMainnet",
-    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify DogeBTC --network bscTestnet"
+    "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify BTCSTtLTC --network bscMainnet",
+    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify BTCSTtLTC --network bscTestnet"
   },
   "keywords": [],
   "author": "",

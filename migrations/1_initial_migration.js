@@ -1,6 +1,5 @@
-const Migrations = artifacts.require("Migrations");
-const DogeBTC = artifacts.require("DogeBTC");
-const IterableMapping = artifacts.require("IterableMapping");
+const Migrations = artifacts.require('Migrations');
+const BTCSTtLTC = artifacts.require('BTCSTtLTC');
 
 module.exports = async (deployer, network, accounts) => {
   // await localDeploy(deployer, accounts);
@@ -10,15 +9,10 @@ module.exports = async (deployer, network, accounts) => {
 
 const localDeploy = async (deployer, [_, client, owner, dev]) => {
   await deployer.deploy(Migrations);
-  await deployer.deploy(IterableMapping);
-  await deployer.link(IterableMapping, DogeBTC);
-  await deployer.deploy(DogeBTC);
+  await deployer.deploy(BTCSTtLTC);
 };
-
 
 const bscTestnet = async (deployer, [_, client, owner, dev]) => {
   await deployer.deploy(Migrations);
-  await deployer.deploy(IterableMapping);
-  await deployer.link(IterableMapping, DogeBTC);
-  await deployer.deploy(DogeBTC);
+  await deployer.deploy(BTCSTtLTC);
 };
