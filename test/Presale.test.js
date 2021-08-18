@@ -6,14 +6,11 @@ contract(
   'Presale Generator',
   async ([
     _,
-    tokenXOwner,
-    tokenBUSDOwner,
-    tokenLpOwner,
-    walletOwner,
-    walletDev,
-    clientOfTokenX,
-    parentCompany,
-    presaleOwner
+    tokenXOwner, // any token owner who wants to launch presale for their token
+    busdOwner,
+    presaleEarningWallet,
+    clientOfTokenX, // this person will buy token X
+    parentCompany // the company who provides the services of launchpad
   ]) => {
     // make it like real test case, input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens
     it('Create Presale Factory, Make Presale, call buyTokens(100) and see ', async () => {
@@ -23,25 +20,25 @@ contract(
         tokenXOwner,
         'tokenX',
         'tokenX',
-        toWei('10000'),
+        toWei('1000'),
         { from: tokenXOwner }
       );
 
       // LP TOKEN
       const lpToken = await ERC20Token.new(
-        tokenLpOwner,
+        tokenXOwner,
         'tokenlp',
         'tokenlp',
-        toWei('10000000'),
-        { from: tokenLpOwner }
+        toWei('1000'),
+        { from: tokenXOwner }
       );
 
       const busd = await ERC20Token.new(
-        tokenBUSDOwner,
+        busdOwner,
         'BUSD',
         'BUSD',
-        toWei('10000000'),
-        { from: tokenBUSDOwner }
+        toWei('1000'),
+        { from: busdOwner }
       );
 
       const presaleFactory = await PresaleFactory.new(
@@ -50,22 +47,28 @@ contract(
       );
 
       // this line will not happen in real life
-      await busd.transfer(clientOfTokenX, toWei('10000'), {
-        from: tokenBUSDOwner
+      await busd.transfer(clientOfTokenX, toWei('100'), {
+        from: busdOwner
       }); // give 100$ to client to buy token X
 
-      await lpToken.transfer(presaleOwner, toWei('10000'), {
-        from: tokenLpOwner
-      }); // give 100$ to client to buy token X
-      await tokenX.transfer(presaleOwner, toWei('10000'), {
+      // 100LP for locking
+      await lpToken.transfer(tokenXOwner, toWei('100'), {
         from: tokenXOwner
-      }); // give 100$ to client to buy token X
-
-      await lpToken.approve(presaleFactory.address, MAX_INT, {
-        from: presaleOwner
       });
+
+      // 100 tokenX for selling
+      // 100 tokenX for locking
+      await tokenX.transfer(tokenXOwner, toWei('200'), {
+        from: tokenXOwner
+      });
+
+      // tokenXOwner approves presale address to spend his lpToken for locking
+      await lpToken.approve(presaleFactory.address, MAX_INT, {
+        from: tokenXOwner
+      });
+      // tokenXOwner approves presale address to spend his tokenX for locking, selling
       await tokenX.approve(presaleFactory.address, MAX_INT, {
-        from: presaleOwner
+        from: tokenXOwner
       });
 
       await presaleFactory.createERC20Presale(
@@ -77,10 +80,10 @@ contract(
         toWei('100'), // _tokenXToSell
         '0', // _unlockAtTime
         '0', // _amountTokenXToBuyTokenX
-        walletOwner, // presale owner
+        presaleEarningWallet, // presale owner
         false, //_onlyWhitelistedAllowed
         {
-          from: presaleOwner
+          from: tokenXOwner
         }
       );
 
@@ -88,6 +91,7 @@ contract(
         await presaleFactory.presaleOf(tokenX.address)
       );
 
+      // client of tokenX approves presale address to spend his BUSD
       await busd.approve(presale.address, MAX_INT, { from: clientOfTokenX });
 
       console.log(
@@ -105,13 +109,18 @@ contract(
       //   fromWei((await ERC20Token.balanceOf(client)).toString())
       // );
 
+      // parent company approves the presale is Genuine and not fake
       await presale.onlyParentCompanyFunction_editPresaleIsApproved(true, {
         from: parentCompany
       });
 
       // compare balances, assert
 
+      // now client of token X will spend his BUSD to buy tokenX
       await presale.buyTokens(toWei('100'), { from: clientOfTokenX });
+
+      // now assert, compare previos and current balances of tokenX, BUSD of the client
+
       // assert.equal();
       console.log(
         'AFTER token client',
@@ -124,7 +133,7 @@ contract(
 
       console.log(
         'busd walletOwner: ',
-        fromWei((await busd.balanceOf(walletOwner)).toString())
+        fromWei((await busd.balanceOf(presaleEarningWallet)).toString())
       );
 
       console.log(
