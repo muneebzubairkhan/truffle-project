@@ -72,8 +72,8 @@ module.exports = {
         MNEMONIC,
         'https://rinkeby.infura.io/v3/' + token
       ),
-      network_id: '4'
-      // skipDryRun: true,
+      network_id: '4',
+      skipDryRun: true
     }
     // kovan: {
     //   provider: () => {

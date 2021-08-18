@@ -26,7 +26,8 @@ contract PresaleFactory is Ownable {
         uint256 _unlockAtTime,
         uint256 _amountTokenXToBuyTokenX,
         address _presaleEarningWallet,
-        bool _onlyWhitelistedAllowed
+        bool _onlyWhitelistedAllowed,
+        address[] memory _whitelistAddresses
     ) external {
         Presale presale = new Presale(
             _tokenX,
@@ -37,7 +38,8 @@ contract PresaleFactory is Ownable {
             owner(),
             _onlyWhitelistedAllowed,
             _amountTokenXToBuyTokenX,
-            _unlockAtTime
+            _unlockAtTime,
+            _whitelistAddresses
         );
 
         belongThisFactory[address(presale)] = true;

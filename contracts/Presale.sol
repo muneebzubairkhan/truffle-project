@@ -40,7 +40,8 @@ contract Presale is Ownable {
         address _parentCompany,
         bool _onlyWhitelistedAllowed,
         uint256 _amountTokenXToBuyTokenX,
-        uint256 _unlockAtTime
+        uint256 _unlockAtTime,
+        address[] memory _whitelistAddresses
     ) {
         tokenX = _tokenX;
         busd = _busd;
@@ -50,6 +51,12 @@ contract Presale is Ownable {
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
         amountTokenXToBuyTokenX = _amountTokenXToBuyTokenX;
         parentCompany = _parentCompany;
+
+        if (_onlyWhitelistedAllowed) {
+            for (uint256 i = 0; i < _whitelistAddresses.length; i++) {
+                isWhitelisted[_whitelistAddresses[i]] = true;
+            }
+        }
 
         tokenXLocker = new Locker(
             _tokenX,

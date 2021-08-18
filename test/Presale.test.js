@@ -82,6 +82,7 @@ contract(
         '0', // _amountTokenXToBuyTokenX
         presaleEarningWallet, // presale owner
         false, //_onlyWhitelistedAllowed
+        [presaleEarningWallet, tokenXOwner],
         {
           from: tokenXOwner
         }

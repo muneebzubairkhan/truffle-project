@@ -16,7 +16,11 @@ module.exports = async (deployer, network, accounts) => {
   // await ethMainnet(deployer);
 };
 
-const defaultDeploy = async (deployer, network, [client, dev, owner]) => {
+const defaultDeploy = async (
+  deployer,
+  network,
+  [client, dev, owner, addr1, addr2]
+) => {
   let busd, tokenX, lpTokenAddress;
 
   if (network === 'bscTestnet') {
@@ -58,7 +62,8 @@ const defaultDeploy = async (deployer, network, [client, dev, owner]) => {
     (_parentCompany = owner),
     (_onlyWhitelistedAllowed = false),
     (_amountTokenXToBuyTokenX = toWei('0')),
-    (_unlockAtTime = '' + Date.now())
+    (_unlockAtTime = '' + Date.now()),
+    [addr1, addr2, '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2']
   );
   const presaleFactory = await deployer.deploy(
     PresaleFactory,
