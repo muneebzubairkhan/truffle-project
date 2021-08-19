@@ -9,7 +9,7 @@ contract(
     tokenXOwner, // any token owner who wants to launch presale for their token
     busdOwner,
     presaleEarningWallet,
-    clientOfTokenX, // this person will buy token X
+    client, // this person will buy token X
     parentCompany // the company who provides the services of launchpad
   ]) => {
     // make it like real test case, input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens
@@ -46,10 +46,10 @@ contract(
         busd.address
       );
 
-      // this line will not happen in real life
-      await busd.transfer(clientOfTokenX, toWei('100'), {
+      // give 100$ to client to buy token X
+      await busd.transfer(client, toWei('100'), {
         from: busdOwner
-      }); // give 100$ to client to buy token X
+      });
 
       // 100LP for locking
       await lpToken.transfer(tokenXOwner, toWei('100'), {
@@ -66,6 +66,7 @@ contract(
       await lpToken.approve(presaleFactory.address, MAX_INT, {
         from: tokenXOwner
       });
+
       // tokenXOwner approves presale address to spend his tokenX for locking, selling
       await tokenX.approve(presaleFactory.address, MAX_INT, {
         from: tokenXOwner
@@ -82,68 +83,45 @@ contract(
         '0', // _amountTokenXToBuyTokenX
         presaleEarningWallet, // presale owner
         false, //_onlyWhitelistedAllowed
-        [presaleEarningWallet, tokenXOwner],
+        [presaleEarningWallet, tokenXOwner], // whitelist
         {
           from: tokenXOwner
         }
       );
 
-      const presale = await Presale.at(
-        await presaleFactory.presaleOf(tokenX.address)
-      );
+      const presaleAddress = await presaleFactory.presaleOf(tokenX.address);
+      const presale = await Presale.at(presaleAddress);
 
       // client of tokenX approves presale address to spend his BUSD
-      await busd.approve(presale.address, MAX_INT, { from: clientOfTokenX });
+      await busd.approve(presale.address, MAX_INT, { from: client });
 
-      console.log(
-        'BEFORE tokenX client',
-        fromWei((await tokenX.balanceOf(clientOfTokenX)).toString())
-      );
-      console.log(
-        'busd client',
-        fromWei((await busd.balanceOf(clientOfTokenX)).toString())
-      );
-
-      ///todo lp
-      // console.log(
-      //   "ERC20token client",
-      //   fromWei((await ERC20Token.balanceOf(client)).toString())
-      // );
+      const beforeTokenXOfClient = await balanceOf(tokenX, client);
+      const beforeBusdOfClient = await balanceOf(busd, client);
 
       // parent company approves the presale is Genuine and not fake
       await presale.onlyParentCompanyFunction_editPresaleIsApproved(true, {
         from: parentCompany
       });
 
-      // compare balances, assert
-
       // now client of token X will spend his BUSD to buy tokenX
-      await presale.buyTokens(toWei('100'), { from: clientOfTokenX });
+      const tokenXToBuy = '100';
+      await presale.buyTokens(toWei(tokenXToBuy), { from: client });
+
+      const afterTokenXOfClient = await balanceOf(tokenX, client);
+      const afterBusdOfClient = await balanceOf(busd, client);
 
       // now assert, compare previos and current balances of tokenX, BUSD of the client
+      assert.equal(beforeTokenXOfClient, '0');
+      assert.equal(afterTokenXOfClient, tokenXToBuy); // client has token which he bought
 
-      // assert.equal();
-      console.log(
-        'AFTER token client',
-        fromWei((await tokenX.balanceOf(clientOfTokenX)).toString())
-      );
-      console.log(
-        'busd client',
-        fromWei((await busd.balanceOf(clientOfTokenX)).toString())
-      );
-
-      console.log(
-        'busd walletOwner: ',
-        fromWei((await busd.balanceOf(presaleEarningWallet)).toString())
-      );
-
-      console.log(
-        'await presale.tokensSold(): ',
-        fromWei((await presale.tokenXSold()).toString())
-      );
+      assert.equal(beforeBusdOfClient, '100');
+      assert.equal(afterBusdOfClient, '80');
     });
   }
 );
+
+const balanceOf = async (token, account) =>
+  fromWei((await token.balanceOf(account)).toString());
 
 const toWei = web3.utils.toWei;
 const fromWei = web3.utils.fromWei;

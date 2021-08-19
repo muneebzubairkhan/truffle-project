@@ -29,6 +29,11 @@ contract PresaleFactory is Ownable {
         bool _onlyWhitelistedAllowed,
         address[] memory _whitelistAddresses
     ) external {
+        require(
+            address(presaleOf[_tokenX]) == address(0),
+            "Presale already exist for this token"
+        );
+
         Presale presale = new Presale(
             _tokenX,
             _lpTokenX,
@@ -42,8 +47,8 @@ contract PresaleFactory is Ownable {
             _whitelistAddresses
         );
 
-        belongThisFactory[address(presale)] = true;
         presaleOf[_tokenX] = presale;
+        belongThisFactory[address(presale)] = true;
         presales.push(presale);
 
         _tokenX.transferFrom(

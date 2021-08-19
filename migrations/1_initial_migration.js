@@ -9,6 +9,8 @@ const PresaleFactory = artifacts.require('PresaleFactory');
 const Locker = artifacts.require('Locker');
 
 module.exports = async (deployer, network, accounts) => {
+  if (network === 'development') return;
+
   console.log('network: ', network);
   await deployer.deploy(Migrations);
   await defaultDeploy(deployer, network, accounts);
@@ -76,7 +78,7 @@ const defaultDeploy = async (
   // generate some helper links and code and save in a file
   if (network !== 'development') {
     const fs = require('fs');
-    let res = `// ${network}:\n`;
+    let res = `// ${up(network)}:\n`;
     res += makeExplorerLink(process.env.EXPLORER_URL, {
       locker,
       busd,
@@ -103,6 +105,9 @@ const ethMainnet = async deployer => {};
 
 const toWei = web3.utils.toWei;
 
+// capitalizeFirstLetter
+const up = s => s.charAt(0).toUpperCase() + s.slice(1);
+
 // send variable in input as {someVariable}
 // obj is variables object (it contains variables)
 const makeContractObjects = obj =>
@@ -113,12 +118,14 @@ const makeContractObjects = obj =>
     .join('\n\n');
 
 const boil = (varName, abi, address) =>
-  `export const getContract_${varName} = web3 => {
+  `
+  export const ${varName}Address = 'address';
+  export const getContract${up(varName)} = web3 => {
     return new web3.eth.Contract(
       JSON.parse(
         '${abi}'
       ),
-      "${address}"
+      ${varName}Address
     );
   };`;
 
