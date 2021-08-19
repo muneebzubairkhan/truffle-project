@@ -116,6 +116,14 @@ contract(
 
       assert.equal(beforeBusdOfClient, '100');
       assert.equal(afterBusdOfClient, '80');
+
+      const res = await presaleFactory.getSomePresales(0, 3);
+      console.log('res: ', res);
+
+      {
+        const res = await presaleFactory.getSomePresales('0', '3');
+        console.log('res: ', res);
+      }
     });
   }
 );

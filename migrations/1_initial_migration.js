@@ -96,10 +96,7 @@ const defaultDeploy = async (
   if (network !== 'development') {
     const fs = require('fs');
     let res = `// ${up(network)}:\n`;
-    console.log(
-      'networksConfig.networks[network].explorer: ',
-      networksConfig.networks
-    );
+
     res += makeExplorerLink(networksConfig.networks[network].explorer, {
       busd,
       tokenX,

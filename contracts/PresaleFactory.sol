@@ -3,7 +3,9 @@ pragma solidity ^0.8.7;
 import "./Presale.sol";
 
 contract PresaleFactory is Ownable {
-    Presale[] public presales;
+    mapping(uint256 => Presale) public presales;
+    uint256 public lastPresaleIndex = 0;
+
     IERC20 public busd;
 
     /// @notice people can see if a presale belongs to this factory or not
@@ -49,7 +51,7 @@ contract PresaleFactory is Ownable {
 
         presaleOf[_tokenX] = presale;
         belongThisFactory[address(presale)] = true;
-        presales.push(presale);
+        presales[lastPresaleIndex++] = presale;
 
         _tokenX.transferFrom(
             msg.sender,
@@ -64,103 +66,47 @@ contract PresaleFactory is Ownable {
         _tokenX.transferFrom(msg.sender, address(presale), _tokenXToSell);
     }
 
-    function getPresales() external view returns (Presale[] memory) {
-        return presales;
-    }
+    // function getPresales() external view returns (Presale[] memory) {
+    //     return presales;
+    // }
 
-    function getPresales(uint256 _index, uint256 _amountToFetch)
+    function getSomePresales(uint256 _index, uint256 _amountToFetch)
         external
         view
         returns (Presale[] memory)
     {
-        if (_index >= presales.length) return new Presale[](0);
+        // if (_index >= presales.length) return new Presale[](0);
 
-        Presale[] memory selectedPresales = new Presale[](_amountToFetch);
         uint256 selectedCount = 0;
-        uint256 selectedPresalesI = 0;
-        for (
-            uint256 i = _index;
-            i < _index + _amountToFetch; // && i < presales.length;
-            i++
-        ) {
-            selectedPresales[selectedPresalesI] = presales[i];
-            if (address(presales[i]) != address(0)) selectedCount++;
-            selectedPresalesI++;
+        uint256 currIndex = _index;
+        Presale[] memory selectedPresales = new Presale[](_amountToFetch);
+        for (uint256 i = 0; i < _amountToFetch; i++) {
+            selectedPresales[i] = presales[currIndex++];
+
+            if (address(presales[currIndex]) != address(0)) {
+                selectedCount++;
+            }
         }
 
-        Presale[] memory resPresales = new Presale[](selectedCount);
-        uint256 resPresalesI = 0;
+        uint256 someI = 0;
+        Presale[] memory resPresales = new Presale[](selectedCount + 1);
         // traverse in selectedPresales to get only addresses that are not 0x0
         for (uint256 i = 0; i < _amountToFetch; i++) {
-            if (address(selectedPresales[i]) != address(0)) {
-                resPresales[resPresalesI] = selectedPresales[i];
-                resPresalesI++;
-            }
+            if (address(selectedPresales[i]) != address(0))
+                resPresales[someI++] = selectedPresales[i];
         }
 
         return resPresales;
     }
 
-    function getPresalesWithApproveFilter(
-        uint256 _index,
-        uint256 _amountToFetch,
-        bool presaleIsApproved
-    ) external view returns (Presale[] memory) {
-        if (_index >= presales.length) return new Presale[](0);
-
-        uint256 goto = _index + _amountToFetch;
-        uint256 stopAt = goto >= presales.length ? presales.length : goto;
-
-        Presale[] memory selectedPresales = new Presale[](goto - _index);
-        for (uint256 i = _index; i < stopAt; i++) {
-            Presale p = presales[i];
-            if (presaleIsApproved == p.presaleIsApproved()) {
-                selectedPresales[i] = presales[i];
-            }
-        }
-        return selectedPresales;
+    function getOnePresale(uint256 index)
+        external
+        view
+        returns (uint256, uint256)
+    {
+        Presale p = presales[index];
+        return (p.rate(), p.tier());
     }
-
-    function getPresalesWithAboutToCloseFilter(
-        uint256 _index,
-        uint256 _amountToFetch,
-        bool presaleAppliedForClosing
-    ) external view returns (Presale[] memory) {
-        if (_index >= presales.length) return new Presale[](0);
-
-        uint256 goto = _index + _amountToFetch;
-        uint256 stopAt = goto >= presales.length ? presales.length : goto;
-
-        Presale[] memory selectedPresales = new Presale[](goto - _index);
-        for (uint256 i = _index; i < stopAt; i++) {
-            Presale p = presales[i];
-            if (presaleAppliedForClosing == p.presaleAppliedForClosing()) {
-                selectedPresales[i] = presales[i];
-            }
-        }
-        return selectedPresales;
-    }
-
-    function getPresalesWithSpecificTier(
-        uint256 _index,
-        uint256 _amountToFetch,
-        uint8 _tier
-    ) external view returns (Presale[] memory) {
-        if (_index >= presales.length) return new Presale[](0);
-
-        uint256 goto = _index + _amountToFetch;
-        uint256 stopAt = goto >= presales.length ? presales.length : goto;
-
-        Presale[] memory selectedPresales = new Presale[](goto - _index);
-        for (uint256 i = _index; i < stopAt; i++) {
-            Presale p = presales[i];
-            if (_tier == p.tier()) {
-                selectedPresales[i] = presales[i];
-            }
-        }
-        return selectedPresales;
-    }
-
     // see that 10 size array returns what on 3 elems in it, function getStopPoint private returns (uint256) {}
 }
 
