@@ -8,6 +8,8 @@ const PresaleFactory = artifacts.require('PresaleFactory');
 
 const Locker = artifacts.require('Locker');
 
+const networksConfig = require('../truffle-config');
+
 module.exports = async (deployer, network, accounts) => {
   if (network === 'development') return;
 
@@ -23,20 +25,9 @@ const defaultDeploy = async (
   network,
   [client, dev, owner, addr1, addr2]
 ) => {
-  let busd, tokenX, lpTokenAddress;
+  let busd, busdAddress, tokenX, tokenXAddress, lpTokenX, lpTokenXAddress;
 
-  if (network === 'bscTestnet') {
-    const busdAddress = '0xec828b4305be12B9B3E8F584FCE8ACDCc56c86E7';
-    const tokenXAddress = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2';
-    busd = await ERC20Token.at(busdAddress);
-    tokenX = await ERC20Token.at(tokenXAddress);
-  }
-  if (network === 'rinkeby') {
-    const busdAddress = '0x60D4f85E9C78e01c3378fc15cbd222009EC9A4Dd';
-    const tokenXAddress = '0x7eC6d1aEB55AE52364B0F6Ff47Ef4fe109eeC6eE';
-    busd = await ERC20Token.at(busdAddress);
-    tokenX = await ERC20Token.at(tokenXAddress);
-  } else {
+  if (network === 'develop' || network === 'development') {
     busd = await deployer.deploy(
       ERC20Token,
       owner,
@@ -51,13 +42,37 @@ const defaultDeploy = async (
       'RED',
       toWei('10000')
     );
+    lpTokenX = await deployer.deploy(
+      ERC20Token,
+      owner,
+      'Red Token',
+      'RED',
+      toWei('10000')
+    );
+  } else {
+    if (network === 'bscTestnet') {
+      busdAddress = '0xec828b4305be12B9B3E8F584FCE8ACDCc56c86E7';
+      tokenXAddress = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2';
+      lpTokenXAddress = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2';
+    } else if (network === 'rinkeby') {
+      busdAddress = '0x60D4f85E9C78e01c3378fc15cbd222009EC9A4Dd';
+      tokenXAddress = '0x7eC6d1aEB55AE52364B0F6Ff47Ef4fe109eeC6eE';
+      lpTokenXAddress = '0x7eC6d1aEB55AE52364B0F6Ff47Ef4fe109eeC6eE';
+    } else {
+      new Error('Hey Bro, Please provide config here');
+    }
+
+    busd = await ERC20Token.at(busdAddress);
+    tokenX = await ERC20Token.at(tokenXAddress);
+    lpTokenX = await ERC20Token.at(lpTokenXAddress);
   }
+
   // const erc20TokenFactory = await deployer.deploy(ERC20TokenFactory);
 
   const presale = await deployer.deploy(
     Presale,
     (_tokenX = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'),
-    (_lpTokenX = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'),
+    (_lpTokenX_ = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'),
     busd.address,
     (_rate = toWei('0.2')),
     (_walletOwner = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
@@ -73,33 +88,41 @@ const defaultDeploy = async (
     busd.address
   );
 
+  // 100% 11.26am
+  // 75% 12.26pm
   const locker = await deployer.deploy(Locker, busd.address, owner, Date.now());
 
   // generate some helper links and code and save in a file
   if (network !== 'development') {
     const fs = require('fs');
     let res = `// ${up(network)}:\n`;
-    res += makeExplorerLink(process.env.EXPLORER_URL, {
-      locker,
+    console.log(
+      'networksConfig.networks[network].explorer: ',
+      networksConfig.networks
+    );
+    res += makeExplorerLink(networksConfig.networks[network].explorer, {
       busd,
       tokenX,
+      lpTokenX,
       presale,
       presaleFactory,
-      Migrations
+      locker
     });
     res += '//=========================\n\n';
     res += makeContractObjects({
-      locker,
       busd,
       tokenX,
+      lpTokenX,
       presale,
-      presaleFactory
+      presaleFactory,
+      locker
     });
+
     fs.writeFile('smart-contracts.js', res, console.log);
   }
 };
 
-const rinkeby = async (deployer, accounts) => {};
+// const rinkeby = async (deployer, accounts) => {};
 
 const ethMainnet = async deployer => {};
 
@@ -119,26 +142,37 @@ const makeContractObjects = obj =>
 
 const boil = (varName, abi, address) =>
   `
-  export const ${varName}Address = 'address';
-  export const getContract${up(varName)} = web3 => {
+  export const ${varName}Address = '${address}';
+  export const getContract${up(
+    varName
+  )} = (web3, address = ${varName}Address) => {
     return new web3.eth.Contract(
       JSON.parse(
         '${abi}'
       ),
-      ${varName}Address
+      address
     );
   };`;
 
-const makeExplorerLink = (explorerUrl, obj) => {
+const makeExplorerLink = (explorerUrl = '', obj) => {
   const vars = Object.keys(obj);
 
   let data = '';
-  vars.map(varName => {
-    data += `// ${varName} ${explorerUrl}${obj[varName].address}\n`;
+  vars.map(contractName => {
+    data += `// ${contractName} ${explorerUrl}${obj[contractName].address}\n`;
   });
 
   return data;
 };
+
+// explorerUrlFor = network => {
+//   let url;
+//   if (network === 'rinkeby') url = '';
+//   else if (network === 'rinkeby') url = 'https://rinkeby.etherscan.io/address/';
+//   else if (network === 'rinkeby') url = 'https://rinkeby.etherscan.io/address/';
+//   else if (network === 'rinkeby') url = 'https://rinkeby.etherscan.io/address/';
+//   else if (network === 'rinkeby') url = 'https://rinkeby.etherscan.io/address/';
+// };
 
 const hour = 60 * 60 * 1000;
 7;

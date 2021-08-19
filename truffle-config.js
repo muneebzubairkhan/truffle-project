@@ -17,6 +17,13 @@ module.exports = {
       gas: 6721975
     },
 
+    develop: {
+      host: '127.0.0.1',
+      port: 7545,
+      network_id: '*',
+      explorer: 'https://rinkeby.etherscan.io/address/'
+      // gas: 6721975
+    },
     //
     //
     // only uncomment those setting which are needed, because,
@@ -73,7 +80,8 @@ module.exports = {
         'https://rinkeby.infura.io/v3/' + token
       ),
       network_id: '4',
-      skipDryRun: true
+      skipDryRun: true,
+      explorer: 'https://rinkeby.etherscan.io/address/'
     }
     // kovan: {
     //   provider: () => {
