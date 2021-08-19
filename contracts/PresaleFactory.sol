@@ -69,7 +69,7 @@ contract PresaleFactory is Ownable {
     function getSelectedItems(
         Presale[] memory tempPresales,
         uint256 selectedCount
-    ) private view returns (Presale[] memory) {
+    ) private pure returns (Presale[] memory) {
         uint256 someI = 0;
         Presale[] memory selectedPresales = new Presale[](selectedCount);
 
