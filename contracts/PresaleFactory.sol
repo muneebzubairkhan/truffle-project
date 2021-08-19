@@ -9,7 +9,7 @@ contract PresaleFactory is Ownable {
     IERC20 public busd;
 
     /// @notice people can see if a presale belongs to this factory or not
-    mapping(address => bool) public belongThisFactory;
+    mapping(address => bool) public belongsToThisFactory;
     mapping(IERC20 => Presale) public presaleOf;
 
     constructor(address _parentCompany, IERC20 _busd) {
@@ -31,10 +31,10 @@ contract PresaleFactory is Ownable {
         bool _onlyWhitelistedAllowed,
         address[] memory _whitelistAddresses
     ) external {
-        require(
-            address(presaleOf[_tokenX]) == address(0),
-            "Presale already exist for this token"
-        );
+        // require(
+        //     address(presaleOf[_tokenX]) == address(0),
+        //     "Presale already exist for this token"
+        // );
 
         Presale presale = new Presale(
             _tokenX,
@@ -50,7 +50,7 @@ contract PresaleFactory is Ownable {
         );
 
         presaleOf[_tokenX] = presale;
-        belongThisFactory[address(presale)] = true;
+        belongsToThisFactory[address(presale)] = true;
         presales[lastPresaleIndex++] = presale;
 
         _tokenX.transferFrom(
@@ -66,57 +66,184 @@ contract PresaleFactory is Ownable {
         _tokenX.transferFrom(msg.sender, address(presale), _tokenXToSell);
     }
 
-    // function getPresales() external view returns (Presale[] memory) {
-    //     return presales;
-    // }
+    function getSelectedItems(
+        Presale[] memory tempPresales,
+        uint256 selectedCount
+    ) private view returns (Presale[] memory) {
+        uint256 someI = 0;
+        Presale[] memory selectedPresales = new Presale[](selectedCount);
 
-    function getSomePresales(uint256 _index, uint256 _amountToFetch)
+        // traverse in tempPresales addresses to get only addresses that are not 0x0
+        for (uint256 i = 0; i < tempPresales.length; i++) {
+            if (address(tempPresales[i]) != address(0))
+                selectedPresales[someI++] = tempPresales[i];
+        }
+
+        return selectedPresales;
+    }
+
+    function getPresales(uint256 _index, uint256 _amountToFetch)
         external
         view
         returns (Presale[] memory)
     {
-        // if (_index >= presales.length) return new Presale[](0);
-
         uint256 selectedCount = 0;
         uint256 currIndex = _index;
-        Presale[] memory selectedPresales = new Presale[](_amountToFetch);
+        Presale[] memory tempPresales = new Presale[](_amountToFetch);
         for (uint256 i = 0; i < _amountToFetch; i++) {
-            selectedPresales[i] = presales[currIndex++];
-
             if (address(presales[currIndex]) != address(0)) {
+                tempPresales[i] = presales[currIndex++];
                 selectedCount++;
             }
         }
 
-        uint256 someI = 0;
-        Presale[] memory resPresales = new Presale[](selectedCount + 1);
-        // traverse in selectedPresales to get only addresses that are not 0x0
+        return getSelectedItems(tempPresales, selectedCount);
+    }
+
+    function getPresales(
+        uint256 _index,
+        uint256 _amountToFetch,
+        bool _approvedValue // this method can be used to get approved and not approved presales
+    ) external view returns (Presale[] memory) {
+        uint256 selectedCount = 0;
+        uint256 currIndex = _index;
+        Presale[] memory tempPresales = new Presale[](_amountToFetch);
         for (uint256 i = 0; i < _amountToFetch; i++) {
-            if (address(selectedPresales[i]) != address(0))
-                resPresales[someI++] = selectedPresales[i];
+            if (
+                address(presales[currIndex]) != address(0) &&
+                presales[currIndex].presaleIsApproved() == _approvedValue
+            ) {
+                tempPresales[i] = presales[currIndex++];
+                selectedCount++;
+            }
         }
 
-        return resPresales;
+        return getSelectedItems(tempPresales, selectedCount);
     }
 
-    function getOnePresale(uint256 index)
+    function getPresales(
+        uint256 _index,
+        uint256 _amountToFetch,
+        uint256 _tier // this method can be used to get tier 1,2,3 presales
+    ) external view returns (Presale[] memory) {
+        uint256 selectedCount = 0;
+        uint256 currIndex = _index;
+        Presale[] memory tempPresales = new Presale[](_amountToFetch);
+        for (uint256 i = 0; i < _amountToFetch; i++) {
+            if (
+                address(presales[currIndex]) != address(0) &&
+                presales[currIndex].tier() == _tier
+            ) {
+                tempPresales[i] = presales[currIndex++];
+                selectedCount++;
+            }
+        }
+
+        return getSelectedItems(tempPresales, selectedCount);
+    }
+
+    function getPresalesAppliedForClosing(
+        uint256 _index,
+        uint256 _amountToFetch
+    ) external view returns (Presale[] memory) {
+        uint256 selectedCount = 0;
+        uint256 currIndex = _index;
+        Presale[] memory tempPresales = new Presale[](_amountToFetch);
+        for (uint256 i = 0; i < _amountToFetch; i++) {
+            if (
+                address(presales[currIndex]) != address(0) &&
+                presales[currIndex].presaleAppliedForClosing() == true
+            ) {
+                tempPresales[i] = presales[currIndex++];
+                selectedCount++;
+            }
+        }
+
+        return getSelectedItems(tempPresales, selectedCount);
+    }
+
+    function getPresales(
+        uint256 _index,
+        uint256 _amountToFetch,
+        address _owner // this method can be used to get _owner's presales
+    ) external view returns (Presale[] memory) {
+        uint256 selectedCount = 0;
+        uint256 currIndex = _index;
+        Presale[] memory tempPresales = new Presale[](_amountToFetch);
+        for (uint256 i = 0; i < _amountToFetch; i++) {
+            if (
+                address(presales[currIndex]) != address(0) &&
+                presales[currIndex].owner() == _owner
+            ) {
+                tempPresales[i] = presales[currIndex++];
+                selectedCount++;
+            }
+        }
+
+        return getSelectedItems(tempPresales, selectedCount);
+    }
+
+    function getPresaleDetails(uint256 _index)
         external
         view
-        returns (uint256, uint256)
+        returns (
+            IERC20,
+            IERC20,
+            Locker,
+            Locker,
+            uint256,
+            uint256,
+            uint256
+        )
     {
-        Presale p = presales[index];
-        return (p.rate(), p.tier());
+        return (
+            presales[_index].tokenX(), // tokenX address used in a presale
+            presales[_index].lpTokenX(), // lpTokenX used in presale to lock lpTokenX
+            presales[_index].tokenXLocker(),
+            presales[_index].lpTokenXLocker(),
+            presales[_index].tokenX().balanceOf(address(presales[_index])), // tokenX left to sell
+            presales[_index].tokenXLocker().balance(), // locked X Tokens
+            presales[_index].lpTokenXLocker().balance() // locked LpTokenX
+            // presales[_index].tokenXSold(),
+            // presales[_index].rate(), // how many BUSD = 1 TokenX
+            // presales[_index].amountTokenXToBuyTokenX(),
+            // presales[_index].presaleClosedAt(),
+            // presales[_index].tier(), // tier can be 1,2,3. higher is better.
+            // presales[_index].presaleIsRejected(),
+            // presales[_index].presaleIsApproved(),
+            // presales[_index].presaleAppliedForClosing()
+        );
     }
+
+    // func return all rates of 50 presales
+
     // see that 10 size array returns what on 3 elems in it, function getStopPoint private returns (uint256) {}
 }
 
 /*
+
+
+    // uint256,
+    // uint256,
+    // uint256,
+    // uint256,
+    // uint256,
+    // uint256,
+    // uint8,
+    // bool,
+    // bool,
+    // bool
+
+
+
 notes:
 getAddresIsTrustedOrNot
-get trusted presales
 get approved presales
+get not approved presales (for admin)
+get rejected presales (for admin)
 get presales of a specific person
-get presales with unlock liquidity request
+// get presales with unlock liquidity request
+disbanding projects
 get presale which wan to be approved
 get locked amount of a presale, (compare run time total vs save total on each transaction)
 write multiple presales...

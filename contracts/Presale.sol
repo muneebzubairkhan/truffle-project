@@ -12,6 +12,7 @@ contract Presale is Ownable {
 
     IERC20 public busd; // People will give BUSD or buyingToken and get tokenX in return
     IERC20 public tokenX; // People will buy tokenX
+    IERC20 public lpTokenX; // Owner of tokenX will lock lpTokenX to get their confidence
     Locker public tokenXLocker;
     Locker public lpTokenXLocker;
     uint256 public tokenXSold = 0;
@@ -25,6 +26,7 @@ contract Presale is Ownable {
 
     mapping(address => bool) isWhitelisted;
     bool public onlyWhitelistedAllowed;
+    bool public presaleIsRejected = false;
     bool public presaleIsApproved = false;
     bool public presaleAppliedForClosing = false;
 
@@ -44,8 +46,9 @@ contract Presale is Ownable {
         address[] memory _whitelistAddresses
     ) {
         tokenX = _tokenX;
+        lpTokenX = _lpTokenX;
         busd = _busd;
-        factory = msg.sender; // only trust those presales who address exist in factory contract
+        factory = msg.sender; // only trust those presales who address exist in factory contract // go to factory address and see presale address belong to that factory or not. use method: belongsToThisFactory
         rate = _rate;
         presaleEarningWallet = _presaleEarningWallet;
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
@@ -73,6 +76,10 @@ contract Presale is Ownable {
 
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
     function buyTokens(uint256 _tokens) external {
+        require(
+            !presaleIsRejected,
+            "Presale is rejected by the parent network."
+        );
         require(block.timestamp < presaleClosedAt, "Presale is closed.");
         require(
             presaleIsApproved,
@@ -134,6 +141,16 @@ contract Presale is Ownable {
             "You must be parent company to edit value of presaleIsApproved."
         );
         presaleIsApproved = _presaleIsApproved;
+    }
+
+    function onlyParentCompanyFunction_editPresaleIsRejected(
+        bool _presaleIsRejected
+    ) public {
+        require(
+            msg.sender == parentCompany,
+            "You must be parent company to edit value of presaleIsRejected."
+        );
+        presaleIsRejected = _presaleIsRejected;
     }
 
     function onlyParentCompanyFunction_editTier(uint8 _tier) public {

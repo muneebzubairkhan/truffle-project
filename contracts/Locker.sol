@@ -56,6 +56,10 @@ contract Locker is Ownable {
         );
         tokenX.transfer(owner(), tokenX.balanceOf(address(this)));
     }
+
+    function balance() public view returns (uint256) {
+        return tokenX.balanceOf(address(this));
+    }
 }
 
 /*
