@@ -81,7 +81,7 @@ module.exports = {
       ),
       network_id: '4',
       skipDryRun: true,
-      explorer: 'https://rinkeby.etherscan.io/address/'
+      // explorer: 'https://rinkeby.etherscan.io/address/'
     }
     // kovan: {
     //   provider: () => {
