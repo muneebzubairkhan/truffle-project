@@ -3,8 +3,7 @@ require('dotenv').config();
 const MNEMONIC = process.env.MNEMONIC;
 const token = process.env.INFURA_TOKEN;
 const etherscanKey =
-  process.env.DEPLOY_NETWORK === 'bscTestnet' ||
-  process.env.DEPLOY_NETWORK === 'bscMainnet'
+  process.env.DEPLOY_NETWORK === 'BSC'
     ? process.env.BSCSCAN_KEY
     : process.env.ETHERSCAN_KEY;
 
@@ -31,19 +30,19 @@ module.exports = {
     // the api limit is used
     //
     //
-    // bscTestnet: {
-    //   provider: () => {
-    //     return new HDWalletProvider(
-    //       MNEMONIC,
-    //       'https://data-seed-prebsc-1-s2.binance.org:8545'
-    //       // 'https://data-seed-prebsc-1-s1.binance.org:8545'
-    //     );
-    //   },
-    //   network_id: '97'
-    //   // skipDryRun: true,
-    //   // gas: 30000000, //from ganache-cli output
-    //   // gasPrice: 20000000000 //1,000,000,000 From ganache-cli output
-    // },
+    bscTestnet: {
+      provider: () => {
+        return new HDWalletProvider(
+          MNEMONIC,
+          'https://data-seed-prebsc-1-s2.binance.org:8545'
+          // 'https://data-seed-prebsc-1-s1.binance.org:8545'
+        );
+      },
+      network_id: '97'
+      // skipDryRun: true,
+      // gas: 30000000, //from ganache-cli output
+      // gasPrice: 20000000000 //1,000,000,000 From ganache-cli output
+    },
 
     // bscMainnet: {
     //   provider: () => {
@@ -80,7 +79,7 @@ module.exports = {
         'https://rinkeby.infura.io/v3/' + token
       ),
       network_id: '4',
-      skipDryRun: true,
+      skipDryRun: true
       // explorer: 'https://rinkeby.etherscan.io/address/'
     }
     // kovan: {
