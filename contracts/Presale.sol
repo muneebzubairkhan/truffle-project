@@ -42,7 +42,6 @@ contract Presale is Ownable {
         address _parentCompany,
         bool _onlyWhitelistedAllowed,
         uint256 _amountTokenXToBuyTokenX,
-        uint256 _unlockAtTime,
         address[] memory _whitelistAddresses
     ) {
         tokenX = _tokenX;

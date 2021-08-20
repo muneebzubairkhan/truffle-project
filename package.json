@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "start": "yarn startRinkeby",
+    "start": "yarn startBscTestnet",
     "ganache-cli": "ganache-cli",
     "migrate": "truffle migrate --reset",
     "compile": "truffle compile",
@@ -16,11 +16,11 @@
     "beep1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
     "beep2": "start wmplayer \"C:\\Windows\\Media\\Alarm10.wav\" && timeout 5 && taskkill /im wmplayer.exe",
     "_____": "_____",
-    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
+    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify %npm_package_selectedContracts% --network bscMainnet",
     "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify %npm_package_selectedContracts% --network rinkeby",
     "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify %npm_package_selectedContracts% --network mainnet",
-    "verify": "truffle run verify Migrations Presale PresaleFactory Locker --network rinkeby",
+    "verify": "truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
     "startInnovate": "truffle migrate --network %(grep DEPLOY_NETWORK .env)% --reset && truffle run verify %npm_package_selectedContracts% --network $(grep DEPLOY_NETWORK .env)"
   },
   "selectedContracts": "Migrations Presale PresaleFactory Locker",

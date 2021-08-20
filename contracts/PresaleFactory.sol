@@ -49,7 +49,6 @@ contract PresaleFactory is Ownable {
             owner(),
             _onlyWhitelistedAllowed,
             _amountTokenXToBuyTokenX,
-            _unlockAtTime,
             _whitelistAddresses
         );
         Locker tokenXLocker = new Locker(

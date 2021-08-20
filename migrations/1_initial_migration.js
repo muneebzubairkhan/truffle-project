@@ -75,7 +75,6 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
     (_parentCompany = owner),
     (_onlyWhitelistedAllowed = false),
     (_amountTokenXToBuyTokenX = toWei('0')),
-    (_unlockAtTime = '' + Date.now()),
     [addr1, addr2, '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2']
   );
 
