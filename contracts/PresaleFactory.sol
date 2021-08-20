@@ -15,7 +15,6 @@ contract PresaleFactory is Ownable {
 
     /// @notice people can see if a presale belongs to this factory or not
     mapping(address => bool) public belongsToThisFactory;
-    mapping(IERC20 => Presale) public presaleOf;
 
     constructor(address _parentCompany, IERC20 _busd) {
         busd = _busd;
@@ -53,22 +52,30 @@ contract PresaleFactory is Ownable {
             _unlockAtTime,
             _whitelistAddresses
         );
+        Locker tokenXLocker = new Locker(
+            _tokenX,
+            _presaleEarningWallet,
+            _unlockAtTime
+        );
+        Locker lpTokenXLocker = new Locker(
+            _lpTokenX,
+            _presaleEarningWallet,
+            _unlockAtTime
+        );
 
-        presaleOf[_tokenX] = presale;
-        belongsToThisFactory[address(presale)] = true;
+        // belongsToThisFactory[address(presale)] = true;
         presales[lastPresaleIndex++] = presale;
 
-        _tokenX.transferFrom(
-            msg.sender,
-            address(presale.tokenXLocker()),
-            _tokenXToLock
-        );
+        presale.setTokenXLocker(tokenXLocker);
+        presale.setLpTokenXLocker(lpTokenXLocker);
+
+        _tokenX.transferFrom(msg.sender, address(presale), _tokenXToSell);
+        _tokenX.transferFrom(msg.sender, address(tokenXLocker), _tokenXToLock);
         _lpTokenX.transferFrom(
             msg.sender,
-            address(presale.lpTokenXLocker()),
+            address(lpTokenXLocker),
             _lpTokenXToLock
         );
-        _tokenX.transferFrom(msg.sender, address(presale), _tokenXToSell);
     }
 
     function getSelectedItems(
@@ -186,6 +193,18 @@ contract PresaleFactory is Ownable {
         }
 
         return getSelectedItems(tempPresales, selectedCount);
+    }
+
+    function getPresaleDetails(address _presale)
+        external
+        view
+        returns (
+            address[] memory,
+            uint256[] memory,
+            bool[] memory
+        )
+    {
+        return Presale(_presale).getPresaleDetails();
     }
 
     // func return all rates of 50 presales

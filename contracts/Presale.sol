@@ -61,16 +61,6 @@ contract Presale is Ownable {
             }
         }
 
-        tokenXLocker = new Locker(
-            _tokenX,
-            _presaleEarningWallet,
-            _unlockAtTime
-        );
-        lpTokenXLocker = new Locker(
-            _lpTokenX,
-            _presaleEarningWallet,
-            _unlockAtTime
-        );
         transferOwnership(_presaleEarningWallet);
     }
 
@@ -193,17 +183,15 @@ contract Presale is Ownable {
         return (addresses, uints, bools);
     }
 
-    // p.tokenX().balanceOf(address(p)), // tokenX left to sell
-    // p.tokenXLocker().balance(), // locked X Tokens
-    // p.lpTokenXLocker().balance() // locked LpTokenX
-    // p.tokenXSold(),
-    // p.rate(), // how many BUSD = 1 TokenX
-    // p.amountTokenXToBuyTokenX(),
-    // p.presaleClosedAt(),
-    // p.tier(), // tier can be 1,2,3. higher is better.
-    // p.presaleIsRejected(),
-    // p.presaleIsApproved(),
-    // p.presaleAppliedForClosing()
+    function setTokenXLocker(Locker _tokenXLocker) external {
+        require(msg.sender == factory, "Only factory can change locker");
+        tokenXLocker = _tokenXLocker;
+    }
+
+    function setLpTokenXLocker(Locker _lpTokenXLocker) external {
+        require(msg.sender == factory, "Only factory can change locker");
+        lpTokenXLocker = _lpTokenXLocker;
+    }
 }
 
 /*

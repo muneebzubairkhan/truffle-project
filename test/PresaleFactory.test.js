@@ -94,7 +94,7 @@ contract(
         }
       );
 
-      const presaleAddress = await presaleFactory.presaleOf(tokenX.address);
+      const presaleAddress = await presaleFactory.presales(0);
       const presale = await Presale.at(presaleAddress);
 
       // client of tokenX approves presale address to spend his BUSD
@@ -116,11 +116,11 @@ contract(
       const afterBusdOfClient = await balanceOf(busd, client);
 
       // now assert, compare previos and current balances of tokenX, BUSD of the client
-      // assert.equal(beforeTokenXOfClient, 0);
-      // assert.equal(afterTokenXOfClient, tokenXToBuy); // client has token which he bought
+      assert.equal(beforeTokenXOfClient, 0);
+      assert.equal(afterTokenXOfClient, tokenXToBuy); // client has token which he bought
 
-      // const price = rate * tokenXToBuy;
-      // assert.equal(afterBusdOfClient, beforeBusdOfClient - price);
+      const price = rate * tokenXToBuy;
+      assert.equal(afterBusdOfClient, beforeBusdOfClient - price);
 
       {
         // See BIG Datatypes and handle them
@@ -128,7 +128,7 @@ contract(
         console.log('res: ', res);
       }
       {
-        const res = await presaleFactory.getPresaleDetails(0);
+        const res = await presaleFactory.getPresaleDetails(presale.address);
         console.log('res: ', res);
       }
     });
