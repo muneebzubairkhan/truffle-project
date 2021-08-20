@@ -3,9 +3,14 @@ pragma solidity ^0.8.7;
 import "./Presale.sol";
 
 contract PresaleFactory is Ownable {
+    bool public test = false;
+
+    function setTest(bool ok) external {
+        test = ok;
+    }
+
     mapping(uint256 => Presale) public presales;
     uint256 public lastPresaleIndex = 0;
-
     IERC20 public busd;
 
     /// @notice people can see if a presale belongs to this factory or not
