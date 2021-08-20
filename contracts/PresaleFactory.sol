@@ -183,38 +183,6 @@ contract PresaleFactory is Ownable {
         return getSelectedItems(tempPresales, selectedCount);
     }
 
-    function getPresaleDetails(uint256 _index)
-        external
-        view
-        returns (
-            IERC20,
-            IERC20,
-            Locker,
-            Locker,
-            uint256,
-            uint256,
-            uint256
-        )
-    {
-        return (
-            presales[_index].tokenX(), // tokenX address used in a presale
-            presales[_index].lpTokenX(), // lpTokenX used in presale to lock lpTokenX
-            presales[_index].tokenXLocker(),
-            presales[_index].lpTokenXLocker(),
-            presales[_index].tokenX().balanceOf(address(presales[_index])), // tokenX left to sell
-            presales[_index].tokenXLocker().balance(), // locked X Tokens
-            presales[_index].lpTokenXLocker().balance() // locked LpTokenX
-            // presales[_index].tokenXSold(),
-            // presales[_index].rate(), // how many BUSD = 1 TokenX
-            // presales[_index].amountTokenXToBuyTokenX(),
-            // presales[_index].presaleClosedAt(),
-            // presales[_index].tier(), // tier can be 1,2,3. higher is better.
-            // presales[_index].presaleIsRejected(),
-            // presales[_index].presaleIsApproved(),
-            // presales[_index].presaleAppliedForClosing()
-        );
-    }
-
     // func return all rates of 50 presales
 
     // see that 10 size array returns what on 3 elems in it, function getStopPoint private returns (uint256) {}

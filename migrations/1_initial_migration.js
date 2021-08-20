@@ -97,7 +97,10 @@ const defaultDeploy = async (
     const fs = require('fs');
     let res = `// ${up(network)}:\n`;
 
-    res += makeExplorerLink(networksConfig.networks[network].explorer, {
+    console.log({ networksConfig });
+    const explorerUrl = networksConfig.networks[network].explorer;
+    console.log({ explorerUrl });
+    res += makeExplorerLink(explorerUrl, {
       busd,
       tokenX,
       lpTokenX,
@@ -140,23 +143,25 @@ const makeContractObjects = obj =>
 const boil = (varName, abi, address) =>
   `
   export const ${varName}Address = '${address}';
+  export const ${varName}Abi = JSON.parse(
+    '${abi}'
+  );
   export const getContract${up(
     varName
-  )} = (web3, address = ${varName}Address) => {
-    return new web3.eth.Contract(
-      JSON.parse(
-        '${abi}'
-      ),
-      address
+  )} = (web3, address = ${varName}Address) => 
+    new web3.eth.Contract(
+      ${varName}Abi, address
     );
-  };`;
+  `;
 
 const makeExplorerLink = (explorerUrl = '', obj) => {
   const vars = Object.keys(obj);
 
   let data = '';
   vars.map(contractName => {
-    data += `// ${contractName} ${explorerUrl}${obj[contractName].address}\n`;
+    data += `// ${up(contractName)} ${explorerUrl}${
+      obj[contractName].address
+    }\n`;
   });
 
   return data;
