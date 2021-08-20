@@ -5,7 +5,10 @@ import "./Presale.sol";
 contract PresaleFactory is Ownable {
     mapping(uint256 => Presale) public presales;
     uint256 public lastPresaleIndex = 0;
-
+    bool public test = false;
+    function setTest(bool ok) external {
+        test = ok;
+    }
     IERC20 public busd;
 
     /// @notice people can see if a presale belongs to this factory or not

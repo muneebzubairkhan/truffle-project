@@ -12,7 +12,7 @@
     "migrate": "truffle migrate --reset",
     "compile": "truffle compile",
     "test": "truffle test",
-    "____":"_____",
+    "____": "_____",
     "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify %npm_package_selectedContracts% --network bscMainnet",
     "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify %npm_package_selectedContracts% --network rinkeby",
