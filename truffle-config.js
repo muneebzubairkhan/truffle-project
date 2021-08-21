@@ -14,14 +14,16 @@ module.exports = {
       port: 8545,
       network_id: '*',
       gas: 6721975,
-      explorer: 'https://rinkeby.etherscan.io/address/'
+      explorerUrl: ' ',
+      web3Provider: 'http://127.0.0.1/',
     },
 
     develop: {
       host: '127.0.0.1',
       port: 7545,
       network_id: '*',
-      explorer: 'https://rinkeby.etherscan.io/address/'
+      explorerUrl: ' ',
+      web3Provider: 'http://127.0.0.1/',
       // gas: 6721975
     },
     //
@@ -35,11 +37,12 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           MNEMONIC,
-          'https://data-seed-prebsc-2-s2.binance.org:8545'
+          'https://data-seed-prebsc-2-s2.binance.org:8545',
         ),
       // 'https://data-seed-prebsc-1-s1.binance.org:8545'
       network_id: '97',
-      explorer: 'https://testnet.bscscan.com/address/'
+      explorerUrl: 'https://testnet.bscscan.com/address/',
+      web3Provider: 'https://data-seed-prebsc-2-s2.binance.org:8545',
       // skipDryRun: true,
       // gas: 30000000, //from ganache-cli output
       // gasPrice: 20000000000 //1,000,000,000 From ganache-cli output
@@ -49,8 +52,9 @@ module.exports = {
         new HDWalletProvider(MNEMONIC, 'https://rinkeby.infura.io/v3/' + token),
       network_id: '4',
       skipDryRun: true,
-      explorer: 'https://rinkeby.etherscan.io/address/'
-    }
+      explorerUrl: 'https://rinkeby.etherscan.io/address/',
+      web3Provider: 'https://rinkeby.infura.io/v3/' + token,
+    },
     // bscMainnet: {
     //   provider: () => {
     //     return new HDWalletProvider(
@@ -94,7 +98,7 @@ module.exports = {
   },
   plugins: ['truffle-plugin-verify'],
   api_keys: {
-    etherscan: etherscanKey
+    etherscan: etherscanKey,
   },
   compilers: {
     solc: {
@@ -102,12 +106,12 @@ module.exports = {
       settings: {
         optimizer: {
           enabled: true,
-          runs: 200
-        }
-      }
-    }
+          runs: 200,
+        },
+      },
+    },
   },
   mocha: {
-    reporter: 'eth-gas-reporter'
-  }
+    reporter: 'eth-gas-reporter',
+  },
 };

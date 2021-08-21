@@ -29,21 +29,21 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
       owner,
       'BUSD',
       'BUSD',
-      toWei('10000')
+      toWei('10000'),
     );
     tokenX = await deployer.deploy(
       ERC20Token,
       owner,
       'Red Token',
       'RED',
-      toWei('10000')
+      toWei('10000'),
     );
     lpTokenX = await deployer.deploy(
       ERC20Token,
       owner,
       'Red Token',
       'RED',
-      toWei('10000')
+      toWei('10000'),
     );
   } else {
     if (network === 'bscTestnet') {
@@ -74,13 +74,13 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
     (_walletOwner = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
     (_onlyWhitelistedAllowed = false),
     (_amountTokenXToBuyTokenX = toWei('0')),
-    [addr1, addr2, '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2']
+    [addr1, addr2, '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'],
   );
 
   const presaleFactory = await deployer.deploy(
     PresaleFactory,
     (_parentCompany = owner),
-    busd.address
+    busd.address,
   );
 
   if (!(network === 'bscMainnet' || network === 'mainnet'))
@@ -96,29 +96,35 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
     const fs = require('fs');
     let res = `// ${up(network)}:\n`;
 
-    console.log({ networksConfig });
-    const explorerUrl = networksConfig.networks[network].explorer;
+    // console.log({ networksConfig });
+
     console.log(
       'networksConfig.networks[network]: ',
-      networksConfig.networks[network]
+      networksConfig.networks[network],
     );
-    console.log({ explorerUrl });
+
+    const { explorerUrl, web3Provider } = networksConfig.networks[network];
+    console.log({
+      explorerUrl,
+      web3Provider,
+    });
+
     res += makeExplorerLink(explorerUrl, {
       busd,
       tokenX,
       lpTokenX,
       presale,
       presaleFactory,
-      locker
+      locker,
     });
-    res += '//=========================\n\n';
-    res += makeContractObjects({
+    res += '//\n//=========================\n\n';
+    res += makeContractObjects(web3Provider, {
       busd,
       tokenX,
       lpTokenX,
       presale,
       presaleFactory,
-      locker
+      locker,
     });
 
     fs.writeFile('smart-contracts.js', res, console.log);
@@ -137,7 +143,7 @@ const makePresaleFromFactoryForTesting = async (presaleFactory, tokenX) => {
     (_amountTokenXToBuyTokenX_ = '0'),
     (_presaleEarningWallet_ = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
     (_onlyWhitelistedAllowed_ = false),
-    ['0x95FB36223A312c7fB3Bb05415b1D85771A781Db2']
+    ['0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'],
   );
 };
 
@@ -152,7 +158,7 @@ const up = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 // send variable in input as {someVariable}
 // obj is variables object (it contains variables)
-const makeContractObjects = obj => {
+const makeContractObjects = (obj, web3Provider) => {
   const boiledWeb3 = `
   // if you want to do only get calls then you can use defaultWeb3.
 
@@ -168,7 +174,7 @@ const makeContractObjects = obj => {
     boiledWeb3 +
     Object.keys(obj)
       .map(varName =>
-        boil(varName, stringify(obj[varName].abi), obj[varName].address)
+        boil(varName, stringify(obj[varName].abi), obj[varName].address),
       )
       .join('\n\n')
   );
@@ -181,7 +187,7 @@ const boil = (varName, abi, address) =>
     '${abi}'
   );
   export const getContract${up(
-    varName
+    varName,
   )} = (web3 = defaultWeb3, address = ${varName}Address) => 
     new web3.eth.Contract(
       ${varName}Abi, address
