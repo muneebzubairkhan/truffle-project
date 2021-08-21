@@ -165,7 +165,7 @@ const makeContractObjects = (web3Provider, obj) => {
   import Web3 from 'web3';
   
   export const defaultWeb3 = new Web3(
-    ${web3Provider}
+    '${web3Provider}'
   );
   
   `;
