@@ -62,7 +62,7 @@ contract PresaleFactory is Ownable {
             _unlockAtTime
         );
 
-        // belongsToThisFactory[address(presale)] = true;
+        belongsToThisFactory[address(presale)] = true;
         presales[lastPresaleIndex++] = presale;
 
         presale.setTokenXLocker(tokenXLocker);

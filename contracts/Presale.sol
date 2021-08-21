@@ -24,7 +24,7 @@ contract Presale is Ownable {
     address public parentCompany;
     address public factory;
 
-    mapping(address => bool) isWhitelisted;
+    mapping(address => bool) public isWhitelisted;
     bool public onlyWhitelistedAllowed;
     bool public presaleIsRejected = false;
     bool public presaleIsApproved = false;
@@ -164,20 +164,29 @@ contract Presale is Ownable {
         addresses[1] = address(lpTokenX);
         addresses[2] = address(tokenXLocker);
         addresses[3] = address(lpTokenXLocker);
-        uint256[] memory uints = new uint256[](9);
+
+        uint256[] memory uints = new uint256[](11);
         uints[0] = tokenX.balanceOf(address(this));
-        uints[1] = lpTokenX.balanceOf(address(this));
-        uints[2] = tokenXLocker.balance();
-        uints[3] = lpTokenXLocker.balance();
-        uints[4] = tokenXSold;
-        uints[5] = rate;
-        uints[6] = amountTokenXToBuyTokenX;
-        uints[7] = presaleClosedAt;
-        uints[8] = tier;
-        bool[] memory bools = new bool[](3);
+        uints[1] = tokenXLocker.balance();
+        uints[2] = tokenXLocker.unlockTokensAtTime();
+        uints[3] = lpTokenX.balanceOf(address(this));
+        uints[4] = lpTokenXLocker.balance();
+        uints[5] = lpTokenXLocker.unlockTokensAtTime();
+        uints[6] = tokenXSold;
+        uints[7] = rate;
+        uints[8] = amountTokenXToBuyTokenX;
+        uints[9] = presaleClosedAt;
+        uints[10] = tier;
+
+        bool[] memory bools = new bool[](7);
         bools[0] = presaleIsRejected;
         bools[1] = presaleIsApproved;
         bools[2] = presaleAppliedForClosing;
+
+        bools[3] = tokenXLocker.unlockTokensRequestMade();
+        bools[4] = tokenXLocker.unlockTokensRequestAccepted();
+        bools[5] = lpTokenXLocker.unlockTokensRequestMade();
+        bools[6] = lpTokenXLocker.unlockTokensRequestAccepted();
 
         return (addresses, uints, bools);
     }
