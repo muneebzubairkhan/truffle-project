@@ -158,14 +158,14 @@ const up = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 // send variable in input as {someVariable}
 // obj is variables object (it contains variables)
-const makeContractObjects = (obj, web3Provider) => {
+const makeContractObjects = (web3Provider, obj) => {
   const boiledWeb3 = `
   // if you want to do only get calls then you can use defaultWeb3.
 
   import Web3 from 'web3';
   
   export const defaultWeb3 = new Web3(
-    'https://data-seed-prebsc-2-s2.binance.org:8545'
+    ${web3Provider}
   );
   
   `;
@@ -194,7 +194,7 @@ const boil = (varName, abi, address) =>
     );
   `;
 
-const makeExplorerLink = (explorerUrl = '', obj) => {
+const makeExplorerLink = (explorerUrl = ' ', obj) => {
   const vars = Object.keys(obj);
 
   let data = '';
