@@ -32,13 +32,12 @@ module.exports = {
     //
     //
     bscTestnet: {
-      provider: () => {
-        return new HDWalletProvider(
+      provider: () =>
+        new HDWalletProvider(
           MNEMONIC,
-          'https://data-seed-prebsc-1-s2.binance.org:8545'
-          // 'https://data-seed-prebsc-1-s1.binance.org:8545'
-        );
-      },
+          'https://data-seed-prebsc-2-s2.binance.org:8545'
+        ),
+      // 'https://data-seed-prebsc-1-s1.binance.org:8545'
       network_id: '97',
       explorer: 'https://testnet.bscscan.com/address/'
       // skipDryRun: true,
@@ -46,10 +45,8 @@ module.exports = {
       // gasPrice: 20000000000 //1,000,000,000 From ganache-cli output
     },
     rinkeby: {
-      provider: new HDWalletProvider(
-        MNEMONIC,
-        'https://rinkeby.infura.io/v3/' + token
-      ),
+      provider: () =>
+        new HDWalletProvider(MNEMONIC, 'https://rinkeby.infura.io/v3/' + token),
       network_id: '4',
       skipDryRun: true,
       explorer: 'https://rinkeby.etherscan.io/address/'
