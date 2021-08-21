@@ -2,6 +2,14 @@
 pragma solidity ^0.8.7;
 import "./Presale.sol";
 
+interface IName {
+    function name() external view returns (string memory);
+}
+
+interface ISymbol {
+    function symbol() external view returns (string memory);
+}
+
 contract PresaleFactory is Ownable {
     bool public test = false;
 
@@ -71,26 +79,30 @@ contract PresaleFactory is Ownable {
         );
     }
 
+    /// @dev returns presales address and their corresponding token addresses
     function getSelectedItems(
-        Presale[] memory tempPresales,
+        Presale[] memory tempPresales, // search results temp presales list
         uint256 selectedCount
-    ) private pure returns (Presale[] memory) {
+    ) private view returns (Presale[] memory, IERC20[] memory) {
         uint256 someI = 0;
         Presale[] memory selectedPresales = new Presale[](selectedCount);
+        IERC20[] memory selectedPresalesTokens = new IERC20[](selectedCount);
 
         // traverse in tempPresales addresses to get only addresses that are not 0x0
         for (uint256 i = 0; i < tempPresales.length; i++) {
-            if (address(tempPresales[i]) != address(0))
-                selectedPresales[someI++] = tempPresales[i];
+            if (address(tempPresales[i]) != address(0)) {
+                selectedPresales[someI] = tempPresales[i];
+                selectedPresalesTokens[someI++] = tempPresales[i].tokenX();
+            }
         }
 
-        return selectedPresales;
+        return (selectedPresales, selectedPresalesTokens);
     }
 
     function getPresales(uint256 _index, uint256 _amountToFetch)
         external
         view
-        returns (Presale[] memory)
+        returns (Presale[] memory, IERC20[] memory)
     {
         uint256 selectedCount = 0;
         uint256 currIndex = _index;
@@ -109,7 +121,7 @@ contract PresaleFactory is Ownable {
         uint256 _index,
         uint256 _amountToFetch,
         bool _approvedValue // this method can be used to get approved and not approved presales
-    ) external view returns (Presale[] memory) {
+    ) external view returns (Presale[] memory, IERC20[] memory) {
         uint256 selectedCount = 0;
         uint256 currIndex = _index;
         Presale[] memory tempPresales = new Presale[](_amountToFetch);
@@ -130,7 +142,7 @@ contract PresaleFactory is Ownable {
         uint256 _index,
         uint256 _amountToFetch,
         uint256 _tier // this method can be used to get tier 1,2,3 presales
-    ) external view returns (Presale[] memory) {
+    ) external view returns (Presale[] memory, IERC20[] memory) {
         uint256 selectedCount = 0;
         uint256 currIndex = _index;
         Presale[] memory tempPresales = new Presale[](_amountToFetch);
@@ -150,7 +162,7 @@ contract PresaleFactory is Ownable {
     function getPresalesAppliedForClosing(
         uint256 _index,
         uint256 _amountToFetch
-    ) external view returns (Presale[] memory) {
+    ) external view returns (Presale[] memory, IERC20[] memory) {
         uint256 selectedCount = 0;
         uint256 currIndex = _index;
         Presale[] memory tempPresales = new Presale[](_amountToFetch);
@@ -171,7 +183,7 @@ contract PresaleFactory is Ownable {
         uint256 _index,
         uint256 _amountToFetch,
         address _owner // this method can be used to get _owner's presales
-    ) external view returns (Presale[] memory) {
+    ) external view returns (Presale[] memory, IERC20[] memory) {
         uint256 selectedCount = 0;
         uint256 currIndex = _index;
         Presale[] memory tempPresales = new Presale[](_amountToFetch);
@@ -192,8 +204,6 @@ contract PresaleFactory is Ownable {
         external
         view
         returns (
-            string memory tokenName,
-            string memory tokenSymbol,
             address[] memory,
             uint256[] memory,
             bool[] memory
@@ -202,13 +212,27 @@ contract PresaleFactory is Ownable {
         return Presale(_presale).getPresaleDetails();
     }
 
-    // func return all rates of 50 presales
+    function getTokenName(address _token)
+        public
+        view
+        returns (string memory name)
+    {
+        return IName(_token).name();
+    }
 
-    // see that 10 size array returns what on 3 elems in it, function getStopPoint private returns (uint256) {}
+    function getTokenSymbol(address _token)
+        public
+        view
+        returns (string memory symbol)
+    {
+        return ISymbol(_token).symbol();
+    }
 }
 
 /*
+// func return all rates of 50 presales
 
+    // see that 10 size array returns what on 3 elems in it, function getStopPoint private returns (uint256) {}
 
     // uint256,
     // uint256,

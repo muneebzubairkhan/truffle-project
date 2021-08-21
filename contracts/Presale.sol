@@ -5,13 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Locker.sol";
 
-interface IName {
-    function name() external view returns (string memory);
-}
-
-interface ISymbol {
-    function symbol() external view returns (string memory);
-}
 
 contract Presale is Ownable {
     using SafeERC20 for IERC20;
@@ -157,8 +150,6 @@ contract Presale is Ownable {
         external
         view
         returns (
-            string memory name,
-            string memory symbol,
             address[] memory,
             uint256[] memory,
             bool[] memory
@@ -194,13 +185,7 @@ contract Presale is Ownable {
         bools[5] = lpTokenXLocker.unlockTokensRequestMade();
         bools[6] = lpTokenXLocker.unlockTokensRequestAccepted();
 
-        return (
-            IName(address(tokenX)).name(),
-            ISymbol(address(tokenX)).symbol(),
-            addresses,
-            uints,
-            bools
-        );
+        return (addresses, uints, bools);
     }
 
     function setTokenXLocker(Locker _tokenXLocker) external {

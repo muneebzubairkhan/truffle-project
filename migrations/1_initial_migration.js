@@ -83,6 +83,9 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
     busd.address
   );
 
+  if (!(network === 'bscMainnet' || network === 'mainnet'))
+    await makePresaleFromFactoryForTesting(presaleFactory, tokenX);
+
   // 100% 11.26am
   // 75% 12.26pm
   const locker = await deployer.deploy(Locker, busd.address, owner, Date.now());
@@ -122,6 +125,22 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
   }
 };
 
+const makePresaleFromFactoryForTesting = async (presaleFactory, tokenX) => {
+  await presaleFactory.createERC20Presale(
+    tokenX.address,
+    tokenX.address,
+    (_rate_ = toWei('0.2')),
+    (_tokenXToLock_ = '0'),
+    (_lpTokenXToLock_ = '0'),
+    (_tokenXToSell_ = '0'),
+    (_unlockAtTime_ = '0'),
+    (_amountTokenXToBuyTokenX_ = '0'),
+    (_presaleEarningWallet_ = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
+    (_onlyWhitelistedAllowed_ = false),
+    ['0x95FB36223A312c7fB3Bb05415b1D85771A781Db2']
+  );
+};
+
 // const rinkeby = async (deployer, accounts) => {};
 
 const ethMainnet = async deployer => {};
@@ -140,7 +159,7 @@ const makeContractObjects = obj => {
   import Web3 from 'web3';
   
   export const defaultWeb3 = new Web3(
-    'https://rinkeby.infura.io/v3/3da1c863472e43d989856450d4e6889d'
+    'https://data-seed-prebsc-2-s2.binance.org:8545'
   );
   
   `;
