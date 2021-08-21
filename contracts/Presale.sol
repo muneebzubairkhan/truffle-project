@@ -5,8 +5,14 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Locker.sol";
 
-// functions: setRate, buyTokens...
-// Presale is Locker
+interface IName {
+    function name() external view returns (string memory);
+}
+
+interface ISymbol {
+    function symbol() external view returns (string memory);
+}
+
 contract Presale is Ownable {
     using SafeERC20 for IERC20;
 
@@ -21,7 +27,6 @@ contract Presale is Ownable {
     uint256 public presaleClosedAt = type(uint256).max;
     uint8 public tier = 1;
     address public presaleEarningWallet;
-    address public parentCompany;
     address public factory;
 
     mapping(address => bool) public isWhitelisted;
@@ -39,7 +44,6 @@ contract Presale is Ownable {
         IERC20 _busd,
         uint256 _rate,
         address _presaleEarningWallet,
-        address _parentCompany,
         bool _onlyWhitelistedAllowed,
         uint256 _amountTokenXToBuyTokenX,
         address[] memory _whitelistAddresses
@@ -52,7 +56,6 @@ contract Presale is Ownable {
         presaleEarningWallet = _presaleEarningWallet;
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
         amountTokenXToBuyTokenX = _amountTokenXToBuyTokenX;
-        parentCompany = _parentCompany;
 
         if (_onlyWhitelistedAllowed) {
             for (uint256 i = 0; i < _whitelistAddresses.length; i++) {
@@ -126,7 +129,7 @@ contract Presale is Ownable {
         bool _presaleIsApproved
     ) public {
         require(
-            msg.sender == parentCompany,
+            msg.sender == parentCompany(),
             "You must be parent company to edit value of presaleIsApproved."
         );
         presaleIsApproved = _presaleIsApproved;
@@ -136,7 +139,7 @@ contract Presale is Ownable {
         bool _presaleIsRejected
     ) public {
         require(
-            msg.sender == parentCompany,
+            msg.sender == parentCompany(),
             "You must be parent company to edit value of presaleIsRejected."
         );
         presaleIsRejected = _presaleIsRejected;
@@ -144,7 +147,7 @@ contract Presale is Ownable {
 
     function onlyParentCompanyFunction_editTier(uint8 _tier) public {
         require(
-            msg.sender == parentCompany,
+            msg.sender == parentCompany(),
             "You must be parent company to edit value of tier."
         );
         tier = _tier;
@@ -154,6 +157,8 @@ contract Presale is Ownable {
         external
         view
         returns (
+            string memory name,
+            string memory symbol,
             address[] memory,
             uint256[] memory,
             bool[] memory
@@ -165,18 +170,19 @@ contract Presale is Ownable {
         addresses[2] = address(tokenXLocker);
         addresses[3] = address(lpTokenXLocker);
 
-        uint256[] memory uints = new uint256[](11);
-        uints[0] = tokenX.balanceOf(address(this));
-        uints[1] = tokenXLocker.balance();
-        uints[2] = tokenXLocker.unlockTokensAtTime();
-        uints[3] = lpTokenX.balanceOf(address(this));
-        uints[4] = lpTokenXLocker.balance();
-        uints[5] = lpTokenXLocker.unlockTokensAtTime();
-        uints[6] = tokenXSold;
-        uints[7] = rate;
-        uints[8] = amountTokenXToBuyTokenX;
-        uints[9] = presaleClosedAt;
-        uints[10] = tier;
+        uint256[] memory uints = new uint256[](12);
+        uints[0] = tokenX.totalSupply();
+        uints[1] = tokenX.balanceOf(address(this));
+        uints[2] = tokenXLocker.balance();
+        uints[3] = tokenXLocker.unlockTokensAtTime();
+        uints[4] = lpTokenX.balanceOf(address(this));
+        uints[5] = lpTokenXLocker.balance();
+        uints[6] = lpTokenXLocker.unlockTokensAtTime();
+        uints[7] = tokenXSold;
+        uints[8] = rate;
+        uints[9] = amountTokenXToBuyTokenX;
+        uints[10] = presaleClosedAt;
+        uints[11] = tier;
 
         bool[] memory bools = new bool[](7);
         bools[0] = presaleIsRejected;
@@ -188,7 +194,13 @@ contract Presale is Ownable {
         bools[5] = lpTokenXLocker.unlockTokensRequestMade();
         bools[6] = lpTokenXLocker.unlockTokensRequestAccepted();
 
-        return (addresses, uints, bools);
+        return (
+            IName(address(tokenX)).name(),
+            ISymbol(address(tokenX)).symbol(),
+            addresses,
+            uints,
+            bools
+        );
     }
 
     function setTokenXLocker(Locker _tokenXLocker) external {
@@ -199,6 +211,10 @@ contract Presale is Ownable {
     function setLpTokenXLocker(Locker _lpTokenXLocker) external {
         require(msg.sender == factory, "Only factory can change locker");
         lpTokenXLocker = _lpTokenXLocker;
+    }
+
+    function parentCompany() public view returns (address) {
+        return Ownable(factory).owner();
     }
 }
 

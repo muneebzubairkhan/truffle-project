@@ -35,18 +35,12 @@ contract PresaleFactory is Ownable {
         bool _onlyWhitelistedAllowed,
         address[] memory _whitelistAddresses
     ) external {
-        // require(
-        //     address(presaleOf[_tokenX]) == address(0),
-        //     "Presale already exist for this token"
-        // );
-
         Presale presale = new Presale(
             _tokenX,
             _lpTokenX,
             busd,
             _rate,
             _presaleEarningWallet,
-            owner(),
             _onlyWhitelistedAllowed,
             _amountTokenXToBuyTokenX,
             _whitelistAddresses
@@ -198,6 +192,8 @@ contract PresaleFactory is Ownable {
         external
         view
         returns (
+            string memory tokenName,
+            string memory tokenSymbol,
             address[] memory,
             uint256[] memory,
             bool[] memory

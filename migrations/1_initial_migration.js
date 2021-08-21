@@ -72,7 +72,6 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
     busd.address,
     (_rate = toWei('0.2')),
     (_walletOwner = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
-    (_parentCompany = owner),
     (_onlyWhitelistedAllowed = false),
     (_amountTokenXToBuyTokenX = toWei('0')),
     [addr1, addr2, '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2']
@@ -140,7 +139,7 @@ const makeContractObjects = obj => {
 
   import Web3 from 'web3';
   
-  const defaultWeb3 = new Web3(
+  export const defaultWeb3 = new Web3(
     'https://rinkeby.infura.io/v3/3da1c863472e43d989856450d4e6889d'
   );
   
