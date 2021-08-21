@@ -13,7 +13,8 @@ module.exports = {
       host: '127.0.0.1',
       port: 8545,
       network_id: '*',
-      gas: 6721975
+      gas: 6721975,
+      explorer: 'https://rinkeby.etherscan.io/address/'
     },
 
     develop: {
@@ -38,12 +39,21 @@ module.exports = {
           // 'https://data-seed-prebsc-1-s1.binance.org:8545'
         );
       },
-      network_id: '97'
+      network_id: '97',
+      explorer: 'https://testnet.bscscan.com/address/'
       // skipDryRun: true,
       // gas: 30000000, //from ganache-cli output
       // gasPrice: 20000000000 //1,000,000,000 From ganache-cli output
     },
-
+    rinkeby: {
+      provider: new HDWalletProvider(
+        MNEMONIC,
+        'https://rinkeby.infura.io/v3/' + token
+      ),
+      network_id: '4',
+      skipDryRun: true,
+      explorer: 'https://rinkeby.etherscan.io/address/'
+    }
     // bscMainnet: {
     //   provider: () => {
     //     return new HDWalletProvider(
@@ -73,15 +83,7 @@ module.exports = {
     //   network_id: '3',
     //   skipDryRun: true
     // },
-    rinkeby: {
-      provider: new HDWalletProvider(
-        MNEMONIC,
-        'https://rinkeby.infura.io/v3/' + token
-      ),
-      network_id: '4',
-      skipDryRun: true
-      // explorer: 'https://rinkeby.etherscan.io/address/'
-    }
+
     // kovan: {
     //   provider: () => {
     //     return new HDWalletProvider(

@@ -134,12 +134,27 @@ const up = s => s.charAt(0).toUpperCase() + s.slice(1);
 
 // send variable in input as {someVariable}
 // obj is variables object (it contains variables)
-const makeContractObjects = obj =>
-  Object.keys(obj)
-    .map(varName =>
-      boil(varName, stringify(obj[varName].abi), obj[varName].address)
-    )
-    .join('\n\n');
+const makeContractObjects = obj => {
+  const boiledWeb3 = `
+  // if you want to do only get calls then you can use defaultWeb3.
+
+  import Web3 from 'web3';
+  
+  const defaultWeb3 = new Web3(
+    'https://rinkeby.infura.io/v3/3da1c863472e43d989856450d4e6889d'
+  );
+  
+  `;
+
+  return (
+    boiledWeb3 +
+    Object.keys(obj)
+      .map(varName =>
+        boil(varName, stringify(obj[varName].abi), obj[varName].address)
+      )
+      .join('\n\n')
+  );
+};
 
 const boil = (varName, abi, address) =>
   `
@@ -149,7 +164,7 @@ const boil = (varName, abi, address) =>
   );
   export const getContract${up(
     varName
-  )} = (web3, address = ${varName}Address) => 
+  )} = (web3 = defaultWeb3, address = ${varName}Address) => 
     new web3.eth.Contract(
       ${varName}Abi, address
     );
