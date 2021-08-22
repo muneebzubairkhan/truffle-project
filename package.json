@@ -7,12 +7,13 @@
     "test": "test"
   },
   "scripts": {
-    "start": "yarn startBscTestnet",
+    "start": "yarn startBscTestnet && yarn beep2",
     "ganache-cli": "ganache-cli",
-    "migrate": "truffle migrate --reset",
+    "migrate": "truffle migrate --reset && yarn beep2",
     "compile": "truffle compile",
     "test": "truffle test",
     "____": "_____",
+    "b": "yarn b",
     "beep1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
     "beep2": "start wmplayer \"C:\\Windows\\Media\\Alarm10.wav\" && timeout 5 && taskkill /im wmplayer.exe",
     "_____": "_____",

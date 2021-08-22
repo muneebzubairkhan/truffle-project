@@ -8,6 +8,9 @@ const PresaleFactory = artifacts.require('PresaleFactory');
 
 const Locker = artifacts.require('Locker');
 
+const MAX_INT =
+  '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
 const networksConfig = require('../truffle-config');
 
 module.exports = async (deployer, network, accounts) => {
@@ -85,7 +88,7 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
   );
 
   if (!(network === 'bscMainnet' || network === 'mainnet')) {
-    await makePresaleFromFactoryForTesting(presaleFactory, tokenX);
+    await makePresaleFromFactoryForTesting(presaleFactory, tokenX, lpTokenX);
   }
 
   // 100% 11.26am
@@ -133,20 +136,30 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
   }
 };
 
-const makePresaleFromFactoryForTesting = async (presaleFactory, tokenX) => {
+const makePresaleFromFactoryForTesting = async (
+  presaleFactory,
+  tokenX,
+  lpTokenX,
+) => {
+  await tokenX.approve(presaleFactory.address, MAX_INT);
+  await lpTokenX.approve(presaleFactory.address, MAX_INT);
+
+  const truncNum = n => Number(Math.trunc(n));
+  console.log('truncNum: ', truncNum(Date.now() / 1000));
+
   await presaleFactory.createERC20Presale(
     tokenX.address,
-    tokenX.address,
+    lpTokenX.address,
     (_rate_ = toWei('0.2')),
-    (_tokenXToLock_ = '0'),
-    (_lpTokenXToLock_ = '0'),
-    (_tokenXToSell_ = '0'),
-    (_unlockAtTime_ = '0'),
+    (_tokenXToLock_ = toWei('5.55')),
+    (_lpTokenXToLock_ = toWei('10.77')),
+    (_tokenXToSell_ = toWei('12.33')),
+    (_unlockAtTime_ = truncNum(Date.now() / 1000)),
     (_amountTokenXToBuyTokenX_ = '0'),
     (_presaleEarningWallet_ = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
     (_onlyWhitelistedAllowed_ = false),
     ['0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'],
-    socialMedia + socialMedia,
+    socialMedia,
   );
 };
 
