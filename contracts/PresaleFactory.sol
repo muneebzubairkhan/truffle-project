@@ -41,7 +41,8 @@ contract PresaleFactory is Ownable {
         uint256 _amountTokenXToBuyTokenX,
         address _presaleEarningWallet,
         bool _onlyWhitelistedAllowed,
-        address[] memory _whitelistAddresses
+        address[] memory _whitelistAddresses,
+        string memory _presaleOwnerDetails
     ) external {
         Presale presale = new Presale(
             _tokenX,
@@ -51,7 +52,8 @@ contract PresaleFactory is Ownable {
             _presaleEarningWallet,
             _onlyWhitelistedAllowed,
             _amountTokenXToBuyTokenX,
-            _whitelistAddresses
+            _whitelistAddresses,
+            _presaleOwnerDetails
         );
         Locker tokenXLocker = new Locker(
             _tokenX,
@@ -226,6 +228,11 @@ contract PresaleFactory is Ownable {
         returns (string memory symbol)
     {
         return ISymbol(_token).symbol();
+    }
+
+    function developers() public pure returns (string memory) {
+        return
+            "This smart contract is Made in Pakistan by Muneeb Zubair Khan, Whatsapp +923014440289, Telegram @thinkmuneeb, https://shield-launchpad.netlify.app/ and this UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash. Discord timon#1213";
     }
 }
 

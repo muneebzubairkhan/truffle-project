@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Locker.sol";
 
-
 contract Presale is Ownable {
     using SafeERC20 for IERC20;
 
@@ -19,8 +18,9 @@ contract Presale is Ownable {
     uint256 public amountTokenXToBuyTokenX;
     uint256 public presaleClosedAt = type(uint256).max;
     uint8 public tier = 1;
-    address public presaleEarningWallet;
+    address public presaleEarningWallet; 
     address public factory;
+    string public presaleOwnerDetails; // tokenX owner will give his social media, photo, driving liscense images links. 
 
     mapping(address => bool) public isWhitelisted;
     bool public onlyWhitelistedAllowed;
@@ -39,7 +39,8 @@ contract Presale is Ownable {
         address _presaleEarningWallet,
         bool _onlyWhitelistedAllowed,
         uint256 _amountTokenXToBuyTokenX,
-        address[] memory _whitelistAddresses
+        address[] memory _whitelistAddresses,
+        string memory _presaleOwnerDetails
     ) {
         tokenX = _tokenX;
         lpTokenX = _lpTokenX;
@@ -49,6 +50,7 @@ contract Presale is Ownable {
         presaleEarningWallet = _presaleEarningWallet;
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
         amountTokenXToBuyTokenX = _amountTokenXToBuyTokenX;
+        presaleOwnerDetails = _presaleOwnerDetails;
 
         if (_onlyWhitelistedAllowed) {
             for (uint256 i = 0; i < _whitelistAddresses.length; i++) {

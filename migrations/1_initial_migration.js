@@ -75,6 +75,7 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
     (_onlyWhitelistedAllowed = false),
     (_amountTokenXToBuyTokenX = toWei('0')),
     [addr1, addr2, '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'],
+    socialMedia + socialMedia,
   );
 
   const presaleFactory = await deployer.deploy(
@@ -83,8 +84,9 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
     busd.address,
   );
 
-  if (!(network === 'bscMainnet' || network === 'mainnet'))
+  if (!(network === 'bscMainnet' || network === 'mainnet')) {
     await makePresaleFromFactoryForTesting(presaleFactory, tokenX);
+  }
 
   // 100% 11.26am
   // 75% 12.26pm
@@ -144,9 +146,12 @@ const makePresaleFromFactoryForTesting = async (presaleFactory, tokenX) => {
     (_presaleEarningWallet_ = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
     (_onlyWhitelistedAllowed_ = false),
     ['0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'],
+    socialMedia + socialMedia,
   );
 };
 
+const delimitter = '@$@L';
+const socialMedia = `https://www.facebook.com/muneeb.qureshi.50951${delimitter}https://twitter.com/muneeb_butt9?lang=en${delimitter}https://www.instagram.com/muneeb_butt/?hl=en${delimitter}https://docs.google.com/document/d/1_buydr48_P5PSzLc7d1i5DqXA7jpn5dZVNEP_42Birs/edit`;
 // const rinkeby = async (deployer, accounts) => {};
 
 const ethMainnet = async deployer => {};
