@@ -101,7 +101,7 @@ contract PresaleFactory is Ownable {
         return (selectedPresales, selectedPresalesTokens);
     }
 
-    function getPresales(uint256 _index, uint256 _amountToFetch)
+    function getPresalesAll(uint256 _index, uint256 _amountToFetch)
         external
         view
         returns (Presale[] memory, IERC20[] memory)
@@ -119,7 +119,7 @@ contract PresaleFactory is Ownable {
         return getSelectedItems(tempPresales, selectedCount);
     }
 
-    function getPresales(
+    function getPresalesApproved(
         uint256 _index,
         uint256 _amountToFetch,
         bool _approvedValue // this method can be used to get approved and not approved presales
@@ -140,7 +140,7 @@ contract PresaleFactory is Ownable {
         return getSelectedItems(tempPresales, selectedCount);
     }
 
-    function getPresales(
+    function getPresalesOfTier(
         uint256 _index,
         uint256 _amountToFetch,
         uint256 _tier // this method can be used to get tier 1,2,3 presales
@@ -163,7 +163,8 @@ contract PresaleFactory is Ownable {
 
     function getPresalesAppliedForClosing(
         uint256 _index,
-        uint256 _amountToFetch
+        uint256 _amountToFetch,
+        bool _closed
     ) external view returns (Presale[] memory, IERC20[] memory) {
         uint256 selectedCount = 0;
         uint256 currIndex = _index;
@@ -171,7 +172,7 @@ contract PresaleFactory is Ownable {
         for (uint256 i = 0; i < _amountToFetch; i++) {
             if (
                 address(presales[currIndex]) != address(0) &&
-                presales[currIndex].presaleAppliedForClosing() == true
+                presales[currIndex].presaleAppliedForClosing() == _closed
             ) {
                 tempPresales[i] = presales[currIndex++];
                 selectedCount++;
@@ -181,7 +182,7 @@ contract PresaleFactory is Ownable {
         return getSelectedItems(tempPresales, selectedCount);
     }
 
-    function getPresales(
+    function getPresalesOfOwner(
         uint256 _index,
         uint256 _amountToFetch,
         address _owner // this method can be used to get _owner's presales

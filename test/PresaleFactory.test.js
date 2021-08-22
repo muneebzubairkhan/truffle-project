@@ -47,7 +47,7 @@ contract(
       );
 
       {
-        const res = await presaleFactory.getPresales('0', '3');
+        const res = await presaleFactory.getPresalesApproved('0', '3', true);
         console.log('res: ', res);
       }
 
@@ -124,18 +124,25 @@ contract(
       assert.equal(afterBusdOfClient, beforeBusdOfClient - price);
 
       {
-        // See BIG Datatypes and handle them
-        const res = await presaleFactory.getPresales(0, 30);
-        console.log('res: ', res);
+        const res = await presaleFactory.getPresalesAll(0, 30);
+        console.log('res all sales: ', res);
       }
       {
-        const res = await presaleFactory.getPresaleDetails(presale.address);
-        console.log('res: ', res);
+        const res = await presaleFactory.getPresalesApproved(0, 30, true);
+        console.log('res approved sales: ', res);
       }
       {
-        const res = await presaleFactory.getPresaleMediaLinks(presale.address);
-        console.log('res: ', res.split(delimitter));
+        const res = await presaleFactory.getPresalesApproved(0, 30, false);
+        console.log('res not approved sales: ', res);
       }
+      // {
+      //   const res = await presaleFactory.getPresaleDetails(presale.address);
+      //   console.log('res: ', res);
+      // }
+      // {
+      //   const res = await presaleFactory.getPresaleMediaLinks(presale.address);
+      //   console.log('res: ', res.split(delimitter));
+      // }
     });
   },
 );
