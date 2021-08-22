@@ -42,7 +42,7 @@ contract PresaleFactory is Ownable {
         address _presaleEarningWallet,
         bool _onlyWhitelistedAllowed,
         address[] memory _whitelistAddresses,
-        string memory _presaleOwnerDetails
+        string memory _presaleMediaLinks
     ) external {
         Presale presale = new Presale(
             _tokenX,
@@ -53,7 +53,7 @@ contract PresaleFactory is Ownable {
             _onlyWhitelistedAllowed,
             _amountTokenXToBuyTokenX,
             _whitelistAddresses,
-            _presaleOwnerDetails
+            _presaleMediaLinks
         );
         Locker tokenXLocker = new Locker(
             _tokenX,
@@ -228,6 +228,14 @@ contract PresaleFactory is Ownable {
         returns (string memory symbol)
     {
         return ISymbol(_token).symbol();
+    }
+
+    function getPresaleMediaLinks(Presale _presale)
+        public
+        view
+        returns (string memory symbol)
+    {
+        return _presale.presaleMediaLinks();
     }
 
     function developers() public pure returns (string memory) {

@@ -132,6 +132,10 @@ contract(
         const res = await presaleFactory.getPresaleDetails(presale.address);
         console.log('res: ', res);
       }
+      {
+        const res = await presaleFactory.getPresaleMediaLinks(presale.address);
+        console.log('res: ', res.split(delimitter));
+      }
     });
   },
 );

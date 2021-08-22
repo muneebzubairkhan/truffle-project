@@ -18,9 +18,9 @@ contract Presale is Ownable {
     uint256 public amountTokenXToBuyTokenX;
     uint256 public presaleClosedAt = type(uint256).max;
     uint8 public tier = 1;
-    address public presaleEarningWallet; 
+    address public presaleEarningWallet;
     address public factory;
-    string public presaleOwnerDetails; // tokenX owner will give his social media, photo, driving liscense images links. 
+    string public presaleMediaLinks; // tokenX owner will give his social media, photo, driving liscense images links.
 
     mapping(address => bool) public isWhitelisted;
     bool public onlyWhitelistedAllowed;
@@ -40,7 +40,7 @@ contract Presale is Ownable {
         bool _onlyWhitelistedAllowed,
         uint256 _amountTokenXToBuyTokenX,
         address[] memory _whitelistAddresses,
-        string memory _presaleOwnerDetails
+        string memory _presaleMediaLinks
     ) {
         tokenX = _tokenX;
         lpTokenX = _lpTokenX;
@@ -50,7 +50,7 @@ contract Presale is Ownable {
         presaleEarningWallet = _presaleEarningWallet;
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
         amountTokenXToBuyTokenX = _amountTokenXToBuyTokenX;
-        presaleOwnerDetails = _presaleOwnerDetails;
+        presaleMediaLinks = _presaleMediaLinks;
 
         if (_onlyWhitelistedAllowed) {
             for (uint256 i = 0; i < _whitelistAddresses.length; i++) {
