@@ -101,7 +101,7 @@ contract PresaleFactory is Ownable {
         return (selectedPresales, selectedPresalesTokens);
     }
 
-    function getPresalesAll(uint256 _index, uint256 _amountToFetch)
+    function getPresales(uint256 _index, uint256 _amountToFetch)
         external
         view
         returns (Presale[] memory, IERC20[] memory)
@@ -113,90 +113,8 @@ contract PresaleFactory is Ownable {
             if (address(presales[currIndex]) != address(0)) {
                 tempPresales[i] = presales[currIndex++];
                 selectedCount++;
-            }
-        }
-
-        return getSelectedItems(tempPresales, selectedCount);
-    }
-
-    function getPresalesApproved(
-        uint256 _index,
-        uint256 _amountToFetch,
-        bool _approvedValue // this method can be used to get approved and not approved presales
-    ) external view returns (Presale[] memory, IERC20[] memory) {
-        uint256 selectedCount = 0;
-        uint256 currIndex = _index;
-        Presale[] memory tempPresales = new Presale[](_amountToFetch);
-        for (uint256 i = 0; i < _amountToFetch; i++) {
-            if (
-                address(presales[currIndex]) != address(0) &&
-                presales[currIndex].presaleIsApproved() == _approvedValue
-            ) {
-                tempPresales[i] = presales[currIndex++];
-                selectedCount++;
-            }
-        }
-
-        return getSelectedItems(tempPresales, selectedCount);
-    }
-
-    function getPresalesOfTier(
-        uint256 _index,
-        uint256 _amountToFetch,
-        uint256 _tier // this method can be used to get tier 1,2,3 presales
-    ) external view returns (Presale[] memory, IERC20[] memory) {
-        uint256 selectedCount = 0;
-        uint256 currIndex = _index;
-        Presale[] memory tempPresales = new Presale[](_amountToFetch);
-        for (uint256 i = 0; i < _amountToFetch; i++) {
-            if (
-                address(presales[currIndex]) != address(0) &&
-                presales[currIndex].tier() == _tier
-            ) {
-                tempPresales[i] = presales[currIndex++];
-                selectedCount++;
-            }
-        }
-
-        return getSelectedItems(tempPresales, selectedCount);
-    }
-
-    function getPresalesAppliedForClosing(
-        uint256 _index,
-        uint256 _amountToFetch,
-        bool _closed
-    ) external view returns (Presale[] memory, IERC20[] memory) {
-        uint256 selectedCount = 0;
-        uint256 currIndex = _index;
-        Presale[] memory tempPresales = new Presale[](_amountToFetch);
-        for (uint256 i = 0; i < _amountToFetch; i++) {
-            if (
-                address(presales[currIndex]) != address(0) &&
-                presales[currIndex].presaleAppliedForClosing() == _closed
-            ) {
-                tempPresales[i] = presales[currIndex++];
-                selectedCount++;
-            }
-        }
-
-        return getSelectedItems(tempPresales, selectedCount);
-    }
-
-    function getPresalesOfOwner(
-        uint256 _index,
-        uint256 _amountToFetch,
-        address _owner // this method can be used to get _owner's presales
-    ) external view returns (Presale[] memory, IERC20[] memory) {
-        uint256 selectedCount = 0;
-        uint256 currIndex = _index;
-        Presale[] memory tempPresales = new Presale[](_amountToFetch);
-        for (uint256 i = 0; i < _amountToFetch; i++) {
-            if (
-                address(presales[currIndex]) != address(0) &&
-                presales[currIndex].owner() == _owner
-            ) {
-                tempPresales[i] = presales[currIndex++];
-                selectedCount++;
+            } else {
+                tempPresales[i] = Presale(address(0));
             }
         }
 
@@ -248,19 +166,7 @@ contract PresaleFactory is Ownable {
 /*
 // func return all rates of 50 presales
 
-    // see that 10 size array returns what on 3 elems in it, function getStopPoint private returns (uint256) {}
-
-    // uint256,
-    // uint256,
-    // uint256,
-    // uint256,
-    // uint256,
-    // uint256,
-    // uint8,
-    // bool,
-    // bool,
-    // bool
-
+// see that 10 size array returns what on 3 elems in it, function getStopPoint private returns (uint256) {}
 
 
 notes:
