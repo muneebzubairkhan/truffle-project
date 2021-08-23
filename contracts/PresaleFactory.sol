@@ -162,27 +162,3 @@ contract PresaleFactory is Ownable {
             "This smart contract is Made in Pakistan by Muneeb Zubair Khan, Whatsapp +923014440289, Telegram @thinkmuneeb, https://shield-launchpad.netlify.app/ and this UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash. Discord timon#1213";
     }
 }
-
-/*
-// func return all rates of 50 presales
-
-// see that 10 size array returns what on 3 elems in it, function getStopPoint private returns (uint256) {}
-
-
-notes:
-getAddresIsTrustedOrNot
-get approved presales
-get not approved presales (for admin)
-get rejected presales (for admin)
-get presales of a specific person
-// get presales with unlock liquidity request
-disbanding projects
-get presale which wan to be approved
-get locked amount of a presale, (compare run time total vs save total on each transaction)
-write multiple presales...
-Plus more...
-
-
-
-
-*/

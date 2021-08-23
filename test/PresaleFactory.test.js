@@ -47,7 +47,7 @@ contract(
       );
 
       {
-        const res = await presaleFactory.getPresalesApproved('0', '3', true);
+        const res = await presaleFactory.getPresales('0', '3', true);
         console.log('res: ', res);
       }
 
@@ -124,15 +124,15 @@ contract(
       assert.equal(afterBusdOfClient, beforeBusdOfClient - price);
 
       {
-        const res = await presaleFactory.getPresalesAll(0, 30);
+        const res = await presaleFactory.getPresales(0, 30);
         console.log('res all sales: ', res);
       }
       {
-        const res = await presaleFactory.getPresalesApproved(0, 30, true);
+        const res = await presaleFactory.getPresales(0, 30);
         console.log('res approved sales: ', res);
       }
       {
-        const res = await presaleFactory.getPresalesApproved(0, 30, false);
+        const res = await presaleFactory.getPresales(0, 30);
         console.log('res not approved sales: ', res);
       }
       // {

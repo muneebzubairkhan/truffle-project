@@ -211,7 +211,7 @@ const boil = (varName, abi, address) =>
   );
   export const getContract${up(
     varName,
-  )} = (web3 = defaultWeb3, address = ${varName}Address) => 
+  )} = (address = ${varName}Address, web3 = defaultWeb3) => 
     new web3.eth.Contract(
       ${varName}Abi, address
     );

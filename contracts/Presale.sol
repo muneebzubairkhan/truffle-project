@@ -204,35 +204,3 @@ contract Presale is Ownable {
         return Ownable(factory).owner();
     }
 }
-
-/*
-notes:
-
-first implemet core logic
-// nonreentrant modifier ? I think its only need in case external calls are not at end
-
-update variables by owner of tokenX and shieldNetwork
-be ware of ownerships and mint to proper owners
-as different factory calling will be used
-natspec annotations, author Muneeb Khan
-mention comments see sir written contract
-
-function thisContractIsMadeBy_TheHash.io() external returns(memory string) {
-    return "Hi if you want to develop a smart contract you can contact on telegram @thinkmuneeb";
-}
-
-cosmetics
-function ownerFunction_unlockTokens(IERC20 _token) external onlyOwner {
-    _token.transfer(owner(), _token.balanceOf(address(this)));
-}
-fallback send eth to owner
-can send erc721 erc1155 to owner
-
-getWhitelist addresses  method?
-presaleIsApproved = false; get approval after changing rate ?
-
-
-// when I do something crazy in code I feel that it will be caught in auidt. or I need to fix it. Or use some other api.
-        // i.e lock token in wallet at time of its creation in single go
-        
-*/
