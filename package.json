@@ -30,12 +30,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@openzeppelin/contracts": "^4.1.0",
+    "@openzeppelin/contracts": "^2.4.0",
     "@openzeppelin/contracts-upgradeable": "^4.3.0",
     "@truffle/hdwallet-provider": "^1.2.2",
     "dotenv": "^10.0.0",
     "eth-gas-reporter": "^0.2.22",
-    "hdwallet": "^0.7.3",
     "truffle-plugin-verify": "^0.5.8"
   }
 }
