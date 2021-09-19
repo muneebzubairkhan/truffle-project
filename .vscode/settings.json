@@ -1,3 +1,4 @@
 {
-    "npm-scripts.showStartNotification": false
+    "npm-scripts.showStartNotification": false,
+    "solidity.compileUsingRemoteVersion": "v0.8.7+commit.e28d00a7"
 }

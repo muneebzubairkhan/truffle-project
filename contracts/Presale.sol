@@ -24,12 +24,16 @@ contract Presale is Ownable {
 
     mapping(address => bool) public isWhitelisted;
     bool public onlyWhitelistedAllowed;
-    bool public presaleIsRejected = false;
+    bool public presaleIsBlacklisted = false;
     bool public presaleIsApproved = false;
     bool public presaleAppliedForClosing = false;
 
     event RateChanged(uint256 _newRate);
-    event PresaleClosed();
+    event PresaleMediaLinksChanged(string _presaleMediaLinks);
+
+    event AmountTokenXToBuyTokenXChanged(uint256 _amountTokenXToBuyTokenX);
+    event OwnerTookLockedTokensBack(uint256 _tokens);
+    event PresaleAppliedToClosed(uint256 _presaleWillCloseAt);
 
     constructor(
         IERC20 _tokenX,
@@ -64,7 +68,7 @@ contract Presale is Ownable {
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
     function buyTokens(uint256 _tokens) external {
         require(
-            !presaleIsRejected,
+            !presaleIsBlacklisted,
             "Presale is rejected by the parent network."
         );
         require(block.timestamp < presaleClosedAt, "Presale is closed.");
@@ -95,6 +99,20 @@ contract Presale is Ownable {
         tokenX.transfer(msg.sender, _tokens); // try with _msgsender on truufle test and ethgas reporter
     }
 
+    function ownerFunction_editOnlyWhitelistedAllowed(
+        bool _onlyWhitelistedAllowed
+    ) external onlyOwner {
+        onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
+    }
+
+    function ownerFunction_editOnlyWhitelistedAllowed(
+        string memory _presaleMediaLinks
+    ) external onlyOwner {
+        presaleMediaLinks = _presaleMediaLinks;
+
+        emit PresaleMediaLinksChanged(_presaleMediaLinks);
+    }
+
     /// @dev pass true to add to whitelist, pass false to remove from whitelist
     function ownerFunction_editWhitelist(
         address[] memory _addresses,
@@ -110,14 +128,31 @@ contract Presale is Ownable {
         emit RateChanged(_rate);
     }
 
+    function onlyOwnerFunction_setAmountTokenXToBuyTokenX(
+        uint256 _amountTokenXToBuyTokenX
+    ) external onlyOwner {
+        amountTokenXToBuyTokenX = _amountTokenXToBuyTokenX;
+        emit AmountTokenXToBuyTokenXChanged(_amountTokenXToBuyTokenX);
+    }
+
+    function onlyOwnerFunction_getLockedTokensBack() external onlyOwner {
+        uint256 contractBalance = tokenX.balanceOf(address(this));
+        tokenX.transfer(msg.sender, contractBalance);
+        emit OwnerTookLockedTokensBack(contractBalance);
+    }
+
     function onlyOwnerFunction_closePresale(uint8 _months) external onlyOwner {
         require(
             _months >= 1 && _months <= 3,
             "Presale closing period can be 1 to 3 months."
         );
-        presaleAppliedForClosing = presaleAppliedForClosing;
+        require(
+            !presaleAppliedForClosing,
+            "Presale is already applied for closing."
+        );
+        presaleAppliedForClosing = true;
         presaleClosedAt = block.timestamp + _months * 30 days;
-        emit PresaleClosed();
+        emit PresaleAppliedToClosed(presaleClosedAt);
     }
 
     function onlyParentCompanyFunction_editPresaleIsApproved(
@@ -130,14 +165,14 @@ contract Presale is Ownable {
         presaleIsApproved = _presaleIsApproved;
     }
 
-    function onlyParentCompanyFunction_editPresaleIsRejected(
-        bool _presaleIsRejected
+    function onlyParentCompanyFunction_editPresaleIsBlacklisted(
+        bool _presaleIsBlacklisted
     ) public {
         require(
             msg.sender == parentCompany(),
-            "You must be parent company to edit value of presaleIsRejected."
+            "You must be parent company to edit value of presaleIsBlacklisted."
         );
-        presaleIsRejected = _presaleIsRejected;
+        presaleIsBlacklisted = _presaleIsBlacklisted;
     }
 
     function onlyParentCompanyFunction_editTier(uint8 _tier) public {
@@ -178,7 +213,7 @@ contract Presale is Ownable {
         uints[11] = tier;
 
         bool[] memory bools = new bool[](7);
-        bools[0] = presaleIsRejected;
+        bools[0] = presaleIsBlacklisted;
         bools[1] = presaleIsApproved;
         bools[2] = presaleAppliedForClosing;
 

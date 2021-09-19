@@ -10,7 +10,7 @@ contract(
     busdOwner,
     presaleEarningWallet,
     client, // this person will buy token X
-    parentCompany, // the company who provides the services of launchpad
+    parentCompany // the company who provides the services of launchpad
   ]) => {
     // make it like real test case, input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens
     it('Create Presale Factory, Make Presale, call buyTokens(100) and see ', async () => {
@@ -21,7 +21,7 @@ contract(
         'tokenX',
         'tokenX',
         toWei('1000000'),
-        { from: tokenXOwner },
+        { from: tokenXOwner }
       );
 
       // LP TOKEN
@@ -30,7 +30,7 @@ contract(
         'tokenlp',
         'tokenlp',
         toWei('1000000'),
-        { from: tokenXOwner },
+        { from: tokenXOwner }
       );
 
       const busd = await ERC20Token.new(
@@ -38,43 +38,43 @@ contract(
         'BUSD',
         'BUSD',
         toWei('1000000'),
-        { from: busdOwner },
+        { from: busdOwner }
       );
 
       const presaleFactory = await PresaleFactory.new(
         parentCompany,
-        busd.address,
+        busd.address
       );
 
-      {
-        const res = await presaleFactory.getPresales('0', '3', true);
-        console.log('res: ', res);
-      }
+      // {
+      //   const res = await presaleFactory.getPresales('0', '3', true);
+      //   console.log('res: ', res);
+      // }
 
       // give 100$ to client to buy token X
       await busd.transfer(client, toWei('1200'), {
-        from: busdOwner,
+        from: busdOwner
       });
 
       // 100LP for locking
       await lpToken.transfer(tokenXOwner, toWei('1200'), {
-        from: tokenXOwner,
+        from: tokenXOwner
       });
 
       // 100 tokenX for selling
       // 100 tokenX for locking
       await tokenX.transfer(tokenXOwner, toWei('1400'), {
-        from: tokenXOwner,
+        from: tokenXOwner
       });
 
       // tokenXOwner approves presale address to spend his lpToken for locking
       await lpToken.approve(presaleFactory.address, MAX_INT, {
-        from: tokenXOwner,
+        from: tokenXOwner
       });
 
       // tokenXOwner approves presale address to spend his tokenX for locking, selling
       await tokenX.approve(presaleFactory.address, MAX_INT, {
-        from: tokenXOwner,
+        from: tokenXOwner
       });
       const rate = 0.2;
       await presaleFactory.createERC20Presale(
@@ -91,8 +91,8 @@ contract(
         [presaleEarningWallet, tokenXOwner], // whitelist
         socialMedia + socialMedia,
         {
-          from: tokenXOwner,
-        },
+          from: tokenXOwner
+        }
       );
 
       const presaleAddress = await presaleFactory.presales(0);
@@ -106,7 +106,7 @@ contract(
 
       // parent company approves the presale is Genuine and not fake
       await presale.onlyParentCompanyFunction_editPresaleIsApproved(true, {
-        from: parentCompany,
+        from: parentCompany
       });
 
       // now client of token X will spend his BUSD to buy tokenX
@@ -123,18 +123,18 @@ contract(
       const price = rate * tokenXToBuy;
       assert.equal(afterBusdOfClient, beforeBusdOfClient - price);
 
-      {
-        const res = await presaleFactory.getPresales(0, 30);
-        console.log('res all sales: ', res);
-      }
-      {
-        const res = await presaleFactory.getPresales(0, 30);
-        console.log('res approved sales: ', res);
-      }
-      {
-        const res = await presaleFactory.getPresales(0, 30);
-        console.log('res not approved sales: ', res);
-      }
+      // {
+      //   const res = await presaleFactory.getPresales(0, 30);
+      //   console.log('res all sales: ', res);
+      // }
+      // {
+      //   const res = await presaleFactory.getPresales(0, 30);
+      //   console.log('res approved sales: ', res);
+      // }
+      // {
+      //   const res = await presaleFactory.getPresales(0, 30);
+      //   console.log('res not approved sales: ', res);
+      // }
       // {
       //   const res = await presaleFactory.getPresaleDetails(presale.address);
       //   console.log('res: ', res);
@@ -144,7 +144,7 @@ contract(
       //   console.log('res: ', res.split(delimitter));
       // }
     });
-  },
+  }
 );
 
 const balanceOf = async (token, account) =>

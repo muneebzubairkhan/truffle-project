@@ -16,7 +16,7 @@ const networksConfig = require('../truffle-config');
 module.exports = async (deployer, network, accounts) => {
   // if (network === "development") return;
 
-  console.log('network: ', network);
+  // console.log('network: ', network);
   await deployer.deploy(Migrations);
   await defaultDeploy(deployer, network, accounts);
   // await rinkeby(deployer, accounts);
@@ -32,21 +32,21 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
       owner,
       'BUSD',
       'BUSD',
-      toWei('10000'),
+      toWei('10000')
     );
     tokenX = await deployer.deploy(
       ERC20Token,
       owner,
       'Red Token',
       'RED',
-      toWei('10000'),
+      toWei('10000')
     );
     lpTokenX = await deployer.deploy(
       ERC20Token,
       owner,
       'Red Token',
       'RED',
-      toWei('10000'),
+      toWei('10000')
     );
   } else {
     if (network === 'bscTestnet') {
@@ -78,13 +78,13 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
     (_onlyWhitelistedAllowed = false),
     (_amountTokenXToBuyTokenX = toWei('0')),
     [addr1, addr2, '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'],
-    socialMedia + socialMedia,
+    socialMedia + socialMedia
   );
 
   const presaleFactory = await deployer.deploy(
     PresaleFactory,
     (_parentCompany = owner),
-    busd.address,
+    busd.address
   );
 
   if (!(network === 'bscMainnet' || network === 'mainnet')) {
@@ -108,16 +108,18 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
 
     // console.log({ networksConfig });
 
-    console.log(
-      'networksConfig.networks[network]: ',
-      networksConfig.networks[network],
-    );
+    // console.log(
+    //   'networksConfig.networks[network]: ',
+    //   networksConfig.networks[network],
+    // );
 
     const { explorerUrl, web3Provider } = networksConfig.networks[network];
-    console.log({
-      explorerUrl,
-      web3Provider,
-    });
+
+    if (network !== 'development')
+      console.log({
+        explorerUrl,
+        web3Provider
+      });
 
     res += makeExplorerLink(explorerUrl, {
       busd,
@@ -125,7 +127,7 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
       lpTokenX,
       presale,
       presaleFactory,
-      locker,
+      locker
     });
     res += '//\n//=========================\n\n';
     res += makeContractObjects(web3Provider, {
@@ -134,7 +136,7 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
       lpTokenX,
       presale,
       presaleFactory,
-      locker,
+      locker
     });
 
     fs.writeFile('smart-contracts.js', res, console.log);
@@ -144,13 +146,13 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
 const makePresaleFromFactoryForTesting = async (
   presaleFactory,
   tokenX,
-  lpTokenX,
+  lpTokenX
 ) => {
   await tokenX.approve(presaleFactory.address, MAX_INT);
   await lpTokenX.approve(presaleFactory.address, MAX_INT);
 
   const truncNum = n => Number(Math.trunc(n));
-  console.log('truncNum: ', truncNum(Date.now() / 1000));
+  // console.log('truncNum: ', truncNum(Date.now() / 1000));
 
   await presaleFactory.createERC20Presale(
     tokenX.address,
@@ -164,7 +166,7 @@ const makePresaleFromFactoryForTesting = async (
     (_presaleEarningWallet_ = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
     (_onlyWhitelistedAllowed_ = false),
     ['0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'],
-    socialMedia,
+    socialMedia
   );
 };
 
@@ -197,7 +199,7 @@ const makeContractObjects = (web3Provider, obj) => {
     boiledWeb3 +
     Object.keys(obj)
       .map(varName =>
-        boil(varName, stringify(obj[varName].abi), obj[varName].address),
+        boil(varName, stringify(obj[varName].abi), obj[varName].address)
       )
       .join('\n\n')
   );
@@ -210,7 +212,7 @@ const boil = (varName, abi, address) =>
     '${abi}'
   );
   export const getContract${up(
-    varName,
+    varName
   )} = (address = ${varName}Address, web3 = defaultWeb3) => 
     new web3.eth.Contract(
       ${varName}Abi, address
