@@ -230,6 +230,7 @@ const makeExplorerLink = (explorerUrl = ' ', obj) => {
   return data;
 };
 
+const stringify = JSON.stringify;
 // explorerUrlFor = network => {
 //   let url;
 //   if (network === 'rinkeby') url = '';
@@ -241,7 +242,6 @@ const makeExplorerLink = (explorerUrl = ' ', obj) => {
 
 const hour = 60 * 60 * 1000;
 7;
-const stringify = JSON.stringify;
 /*
 
 https://www.ovhcloud.com/it/bare-metal/hosting/?xtor=SEC-13-GOO-[it_int_2020_ovh_baremetal_undefinite_sale_acquisition_srch_offensive()]-[496561848614]-S-[]&gclid=CjwKCAjwsNiIBhBdEiwAJK4khscOu7d1CLdsfI1qBuqc0alOdNY6SwO4pBmfVHZ8rZtrepmAPKawtxoCNt0QAvD_BwE

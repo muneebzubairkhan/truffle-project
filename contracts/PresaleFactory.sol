@@ -11,12 +11,6 @@ interface ISymbol {
 }
 
 contract PresaleFactory is Ownable {
-    bool public test = false;
-
-    function setTest(bool ok) external {
-        test = ok;
-    }
-
     mapping(uint256 => Presale) public presales;
     uint256 public lastPresaleIndex = 0;
     IERC20 public busd;
@@ -159,6 +153,6 @@ contract PresaleFactory is Ownable {
 
     function developers() public pure returns (string memory) {
         return
-            "This smart contract is Made in Pakistan by Muneeb Zubair Khan, Whatsapp +923014440289, Telegram @thinkmuneeb, https://shield-launchpad.netlify.app/ and this UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash. Discord timon#1213";
+            "This smart contract is Made in Pakistan by Muneeb Zubair Khan, Whatsapp +923014440289, Telegram @thinkmuneeb, https://shield-launchpad.netlify.app/ and this UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash. Discord timon#1213. We did it with TrippyBlue and the team from ShieldNet.";
     }
 }
