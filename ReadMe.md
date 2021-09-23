@@ -27,3 +27,11 @@ bsc address
 I neeed the contract to be verified on bsc scan
 
 i need it fast within 24 hours can u do it?
+
+### Commands
+    yarn
+    ganache-cli
+    truffle test
+
+### todo
+    * test for participants

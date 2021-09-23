@@ -8,15 +8,19 @@ import "./Locker.sol";
 contract Presale is Ownable {
     using SafeERC20 for IERC20;
 
+    // tokenX = token which people will buy from presale
     IERC20 public busd; // People will give BUSD or buyingToken and get tokenX in return
     IERC20 public tokenX; // People will buy tokenX
+    IERC20 public tokenToHold; // People hold this token to buy token X
     IERC20 public lpTokenX; // Owner of tokenX will lock lpTokenX to get their confidence
     Locker public tokenXLocker;
     Locker public lpTokenXLocker;
     uint256 public tokenXSold = 0;
     uint256 public rate; // 3 = 3 000 000 000 000 000 000, 0.3 = 3 00 000 000 000 000 000 // 0.3 busd = 1 TokenX
-    uint256 public amountTokenXToBuyTokenX;
+    uint256 public amountTokenToHold;
     uint256 public presaleClosedAt = type(uint256).max;
+    uint256 public participantsCount = 0;
+    mapping(address => bool) private isParticipant;
     uint8 public tier = 1;
     address public presaleEarningWallet;
     address public factory;
@@ -31,29 +35,31 @@ contract Presale is Ownable {
     event RateChanged(uint256 _newRate);
     event PresaleMediaLinksChanged(string _presaleMediaLinks);
 
-    event AmountTokenXToBuyTokenXChanged(uint256 _amountTokenXToBuyTokenX);
-    event OwnerTookLockedTokensBack(uint256 _tokens);
+    event AmountTokenToHoldChanged(uint256 _amountTokenToHold);
+    event UnlockedUnsoldTokens(uint256 _tokens);
     event PresaleAppliedToClosed(uint256 _presaleWillCloseAt);
 
     constructor(
         IERC20 _tokenX,
         IERC20 _lpTokenX,
+        IERC20 _tokenToHold,
         IERC20 _busd,
         uint256 _rate,
         address _presaleEarningWallet,
         bool _onlyWhitelistedAllowed,
-        uint256 _amountTokenXToBuyTokenX,
+        uint256 _amountTokenToHold,
         address[] memory _whitelistAddresses,
         string memory _presaleMediaLinks
     ) {
         tokenX = _tokenX;
         lpTokenX = _lpTokenX;
+        tokenToHold = _tokenToHold;
         busd = _busd;
         factory = msg.sender; // only trust those presales who address exist in factory contract // go to factory address and see presale address belong to that factory or not. use method: belongsToThisFactory
         rate = _rate;
         presaleEarningWallet = _presaleEarningWallet;
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
-        amountTokenXToBuyTokenX = _amountTokenXToBuyTokenX;
+        amountTokenToHold = _amountTokenToHold;
         presaleMediaLinks = _presaleMediaLinks;
 
         if (_onlyWhitelistedAllowed) {
@@ -77,7 +83,7 @@ contract Presale is Ownable {
             "Presale is not approved by the parent network."
         );
         require(
-            tokenX.balanceOf(msg.sender) >= amountTokenXToBuyTokenX,
+            tokenToHold.balanceOf(msg.sender) >= amountTokenToHold,
             "You need to hold tokens to buy them from presale."
         );
 
@@ -92,6 +98,12 @@ contract Presale is Ownable {
                 isWhitelisted[msg.sender],
                 "You should become whitelisted to continue."
             );
+        }
+
+        // count participants
+        if (!isParticipant[msg.sender]) {
+            isParticipant[msg.sender] = true;
+            participantsCount++;
         }
 
         tokenXSold += _tokens;
@@ -123,22 +135,19 @@ contract Presale is Ownable {
         }
     }
 
-    function onlyOwnerFunction_setRate(uint256 _rate) external onlyOwner {
-        rate = _rate;
-        emit RateChanged(_rate);
+
+    function onlyOwnerFunction_setAmountTokenToHold(uint256 _amountTokenToHold)
+        external
+        onlyOwner
+    {
+        amountTokenToHold = _amountTokenToHold;
+        emit AmountTokenToHoldChanged(_amountTokenToHold);
     }
 
-    function onlyOwnerFunction_setAmountTokenXToBuyTokenX(
-        uint256 _amountTokenXToBuyTokenX
-    ) external onlyOwner {
-        amountTokenXToBuyTokenX = _amountTokenXToBuyTokenX;
-        emit AmountTokenXToBuyTokenXChanged(_amountTokenXToBuyTokenX);
-    }
-
-    function onlyOwnerFunction_getLockedTokensBack() external onlyOwner {
+    function onlyOwnerFunction_UnlockUnsoldTokens() external onlyOwner {
         uint256 contractBalance = tokenX.balanceOf(address(this));
         tokenX.transfer(msg.sender, contractBalance);
-        emit OwnerTookLockedTokensBack(contractBalance);
+        emit UnlockedUnsoldTokens(contractBalance);
     }
 
     function onlyOwnerFunction_closePresale(uint8 _months) external onlyOwner {
@@ -208,7 +217,7 @@ contract Presale is Ownable {
         uints[6] = lpTokenXLocker.unlockTokensAtTime();
         uints[7] = tokenXSold;
         uints[8] = rate;
-        uints[9] = amountTokenXToBuyTokenX;
+        uints[9] = amountTokenToHold;
         uints[10] = presaleClosedAt;
         uints[11] = tier;
 

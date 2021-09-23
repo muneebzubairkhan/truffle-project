@@ -23,10 +23,11 @@ contract PresaleFactory is Ownable {
         transferOwnership(_parentCompany);
     }
 
-    /// @dev users can create an ICO for erc20 from this function
+    /// @notice users can create an ICO for erc20 from this function
+    /// @dev we used _tokens[] because solidity gives error of deep stack if we not use it
+    /// @param _tokens _tokens[0] is tokenX and _tokens[1] is lpTokenX and _tokens[2] is tokenToHold
     function createERC20Presale(
-        IERC20 _tokenX,
-        IERC20 _lpTokenX,
+        IERC20[] memory _tokens,
         uint256 _rate,
         uint256 _tokenXToLock,
         uint256 _lpTokenXToLock,
@@ -39,8 +40,9 @@ contract PresaleFactory is Ownable {
         string memory _presaleMediaLinks
     ) external {
         Presale presale = new Presale(
-            _tokenX,
-            _lpTokenX,
+            _tokens[0],
+            _tokens[1],
+            _tokens[2],
             busd,
             _rate,
             _presaleEarningWallet,
@@ -50,12 +52,12 @@ contract PresaleFactory is Ownable {
             _presaleMediaLinks
         );
         Locker tokenXLocker = new Locker(
-            _tokenX,
+            _tokens[0],
             _presaleEarningWallet,
             _unlockAtTime
         );
         Locker lpTokenXLocker = new Locker(
-            _lpTokenX,
+            _tokens[1],
             _presaleEarningWallet,
             _unlockAtTime
         );
@@ -66,9 +68,13 @@ contract PresaleFactory is Ownable {
         presale.setTokenXLocker(tokenXLocker);
         presale.setLpTokenXLocker(lpTokenXLocker);
 
-        _tokenX.transferFrom(msg.sender, address(presale), _tokenXToSell);
-        _tokenX.transferFrom(msg.sender, address(tokenXLocker), _tokenXToLock);
-        _lpTokenX.transferFrom(
+        _tokens[0].transferFrom(msg.sender, address(presale), _tokenXToSell);
+        _tokens[0].transferFrom(
+            msg.sender,
+            address(tokenXLocker),
+            _tokenXToLock
+        );
+        _tokens[1].transferFrom(
             msg.sender,
             address(lpTokenXLocker),
             _lpTokenXToLock
