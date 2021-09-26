@@ -1,4 +1,14 @@
+// Hi. If you have any questions or comments in this smart contract please let me know at:
+// Whatsapp +923014440289, Telegram @thinkmuneeb, discord: timon#1213, I'm Muneeb Zubair Khan
+//
+//
+// Smart Contract belong to this DAPP: https://shield-launchpad.netlify.app/ Made in Pakistan by Muneeb Zubair Khan
+// The UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash.
+// Project done in collaboration with TrippyBlue and ShieldNet Team.
+//
+//
 // SPDX-License-Identifier: MIT
+//
 pragma solidity ^0.8.7;
 import "./Presale.sol";
 
@@ -23,26 +33,26 @@ contract PresaleFactory is Ownable {
         transferOwnership(_parentCompany);
     }
 
-    // struct Box {
-    //     address tokenX;
-    //     address lpTokenX;
-    //     address tokenToHold;
-    //     uint256 rate;
-    //     uint256 tokenXToLock;
-    //     uint256 lpTokenXToLock;
-    //     uint256 tokenXToSell;
-    //     uint256 unlockAtTime;
-    //     uint256 amountTokenXToBuyTokenX;
-    //     uint256 hardcap;
-    //     uint256 softcap;
-    //     uint256 presaleOpenAt;
-    //     uint256 presaleCloseAt;
-    //     uint256 unlockTokensAt;
-    // }
+    struct Box {
+        address tokenX;
+        address lpTokenX;
+        address tokenToHold;
+        uint256 rate;
+        uint256 tokenXToLock;
+        uint256 lpTokenXToLock;
+        uint256 tokenXToSell;
+        uint256 unlockAtTime;
+        uint256 amountTokenXToBuyTokenX;
+        uint256 hardcap;
+        uint256 softcap;
+        uint256 presaleOpenAt;
+        uint256 presaleCloseAt;
+        uint256 unlockTokensAt;
+        uint256[] someArr;
+    }
 
     /// @notice users can create an ICO for erc20 from this function
     /// @dev we used _tokens[] because solidity gives error of deep stack if we not use it
-    /// @param _tokens _tokens[0] is tokenX and _tokens[1] is lpTokenX and _tokens[2] is tokenToHold
     /*
         _tokens
         _tokens[0] tokenX
@@ -62,6 +72,13 @@ contract PresaleFactory is Ownable {
         9 uint256 _presaleCloseAt,
         10 uint256 _unlockTokensAt,
     */
+
+    function B() external {}
+
+    function A() external {}
+
+    function checkBox(Box memory __) external {}
+
     function createERC20Presale(
         IERC20[] memory _tokens,
         uint256[] memory uints,
@@ -84,16 +101,16 @@ contract PresaleFactory is Ownable {
                 uints[8],
                 uints[9],
                 uints[10],
-                _onlyWhitelistedAllowed
-            ),
-            _whitelistAddresses,
-            _presaleMediaLinks
+                _onlyWhitelistedAllowed,
+                _whitelistAddresses,
+                _presaleMediaLinks
+            )
         );
 
-        // presale belongs to this factory
+        // set that this presale belongs to this factory
         belongsToThisFactory[address(presale)] = true;
 
-        // add presale to presales list
+        // add presale to the presales list
         presales[lastPresaleIndex++] = presale;
 
         _tokens[0].transferFrom(msg.sender, address(presale), uints[3]);
@@ -185,8 +202,8 @@ contract PresaleFactory is Ownable {
         return _presale.presaleMediaLinks();
     }
 
-    function developers() public pure returns (string memory) {
+    function AAA_developers() public pure returns (string memory) {
         return
-            "This smart contract is Made in Pakistan by Muneeb Zubair Khan, Whatsapp +923014440289, Telegram @thinkmuneeb, https://shield-launchpad.netlify.app/ and this UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash. Discord timon#1213. We did it with TrippyBlue and the team from ShieldNet.";
+            "Smart Contract belong to this DAPP: https://shield-launchpad.netlify.app/ Smart contract made in Pakistan by Muneeb Zubair Khan, Whatsapp +923014440289, Telegram @thinkmuneeb, The UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash. Discord timon#1213. Project done with TrippyBlue and ShieldNet Team.";
     }
 }

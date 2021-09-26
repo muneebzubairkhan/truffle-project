@@ -76,12 +76,7 @@ contract(
         // ................................token to hold
 
         [tokenX.address, lpToken.address, lpToken.address], // People will buy tokenX, People will give buyingToken or USDT and get tokenX in return
-        toWei(rate), // rate 0.2 busd = 1 tokenX, 20 BUSD= 100 Token X
-        toWei(100), // _tokenXToLock
-        toWei(100), // _lpTokenXToLock
-        toWei(100), // _tokenXToSell
-        0, // _unlockAtTime
-        toWei(0), // _amountTokenXToBuyTokenX
+        [toWei(rate), toWei(100), toWei(100), toWei(100), 0, toWei(0)],
         presaleEarningWallet, // presale owner
         false, //_onlyWhitelistedAllowed
         [presaleEarningWallet, tokenXOwner], // whitelist

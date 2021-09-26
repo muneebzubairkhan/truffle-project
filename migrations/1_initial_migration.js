@@ -60,7 +60,9 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
       tokenXAddress = '0x7eC6d1aEB55AE52364B0F6Ff47Ef4fe109eeC6eE';
       lpTokenXAddress = '0x57fed6fd1f0c3c37e133b886b6dc96c309da6648';
     } else {
-      new Error('Hey Bro, Please provide config here');
+      new Error(
+        'Hey Bro, Please provide config here like we did in above lines.',
+      );
     }
 
     busd = await ERC20Token.at(busdAddress);

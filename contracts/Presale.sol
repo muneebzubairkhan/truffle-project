@@ -1,4 +1,14 @@
+// Hi. If you have any questions or comments in this smart contract please let me know at:
+// Whatsapp +923014440289, Telegram @thinkmuneeb, discord: timon#1213, I'm Muneeb Zubair Khan
+//
+//
+// Smart Contract belong to this DAPP: https://shield-launchpad.netlify.app/ Made in Pakistan by Muneeb Zubair Khan
+// The UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash.
+// Project done in collaboration with TrippyBlue and ShieldNet Team.
+//
+//
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -54,6 +64,8 @@ contract Presale is Ownable {
         uint256 presaleCloseAt;
         uint256 unlockTokensAt;
         bool onlyWhitelistedAllowed;
+        address[] whitelistAddresses;
+        string presaleMediaLinks;
     }
 
     /*
@@ -71,11 +83,8 @@ contract Presale is Ownable {
         5 _presaleCloseAt,
         6 _unlockTokensAt,
     */
-    constructor(
-        Box memory __,
-        address[] memory _whitelistAddresses,
-        string memory _presaleMediaLinks
-    ) {
+
+    constructor(Box memory __) {
         tokenX = __.tokenX;
         lpTokenX = __.lpTokenX;
         tokenToHold = __.tokenToHold;
@@ -92,11 +101,11 @@ contract Presale is Ownable {
 
         onlyWhitelistedAllowed = __.onlyWhitelistedAllowed;
 
-        presaleMediaLinks = _presaleMediaLinks;
+        presaleMediaLinks = __.presaleMediaLinks;
 
         if (__.onlyWhitelistedAllowed) {
-            for (uint256 i = 0; i < _whitelistAddresses.length; i++) {
-                isWhitelisted[_whitelistAddresses[i]] = true;
+            for (uint256 i = 0; i < __.whitelistAddresses.length; i++) {
+                isWhitelisted[__.whitelistAddresses[i]] = true;
             }
         }
 
@@ -270,8 +279,8 @@ contract Presale is Ownable {
         return Ownable(factory).owner();
     }
 
-    function developers() public pure returns (string memory) {
+    function AAA_developers() public pure returns (string memory) {
         return
-            "This smart contract is Made in Pakistan by Muneeb Zubair Khan, Whatsapp +923014440289, Telegram @thinkmuneeb, https://shield-launchpad.netlify.app/ and this UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash. Discord timon#1213. We did it with TrippyBlue and the team from ShieldNet.";
+            "Smart Contract belong to this DAPP: https://shield-launchpad.netlify.app/ Smart contract made in Pakistan by Muneeb Zubair Khan, Whatsapp +923014440289, Telegram @thinkmuneeb, The UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash. Discord timon#1213. Project done with TrippyBlue and ShieldNet Team.";
     }
 }
