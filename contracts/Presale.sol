@@ -40,6 +40,22 @@ contract Presale is Ownable {
     event AmountTokenToHoldChanged(uint256 _amountTokenToHold);
     event UnlockedUnsoldTokens(uint256 _tokens);
 
+    struct Box {
+        IERC20 tokenX;
+        IERC20 lpTokenX;
+        IERC20 tokenToHold;
+        IERC20 busd;
+        address presaleEarningWallet;
+        uint256 hardcap;
+        uint256 softcap;
+        uint256 rate;
+        uint256 amountTokenToHold;
+        uint256 presaleOpenAt;
+        uint256 presaleCloseAt;
+        uint256 unlockTokensAt;
+        bool onlyWhitelistedAllowed;
+    }
+
     /*
         IERC20 _tokenX,
         IERC20 _lpTokenX,
@@ -56,44 +72,47 @@ contract Presale is Ownable {
         6 _unlockTokensAt,
     */
     constructor(
-        IERC20[4] memory _tokens,
-        address _presaleEarningWallet,
+        Box memory __,
         address[] memory _whitelistAddresses,
-        uint256[7] memory uints,
-        bool _onlyWhitelistedAllowed,
         string memory _presaleMediaLinks
     ) {
-        tokenX = _tokens[0];
-        lpTokenX = _tokens[1];
-        tokenToHold = _tokens[2];
-        busd = _tokens[3];
-        hardcap = uints[0];
-        softcap = uints[1];
+        tokenX = __.tokenX;
+        lpTokenX = __.lpTokenX;
+        tokenToHold = __.tokenToHold;
+        busd = __.busd;
         factory = msg.sender; // only trust those presales who address exist in factory contract // go to factory address and see presale address belong to that factory or not. use method: belongsToThisFactory
-        rate = uints[2];
-        presaleOpenAt = uints[4];
-        presaleCloseAt = uints[5];
 
-        presaleEarningWallet = _presaleEarningWallet;
-        onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
-        amountTokenToHold = uints[3];
+        hardcap = __.hardcap;
+        softcap = __.softcap;
+        rate = __.rate;
+        presaleOpenAt = __.presaleOpenAt;
+        presaleCloseAt = __.presaleCloseAt;
+        amountTokenToHold = __.amountTokenToHold;
+        presaleEarningWallet = __.presaleEarningWallet;
+
+        onlyWhitelistedAllowed = __.onlyWhitelistedAllowed;
+
         presaleMediaLinks = _presaleMediaLinks;
 
-        if (_onlyWhitelistedAllowed) {
+        if (__.onlyWhitelistedAllowed) {
             for (uint256 i = 0; i < _whitelistAddresses.length; i++) {
                 isWhitelisted[_whitelistAddresses[i]] = true;
             }
         }
 
-        tokenXLocker = new Locker(_tokens[0], _presaleEarningWallet, uints[6]);
-
-        lpTokenXLocker = new Locker(
-            _tokens[1],
-            _presaleEarningWallet,
-            uints[6]
+        tokenXLocker = new Locker(
+            __.tokenX,
+            __.presaleEarningWallet,
+            __.unlockTokensAt
         );
 
-        transferOwnership(_presaleEarningWallet);
+        lpTokenXLocker = new Locker(
+            __.lpTokenX,
+            __.presaleEarningWallet,
+            __.unlockTokensAt
+        );
+
+        transferOwnership(__.presaleEarningWallet);
     }
 
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
@@ -166,7 +185,6 @@ contract Presale is Ownable {
         emit UnlockedUnsoldTokens(contractBalance);
     }
 
-    
     function onlyParentCompanyFunction_editPresaleIsApproved(
         bool _presaleIsApproved
     ) public {

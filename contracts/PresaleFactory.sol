@@ -23,6 +23,23 @@ contract PresaleFactory is Ownable {
         transferOwnership(_parentCompany);
     }
 
+    // struct Box {
+    //     address tokenX;
+    //     address lpTokenX;
+    //     address tokenToHold;
+    //     uint256 rate;
+    //     uint256 tokenXToLock;
+    //     uint256 lpTokenXToLock;
+    //     uint256 tokenXToSell;
+    //     uint256 unlockAtTime;
+    //     uint256 amountTokenXToBuyTokenX;
+    //     uint256 hardcap;
+    //     uint256 softcap;
+    //     uint256 presaleOpenAt;
+    //     uint256 presaleCloseAt;
+    //     uint256 unlockTokensAt;
+    // }
+
     /// @notice users can create an ICO for erc20 from this function
     /// @dev we used _tokens[] because solidity gives error of deep stack if we not use it
     /// @param _tokens _tokens[0] is tokenX and _tokens[1] is lpTokenX and _tokens[2] is tokenToHold
@@ -54,19 +71,22 @@ contract PresaleFactory is Ownable {
         string memory _presaleMediaLinks
     ) external {
         Presale presale = new Presale(
-            [_tokens[0], _tokens[1], _tokens[2], busd],
-            _presaleEarningWallet,
-            _whitelistAddresses,
-            [
+            Presale.Box(
+                _tokens[0],
+                _tokens[1],
+                _tokens[2],
+                busd,
+                _presaleEarningWallet,
                 uints[6],
                 uints[7],
                 uints[0],
                 uints[5],
                 uints[8],
                 uints[9],
-                uints[10]
-            ],
-            _onlyWhitelistedAllowed,
+                uints[10],
+                _onlyWhitelistedAllowed
+            ),
+            _whitelistAddresses,
             _presaleMediaLinks
         );
 
