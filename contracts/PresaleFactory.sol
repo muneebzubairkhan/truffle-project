@@ -34,76 +34,50 @@ contract PresaleFactory is Ownable {
     }
 
     struct Box {
-        address tokenX;
-        address lpTokenX;
-        address tokenToHold;
+        IERC20 tokenX;
+        IERC20 lpTokenX;
+        IERC20 tokenToHold;
+        //
+        address presaleEarningWallet;
+        //
         uint256 rate;
         uint256 tokenXToLock;
         uint256 lpTokenXToLock;
-        uint256 tokenXToSell;
         uint256 unlockAtTime;
-        uint256 amountTokenXToBuyTokenX;
+        uint256 amountTokenToHold;
         uint256 hardcap;
         uint256 softcap;
         uint256 presaleOpenAt;
         uint256 presaleCloseAt;
         uint256 unlockTokensAt;
-        uint256[] someArr;
+        //
+        bool onlyWhitelistedAllowed;
+        //
+        address[] whitelistAddresses;
+        //
+        string presaleMediaLinks;
     }
 
     /// @notice users can create an ICO for erc20 from this function
-    /// @dev we used _tokens[] because solidity gives error of deep stack if we not use it
-    /*
-        _tokens
-        _tokens[0] tokenX
-        _tokens[1] lpTokenX
-        _tokens[2] tokenToHold
-
-        uints:
-        0 uint256 _rate,
-        1 uint256 _tokenXToLock,
-        2 uint256 _lpTokenXToLock,
-        3 uint256 _tokenXToSell,
-        4 uint256 _unlockAtTime,
-        5 uint256 _amountTokenXToBuyTokenX,
-        6 uint256 _hardcap,
-        7 uint256 _softcap,
-        8 uint256 _presaleOpenAt,
-        9 uint256 _presaleCloseAt,
-        10 uint256 _unlockTokensAt,
-    */
-
-    function B() external {}
-
-    function A() external {}
-
-    function checkBox(Box memory __) external {}
-
-    function createERC20Presale(
-        IERC20[] memory _tokens,
-        uint256[] memory uints,
-        address _presaleEarningWallet,
-        bool _onlyWhitelistedAllowed,
-        address[] memory _whitelistAddresses,
-        string memory _presaleMediaLinks
-    ) external {
+    /// @dev we used struct Box because solidity gives error of deep stack if we not use it
+    function createERC20Presale(Box memory __) external {
         Presale presale = new Presale(
             Presale.Box(
-                _tokens[0],
-                _tokens[1],
-                _tokens[2],
+                __.tokenX,
+                __.lpTokenX,
+                __.tokenToHold,
                 busd,
-                _presaleEarningWallet,
-                uints[6],
-                uints[7],
-                uints[0],
-                uints[5],
-                uints[8],
-                uints[9],
-                uints[10],
-                _onlyWhitelistedAllowed,
-                _whitelistAddresses,
-                _presaleMediaLinks
+                __.presaleEarningWallet,
+                __.hardcap,
+                __.softcap,
+                __.rate,
+                __.amountTokenToHold,
+                __.presaleOpenAt,
+                __.presaleCloseAt,
+                __.unlockTokensAt,
+                __.onlyWhitelistedAllowed,
+                __.whitelistAddresses,
+                __.presaleMediaLinks
             )
         );
 
@@ -113,20 +87,25 @@ contract PresaleFactory is Ownable {
         // add presale to the presales list
         presales[lastPresaleIndex++] = presale;
 
-        _tokens[0].transferFrom(msg.sender, address(presale), uints[3]);
-        _tokens[0].transferFrom(
+        __.tokenX.transferFrom(msg.sender, address(presale), __.hardcap);
+        __.tokenX.transferFrom(
             msg.sender,
             address(presale.tokenXLocker()),
-            uints[1]
+            __.tokenXToLock
         );
-        _tokens[1].transferFrom(
+        __.lpTokenX.transferFrom(
             msg.sender,
             address(presale.lpTokenXLocker()),
-            uints[2]
+            __.lpTokenXToLock
         );
     }
 
+    ////////////////////////////////////////////////////////////////
+    //                  READ CONTRACT                             //
+    ////////////////////////////////////////////////////////////////
+
     /// @dev returns presales address and their corresponding token addresses
+    /// token addresses needed to get token name in multicall
     function getSelectedItems(
         Presale[] memory tempPresales, // search results temp presales list
         uint256 selectedCount

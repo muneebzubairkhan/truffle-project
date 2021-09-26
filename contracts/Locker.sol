@@ -32,7 +32,7 @@ contract Locker is Ownable {
     constructor(
         IERC20 _tokenX,
         address _walletOwner,
-        uint256 _unlockTokensAtTime
+            uint256 _unlockTokensAtTime
     ) {
         tokenX = _tokenX;
         walletOwner = _walletOwner;

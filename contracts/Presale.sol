@@ -68,22 +68,6 @@ contract Presale is Ownable {
         string presaleMediaLinks;
     }
 
-    /*
-        IERC20 _tokenX,
-        IERC20 _lpTokenX,
-        IERC20 _tokenToHold,
-        IERC20 _busd,
-
-        uint[] uints:
-        0 _hardcap,
-        1 _softcap,
-        2 _rate,
-        3 _amountTokenToHold,
-        4 _presaleOpenAt,
-        5 _presaleCloseAt,
-        6 _unlockTokensAt,
-    */
-
     constructor(Box memory __) {
         tokenX = __.tokenX;
         lpTokenX = __.lpTokenX;
