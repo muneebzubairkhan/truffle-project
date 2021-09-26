@@ -15,10 +15,16 @@ contract Presale is Ownable {
     IERC20 public lpTokenX; // Owner of tokenX will lock lpTokenX to get their confidence
     Locker public tokenXLocker;
     Locker public lpTokenXLocker;
+
+    uint256 public softcap;
+    uint256 public hardcap;
+
     uint256 public tokenXSold = 0;
     uint256 public rate; // 3 = 3 000 000 000 000 000 000, 0.3 = 3 00 000 000 000 000 000 // 0.3 busd = 1 TokenX
     uint256 public amountTokenToHold;
-    uint256 public presaleClosedAt = type(uint256).max;
+    uint256 public presaleOpenAt;
+    uint256 public presaleCloseAt;
+
     uint256 public participantsCount = 0;
     mapping(address => bool) private isParticipant;
     uint8 public tier = 1;
@@ -30,36 +36,47 @@ contract Presale is Ownable {
     bool public onlyWhitelistedAllowed;
     bool public presaleIsBlacklisted = false;
     bool public presaleIsApproved = false;
-    bool public presaleAppliedForClosing = false;
-
-    event RateChanged(uint256 _newRate);
-    event PresaleMediaLinksChanged(string _presaleMediaLinks);
 
     event AmountTokenToHoldChanged(uint256 _amountTokenToHold);
     event UnlockedUnsoldTokens(uint256 _tokens);
-    event PresaleAppliedToClosed(uint256 _presaleWillCloseAt);
 
-    constructor(
+    /*
         IERC20 _tokenX,
         IERC20 _lpTokenX,
         IERC20 _tokenToHold,
         IERC20 _busd,
-        uint256 _rate,
+
+        uint[] uints:
+        0 _hardcap,
+        1 _softcap,
+        2 _rate,
+        3 _amountTokenToHold,
+        4 _presaleOpenAt,
+        5 _presaleCloseAt,
+        6 _unlockTokensAt,
+    */
+    constructor(
+        IERC20[4] memory _tokens,
         address _presaleEarningWallet,
-        bool _onlyWhitelistedAllowed,
-        uint256 _amountTokenToHold,
         address[] memory _whitelistAddresses,
+        uint256[7] memory uints,
+        bool _onlyWhitelistedAllowed,
         string memory _presaleMediaLinks
     ) {
-        tokenX = _tokenX;
-        lpTokenX = _lpTokenX;
-        tokenToHold = _tokenToHold;
-        busd = _busd;
+        tokenX = _tokens[0];
+        lpTokenX = _tokens[1];
+        tokenToHold = _tokens[2];
+        busd = _tokens[3];
+        hardcap = uints[0];
+        softcap = uints[1];
         factory = msg.sender; // only trust those presales who address exist in factory contract // go to factory address and see presale address belong to that factory or not. use method: belongsToThisFactory
-        rate = _rate;
+        rate = uints[2];
+        presaleOpenAt = uints[4];
+        presaleCloseAt = uints[5];
+
         presaleEarningWallet = _presaleEarningWallet;
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
-        amountTokenToHold = _amountTokenToHold;
+        amountTokenToHold = uints[3];
         presaleMediaLinks = _presaleMediaLinks;
 
         if (_onlyWhitelistedAllowed) {
@@ -67,6 +84,14 @@ contract Presale is Ownable {
                 isWhitelisted[_whitelistAddresses[i]] = true;
             }
         }
+
+        tokenXLocker = new Locker(_tokens[0], _presaleEarningWallet, uints[6]);
+
+        lpTokenXLocker = new Locker(
+            _tokens[1],
+            _presaleEarningWallet,
+            uints[6]
+        );
 
         transferOwnership(_presaleEarningWallet);
     }
@@ -77,7 +102,7 @@ contract Presale is Ownable {
             !presaleIsBlacklisted,
             "Presale is rejected by the parent network."
         );
-        require(block.timestamp < presaleClosedAt, "Presale is closed.");
+        require(block.timestamp < presaleCloseAt, "Presale is closed.");
         require(
             presaleIsApproved,
             "Presale is not approved by the parent network."
@@ -117,14 +142,6 @@ contract Presale is Ownable {
         onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
     }
 
-    function ownerFunction_editOnlyWhitelistedAllowed(
-        string memory _presaleMediaLinks
-    ) external onlyOwner {
-        presaleMediaLinks = _presaleMediaLinks;
-
-        emit PresaleMediaLinksChanged(_presaleMediaLinks);
-    }
-
     /// @dev pass true to add to whitelist, pass false to remove from whitelist
     function ownerFunction_editWhitelist(
         address[] memory _addresses,
@@ -134,7 +151,6 @@ contract Presale is Ownable {
             isWhitelisted[_addresses[i]] = _approve;
         }
     }
-
 
     function onlyOwnerFunction_setAmountTokenToHold(uint256 _amountTokenToHold)
         external
@@ -150,20 +166,7 @@ contract Presale is Ownable {
         emit UnlockedUnsoldTokens(contractBalance);
     }
 
-    function onlyOwnerFunction_closePresale(uint8 _months) external onlyOwner {
-        require(
-            _months >= 1 && _months <= 3,
-            "Presale closing period can be 1 to 3 months."
-        );
-        require(
-            !presaleAppliedForClosing,
-            "Presale is already applied for closing."
-        );
-        presaleAppliedForClosing = true;
-        presaleClosedAt = block.timestamp + _months * 30 days;
-        emit PresaleAppliedToClosed(presaleClosedAt);
-    }
-
+    
     function onlyParentCompanyFunction_editPresaleIsApproved(
         bool _presaleIsApproved
     ) public {
@@ -192,6 +195,18 @@ contract Presale is Ownable {
         tier = _tier;
     }
 
+    ////////////////////////////////////////////////////////////////
+    //            ONLY PARENT COMPANY FUNCTIONS                   //
+    ////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////
+    //                  READ CONTRACT                             //
+    ////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////
+    //                  WRITE CONTRACT                            //
+    ////////////////////////////////////////////////////////////////
+
     function getPresaleDetails()
         external
         view
@@ -218,33 +233,27 @@ contract Presale is Ownable {
         uints[7] = tokenXSold;
         uints[8] = rate;
         uints[9] = amountTokenToHold;
-        uints[10] = presaleClosedAt;
+        uints[10] = presaleCloseAt;
         uints[11] = tier;
 
-        bool[] memory bools = new bool[](7);
+        bool[] memory bools = new bool[](6);
         bools[0] = presaleIsBlacklisted;
         bools[1] = presaleIsApproved;
-        bools[2] = presaleAppliedForClosing;
 
-        bools[3] = tokenXLocker.unlockTokensRequestMade();
-        bools[4] = tokenXLocker.unlockTokensRequestAccepted();
-        bools[5] = lpTokenXLocker.unlockTokensRequestMade();
-        bools[6] = lpTokenXLocker.unlockTokensRequestAccepted();
+        bools[2] = tokenXLocker.unlockTokensRequestMade();
+        bools[3] = tokenXLocker.unlockTokensRequestAccepted();
+        bools[4] = lpTokenXLocker.unlockTokensRequestMade();
+        bools[5] = lpTokenXLocker.unlockTokensRequestAccepted();
 
         return (addresses, uints, bools);
     }
 
-    function setTokenXLocker(Locker _tokenXLocker) external {
-        require(msg.sender == factory, "Only factory can change locker");
-        tokenXLocker = _tokenXLocker;
-    }
-
-    function setLpTokenXLocker(Locker _lpTokenXLocker) external {
-        require(msg.sender == factory, "Only factory can change locker");
-        lpTokenXLocker = _lpTokenXLocker;
-    }
-
     function parentCompany() public view returns (address) {
         return Ownable(factory).owner();
+    }
+
+    function developers() public pure returns (string memory) {
+        return
+            "This smart contract is Made in Pakistan by Muneeb Zubair Khan, Whatsapp +923014440289, Telegram @thinkmuneeb, https://shield-launchpad.netlify.app/ and this UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash. Discord timon#1213. We did it with TrippyBlue and the team from ShieldNet.";
     }
 }

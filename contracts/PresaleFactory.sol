@@ -26,58 +26,66 @@ contract PresaleFactory is Ownable {
     /// @notice users can create an ICO for erc20 from this function
     /// @dev we used _tokens[] because solidity gives error of deep stack if we not use it
     /// @param _tokens _tokens[0] is tokenX and _tokens[1] is lpTokenX and _tokens[2] is tokenToHold
+    /*
+        _tokens
+        _tokens[0] tokenX
+        _tokens[1] lpTokenX
+        _tokens[2] tokenToHold
+
+        uints:
+        0 uint256 _rate,
+        1 uint256 _tokenXToLock,
+        2 uint256 _lpTokenXToLock,
+        3 uint256 _tokenXToSell,
+        4 uint256 _unlockAtTime,
+        5 uint256 _amountTokenXToBuyTokenX,
+        6 uint256 _hardcap,
+        7 uint256 _softcap,
+        8 uint256 _presaleOpenAt,
+        9 uint256 _presaleCloseAt,
+        10 uint256 _unlockTokensAt,
+    */
     function createERC20Presale(
         IERC20[] memory _tokens,
-        uint256 _rate,
-        uint256 _tokenXToLock,
-        uint256 _lpTokenXToLock,
-        uint256 _tokenXToSell,
-        uint256 _unlockAtTime,
-        uint256 _amountTokenXToBuyTokenX,
+        uint256[] memory uints,
         address _presaleEarningWallet,
         bool _onlyWhitelistedAllowed,
         address[] memory _whitelistAddresses,
         string memory _presaleMediaLinks
     ) external {
         Presale presale = new Presale(
-            _tokens[0],
-            _tokens[1],
-            _tokens[2],
-            busd,
-            _rate,
+            [_tokens[0], _tokens[1], _tokens[2], busd],
             _presaleEarningWallet,
-            _onlyWhitelistedAllowed,
-            _amountTokenXToBuyTokenX,
             _whitelistAddresses,
+            [
+                uints[6],
+                uints[7],
+                uints[0],
+                uints[5],
+                uints[8],
+                uints[9],
+                uints[10]
+            ],
+            _onlyWhitelistedAllowed,
             _presaleMediaLinks
         );
-        Locker tokenXLocker = new Locker(
-            _tokens[0],
-            _presaleEarningWallet,
-            _unlockAtTime
-        );
-        Locker lpTokenXLocker = new Locker(
-            _tokens[1],
-            _presaleEarningWallet,
-            _unlockAtTime
-        );
 
+        // presale belongs to this factory
         belongsToThisFactory[address(presale)] = true;
+
+        // add presale to presales list
         presales[lastPresaleIndex++] = presale;
 
-        presale.setTokenXLocker(tokenXLocker);
-        presale.setLpTokenXLocker(lpTokenXLocker);
-
-        _tokens[0].transferFrom(msg.sender, address(presale), _tokenXToSell);
+        _tokens[0].transferFrom(msg.sender, address(presale), uints[3]);
         _tokens[0].transferFrom(
             msg.sender,
-            address(tokenXLocker),
-            _tokenXToLock
+            address(presale.tokenXLocker()),
+            uints[1]
         );
         _tokens[1].transferFrom(
             msg.sender,
-            address(lpTokenXLocker),
-            _lpTokenXToLock
+            address(presale.lpTokenXLocker()),
+            uints[2]
         );
     }
 

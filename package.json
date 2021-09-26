@@ -8,21 +8,21 @@
   },
   "scripts": {
     "start": "truffle test",
-    "deploy": "yarn startBscTestnet && yarn beep2",
-    "ganache-cli": "ganache-cli",
-    "migrate": "truffle migrate --reset && yarn beep2",
-    "compile": "truffle compile",
-    "test": "truffle test",
+    "deploy": "yarn startBscTestnet && yarn beep1",
+    "g": "ganache-cli",
+    "m": "truffle migrate --reset && yarn beep1",
+    "c": "truffle compile",
+    "t": "truffle test",
     "____": "_____",
     "b": "yarn b",
-    "beep1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
+    "beep1": "yarn b1 && yarn b1",
+    "b1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
     "beep2": "start wmplayer \"C:\\Windows\\Media\\Alarm10.wav\" && timeout 5 && taskkill /im wmplayer.exe",
     "_____": "_____",
     "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify %npm_package_selectedContracts% --network bscMainnet",
     "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify %npm_package_selectedContracts% --network rinkeby",
     "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify %npm_package_selectedContracts% --network mainnet",
-    "verify": "truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
     "startInnovate": "truffle migrate --network %(grep DEPLOY_NETWORK .env)% --reset && truffle run verify %npm_package_selectedContracts% --network $(grep DEPLOY_NETWORK .env)"
   },
   "selectedContracts": "Migrations Presale PresaleFactory Locker",
@@ -36,6 +36,7 @@
     "dotenv": "^10.0.0",
     "eth-gas-reporter": "^0.2.22",
     "hdwallet": "^0.7.3",
-    "truffle-plugin-verify": "^0.5.8"
+    "truffle-plugin-verify": "^0.5.8",
+    "web3-utils": "^1.5.3"
   }
 }

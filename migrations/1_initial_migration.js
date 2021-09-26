@@ -11,7 +11,9 @@ const Locker = artifacts.require('Locker');
 const MAX_INT =
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
+const { toWei } = require('web3-utils');
 const networksConfig = require('../truffle-config');
+const { makeHelperCodeForUIDev } = require('./helper');
 
 module.exports = async (deployer, network, accounts) => {
   // if (network === "development") return;
@@ -68,19 +70,19 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
 
   // const erc20TokenFactory = await deployer.deploy(ERC20TokenFactory);
 
-  const presale = await deployer.deploy(
-    Presale,
-    (_tokenX_ = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'),
-    (_lpTokenX_ = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'),
-    (_tokenToHold_ = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'),
-    busd.address,
-    (_rate = toWei('0.2')),
-    (_walletOwner = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
-    (_onlyWhitelistedAllowed = false),
-    (_amountTokenXToBuyTokenX = toWei('0')),
-    [addr1, addr2, '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'],
-    socialMedia + socialMedia,
-  );
+  // const presale = await deployer.deploy(
+  //   Presale,
+  //   (_tokenX_ = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'),
+  //   (_lpTokenX_ = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'),
+  //   (_tokenToHold_ = '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'),
+  //   busd.address,
+  //   (_rate = toWei('0.2')),
+  //   (_walletOwner = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
+  //   (_onlyWhitelistedAllowed = false),
+  //   (_amountTokenXToBuyTokenX = toWei('0')),
+  //   [addr1, addr2, '0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'],
+  //   socialMedia + socialMedia,
+  // );
 
   const presaleFactory = await deployer.deploy(
     PresaleFactory,
@@ -88,60 +90,21 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
     busd.address,
   );
 
-  if (!(network === 'bscMainnet' || network === 'mainnet')) {
-    await makePresaleFromFactoryForTesting(presaleFactory, tokenX, lpTokenX);
-    await makePresaleFromFactoryForTesting(presaleFactory, lpTokenX, tokenX);
+  // if (!(network === 'bscMainnet' || network === 'mainnet')) {
+  //   await makePresaleFromFactoryForTesting(presaleFactory, tokenX, lpTokenX);
+  //   await makePresaleFromFactoryForTesting(presaleFactory, lpTokenX, tokenX);
 
-    const presaleAddress = await presaleFactory.presales(0);
-    const presale = await Presale.at(presaleAddress);
-    await presale.onlyParentCompanyFunction_editPresaleIsApproved(true);
-  }
+  //   const presaleAddress = await presaleFactory.presales(0);
+  //   const presale = await Presale.at(presaleAddress);
+  //   await presale.onlyParentCompanyFunction_editPresaleIsApproved(true);
+  // }
 
-  // 100% 11.26am
-  // 75% 12.26pm
-  const locker = await deployer.deploy(Locker, busd.address, owner, Date.now());
-
-  // generate some helper links and code and save in a file
-  // if (network !== 'development')
-  {
-    const fs = require('fs');
-    let res = `// ${up(network)}:\n`;
-
-    // console.log({ networksConfig });
-
-    // console.log(
-    //   'networksConfig.networks[network]: ',
-    //   networksConfig.networks[network],
-    // );
-
-    const { explorerUrl, web3Provider } = networksConfig.networks[network];
-
-    if (network !== 'development')
-      console.log({
-        explorerUrl,
-        web3Provider,
-      });
-
-    res += makeExplorerLink(explorerUrl, {
-      busd,
-      tokenX,
-      lpTokenX,
-      presale,
-      presaleFactory,
-      locker,
-    });
-    res += '//\n//=========================\n\n';
-    res += makeContractObjects(web3Provider, {
-      busd,
-      tokenX,
-      lpTokenX,
-      presale,
-      presaleFactory,
-      locker,
-    });
-
-    fs.writeFile('smart-contracts.js', res, console.log);
-  }
+  makeHelperCodeForUIDev(network, {
+    busd,
+    tokenX,
+    lpTokenX,
+    presaleFactory,
+  });
 };
 
 const makePresaleFromFactoryForTesting = async (
@@ -153,7 +116,6 @@ const makePresaleFromFactoryForTesting = async (
   await lpTokenX.approve(presaleFactory.address, MAX_INT);
 
   const truncNum = n => Number(Math.trunc(n));
-  // console.log('truncNum: ', truncNum(Date.now() / 1000));
 
   await presaleFactory.createERC20Presale(
     // ................................token to hold
@@ -175,76 +137,8 @@ const delimitter = '@$@L';
 const socialMedia = `https://www.facebook.com/muneeb.qureshi.50951${delimitter}https://twitter.com/muneeb_butt9?lang=en${delimitter}https://www.instagram.com/muneeb_butt/?hl=en${delimitter}https://docs.google.com/document/d/1_buydr48_P5PSzLc7d1i5DqXA7jpn5dZVNEP_42Birs/edit`;
 // const rinkeby = async (deployer, accounts) => {};
 
-const ethMainnet = async deployer => {};
-
-const toWei = web3.utils.toWei;
-
-// capitalizeFirstLetter
-const up = s => s.charAt(0).toUpperCase() + s.slice(1);
-
-// send variable in input as {someVariable}
-// obj is variables object (it contains variables)
-const makeContractObjects = (web3Provider, obj) => {
-  const boiledWeb3 = `
-  // if you want to do only get calls then you can use defaultWeb3.
-
-  import Web3 from 'web3';
-  
-  export const defaultWeb3 = new Web3(
-    '${web3Provider}'
-  );
-  
-  `;
-
-  return (
-    boiledWeb3 +
-    Object.keys(obj)
-      .map(varName =>
-        boil(varName, stringify(obj[varName].abi), obj[varName].address),
-      )
-      .join('\n\n')
-  );
-};
-
-const boil = (varName, abi, address) =>
-  `
-  export const ${varName}Address = '${address}';
-  export const ${varName}Abi = JSON.parse(
-    '${abi}'
-  );
-  export const getContract${up(
-    varName,
-  )} = (address = ${varName}Address, web3 = defaultWeb3) => 
-    new web3.eth.Contract(
-      ${varName}Abi, address
-    );
-  `;
-
-const makeExplorerLink = (explorerUrl = ' ', obj) => {
-  const vars = Object.keys(obj);
-
-  let data = '';
-  vars.map(contractName => {
-    data += `// ${up(contractName)} ${explorerUrl}${
-      obj[contractName].address
-    }\n`;
-  });
-
-  return data;
-};
-
-const stringify = JSON.stringify;
-// explorerUrlFor = network => {
-//   let url;
-//   if (network === 'rinkeby') url = '';
-//   else if (network === 'rinkeby') url = 'https://rinkeby.etherscan.io/address/';
-//   else if (network === 'rinkeby') url = 'https://rinkeby.etherscan.io/address/';
-//   else if (network === 'rinkeby') url = 'https://rinkeby.etherscan.io/address/';
-//   else if (network === 'rinkeby') url = 'https://rinkeby.etherscan.io/address/';
-// };
-
-const hour = 60 * 60 * 1000;
-7;
+// 94% 8.21am
+//
 /*
 
 https://www.ovhcloud.com/it/bare-metal/hosting/?xtor=SEC-13-GOO-[it_int_2020_ovh_baremetal_undefinite_sale_acquisition_srch_offensive()]-[496561848614]-S-[]&gclid=CjwKCAjwsNiIBhBdEiwAJK4khscOu7d1CLdsfI1qBuqc0alOdNY6SwO4pBmfVHZ8rZtrepmAPKawtxoCNt0QAvD_BwE
@@ -252,4 +146,3 @@ https://www.ovhcloud.com/it/bare-metal/hosting/?xtor=SEC-13-GOO-[it_int_2020_ovh
 */
 
 // .map( () => { () }) I will remove these braces in future
-// done: (todo later improve it, i.e take explorer as input)
