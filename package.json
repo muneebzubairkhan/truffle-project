@@ -10,7 +10,7 @@
     "start": "truffle test",
     "deploy": "yarn startBscTestnet && yarn beep1",
     "g": "ganache-cli",
-    "m": "truffle migrate --reset && yarn beep1",
+    "m": "truffle migrate --reset && yarn b",
     "c": "truffle compile",
     "t": "truffle test",
     "____": "_____",
