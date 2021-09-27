@@ -128,7 +128,7 @@ const makePresaleFromFactoryForTesting = async (
     (_tokenXToSell_ = toWei('12.33')), // hard cap
     (_unlockAtTime_ = truncNum(Date.now() / 1000)),
     (_amountTokenXToBuyTokenX_ = '0'),
-    (_presaleEarningWallet_ = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
+    (_presaleOwner_ = '0xc18E78C0F67A09ee43007579018b2Db091116B4C'),
     (_onlyWhitelistedAllowed_ = false),
     ['0x95FB36223A312c7fB3Bb05415b1D85771A781Db2'],
     socialMedia,

@@ -38,23 +38,19 @@ contract PresaleFactory is Ownable {
         IERC20 lpTokenX;
         IERC20 tokenToHold;
         //
-        address presaleEarningWallet;
-        //
         uint256 rate;
-        uint256 tokenXToLock;
-        uint256 lpTokenXToLock;
-        uint256 unlockAtTime;
-        uint256 amountTokenToHold;
         uint256 hardcap;
         uint256 softcap;
+        uint256 amountTokenToHold;
         uint256 presaleOpenAt;
         uint256 presaleCloseAt;
         uint256 unlockTokensAt;
         //
+        uint256 tokenXToLock;
+        uint256 lpTokenXToLock;
+        //
         bool onlyWhitelistedAllowed;
-        //
         address[] whitelistAddresses;
-        //
         string presaleMediaLinks;
     }
 
@@ -67,10 +63,10 @@ contract PresaleFactory is Ownable {
                 __.lpTokenX,
                 __.tokenToHold,
                 busd,
-                __.presaleEarningWallet,
+                msg.sender, // the person who is creating this presale is the owner of this presale
+                __.rate,
                 __.hardcap,
                 __.softcap,
-                __.rate,
                 __.amountTokenToHold,
                 __.presaleOpenAt,
                 __.presaleCloseAt,

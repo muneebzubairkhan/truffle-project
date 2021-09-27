@@ -8,7 +8,7 @@ contract(
     _,
     tokenXOwner, // any token owner who wants to launch presale for their token
     busdOwner,
-    presaleEarningWallet,
+    presaleOwner,
     client, // this person will buy token X
     parentCompany, // the company who provides the services of launchpad
   ]) => {
@@ -71,16 +71,29 @@ contract(
       await tokenX.approve(presaleFactory.address, MAX_INT, {
         from: tokenXOwner,
       });
+
       const rate = 0.2;
       await presaleFactory.createERC20Presale(
-        // ................................token to hold
-
-        [tokenX.address, lpToken.address, lpToken.address], // People will buy tokenX, People will give buyingToken or USDT and get tokenX in return
-        [toWei(rate), toWei(100), toWei(100), toWei(100), 0, toWei(0)],
-        presaleEarningWallet, // presale owner
-        false, //_onlyWhitelistedAllowed
-        [presaleEarningWallet, tokenXOwner], // whitelist
-        socialMedia + socialMedia,
+        [
+          tokenX.address,
+          lpToken.address,
+          lpToken.address, // tokenToHold,
+          //
+          toWei(rate),
+          toWei(100), // hardcap
+          toWei(100), // softcap
+          toWei(0), // amountTokenToHold
+          0, // presale open at
+          MAX_INT, // presale close at
+          0, // unlockTokensAt
+          //
+          toWei(0), // tokenXToLock
+          toWei(0), // lpTokenXToLock
+          //
+          false,
+          [presaleOwner, tokenXOwner],
+          'a',
+        ],
         {
           from: tokenXOwner,
         },

@@ -38,7 +38,6 @@ contract Presale is Ownable {
     uint256 public participantsCount = 0;
     mapping(address => bool) private isParticipant;
     uint8 public tier = 1;
-    address public presaleEarningWallet;
     address public factory;
     string public presaleMediaLinks; // tokenX owner will give his social media, photo, driving liscense images links.
 
@@ -55,14 +54,17 @@ contract Presale is Ownable {
         IERC20 lpTokenX;
         IERC20 tokenToHold;
         IERC20 busd;
-        address presaleEarningWallet;
+        //
+        address presaleOwner;
+        //
+        uint256 rate;
         uint256 hardcap;
         uint256 softcap;
-        uint256 rate;
         uint256 amountTokenToHold;
         uint256 presaleOpenAt;
         uint256 presaleCloseAt;
         uint256 unlockTokensAt;
+        //
         bool onlyWhitelistedAllowed;
         address[] whitelistAddresses;
         string presaleMediaLinks;
@@ -81,7 +83,6 @@ contract Presale is Ownable {
         presaleOpenAt = __.presaleOpenAt;
         presaleCloseAt = __.presaleCloseAt;
         amountTokenToHold = __.amountTokenToHold;
-        presaleEarningWallet = __.presaleEarningWallet;
 
         onlyWhitelistedAllowed = __.onlyWhitelistedAllowed;
 
@@ -95,17 +96,17 @@ contract Presale is Ownable {
 
         tokenXLocker = new Locker(
             __.tokenX,
-            __.presaleEarningWallet,
+            __.presaleOwner,
             __.unlockTokensAt
         );
 
         lpTokenXLocker = new Locker(
             __.lpTokenX,
-            __.presaleEarningWallet,
+            __.presaleOwner,
             __.unlockTokensAt
         );
 
-        transferOwnership(__.presaleEarningWallet);
+        transferOwnership(__.presaleOwner);
     }
 
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
@@ -114,6 +115,7 @@ contract Presale is Ownable {
             !presaleIsBlacklisted,
             "Presale is rejected by the parent network."
         );
+        require(block.timestamp > presaleOpenAt, "Presale is not opened.");
         require(block.timestamp < presaleCloseAt, "Presale is closed.");
         require(
             presaleIsApproved,
@@ -121,7 +123,7 @@ contract Presale is Ownable {
         );
         require(
             tokenToHold.balanceOf(msg.sender) >= amountTokenToHold,
-            "You need to hold tokens to buy them from presale."
+            "You need to hold tokens to buy from presale."
         );
 
         uint256 price = (_tokens * rate) / 1e18;
@@ -144,7 +146,7 @@ contract Presale is Ownable {
         }
 
         tokenXSold += _tokens;
-        busd.transferFrom(msg.sender, presaleEarningWallet, price);
+        busd.transferFrom(msg.sender, address(this), price);
         tokenX.transfer(msg.sender, _tokens); // try with _msgsender on truufle test and ethgas reporter
     }
 
@@ -206,16 +208,19 @@ contract Presale is Ownable {
         tier = _tier;
     }
 
+    // todo
+    function withdrawBUSD() external {}
+
     ////////////////////////////////////////////////////////////////
     //            ONLY PARENT COMPANY FUNCTIONS                   //
     ////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////
-    //                  READ CONTRACT                             //
+    //                  WRITE CONTRACT                            //
     ////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////
-    //                  WRITE CONTRACT                            //
+    //                  READ CONTRACT                             //
     ////////////////////////////////////////////////////////////////
 
     function getPresaleDetails()

@@ -8,20 +8,24 @@
   },
   "scripts": {
     "start": "truffle test",
-    "deploy": "yarn startBscTestnet && yarn beep1",
+    "s": "yarn start",
+    "d": "yarn startBscTestnet && yarn beep1",
     "g": "ganache-cli",
     "m": "truffle migrate --reset && yarn beep1",
     "c": "truffle compile",
     "t": "truffle test",
     "____": "_____",
-    "beep1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
-    "beep2": "start wmplayer \"C:\\Windows\\Media\\Alarm10.wav\" && timeout 5 && taskkill /im wmplayer.exe",
+    "testRegular": "nodemon --watch contracts --exec \"truffle test\" contracts/Presale.sol",
+    "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" contracts/Presale.sol",
     "_____": "_____",
     "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify %npm_package_selectedContracts% --network bscMainnet",
     "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify %npm_package_selectedContracts% --network rinkeby",
     "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify %npm_package_selectedContracts% --network mainnet",
-    "startInnovate": "truffle migrate --network %(grep DEPLOY_NETWORK .env)% --reset && truffle run verify %npm_package_selectedContracts% --network $(grep DEPLOY_NETWORK .env)"
+    "startInnovate": "truffle migrate --network %(grep DEPLOY_NETWORK .env)% --reset && truffle run verify %npm_package_selectedContracts% --network $(grep DEPLOY_NETWORK .env)",
+    "___": "_____",
+    "beep1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
+    "beep2": "start wmplayer \"C:\\Windows\\Media\\Alarm10.wav\" && timeout 5 && taskkill /im wmplayer.exe"
   },
   "selectedContracts": "Migrations Presale PresaleFactory Locker",
   "allContracts": "Migrations ERC20Token ERC20TokenFactory Presale PresaleFactory Locker",
@@ -33,7 +37,9 @@
     "@truffle/hdwallet-provider": "^1.2.2",
     "dotenv": "^10.0.0",
     "eth-gas-reporter": "^0.2.22",
+    "global": "^4.4.0",
     "hdwallet": "^0.7.3",
+    "nodemon": "^2.0.13",
     "truffle-plugin-verify": "^0.5.8",
     "web3-utils": "^1.5.3"
   }
