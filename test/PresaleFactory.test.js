@@ -140,7 +140,7 @@ contract(
 
       // Now try withdraw for owner and the client
 
-      // in case of presale is not ended. owner can not withdraw tokens. client can not withdraw tokens.
+      // in case of PRESALE IS NOT ENDED. owner can not withdraw tokens. client can not withdraw tokens.
       {
         // owner withdraw
         await assertExceptionOccurs(
@@ -148,12 +148,13 @@ contract(
             await presaleTokenX.onlyOwner_withdrawBUSD({ from: tokenXOwner }),
         );
         // client withdraw
-        // await assertExceptionOccurs(
-        //   async () => await presaleTokenX.sellTokens({ from: client }),
-        // );
+        await assertExceptionOccurs(
+          async () =>
+            await presaleTokenX.sellTokens(toWei(5), { from: client }),
+        );
       }
 
-      // in case of cancelled presale. owner can not withdraw tokens. client can withdraw tokens.
+      // in case of CANCELLED PRESALE. owner can not withdraw tokens. client can withdraw tokens.
       // {
       //   // cancel presale
       //   await presale.cancelPresale({ from: tokenXOwner });
@@ -165,9 +166,9 @@ contract(
       //   await presaleTokenX.sellTokens({ from: client });
       // }
 
-      // in case of presale is ended. softcap met. owner can withdraw tokens. client can not withdraw tokens.
+      // in case of PRESALE IS ENDED. SOFTCAP MET. owner can withdraw tokens. client can not withdraw tokens.
 
-      // in case of presale is ended. softcap not met. owner can not withdraw tokens. client can withdraw tokens.
+      // in case of PRESALE IS ENDED. SOFTCAP NOT MET. owner can not withdraw tokens. client can withdraw tokens.
     });
   },
 );

@@ -132,7 +132,7 @@ contract Presale is Ownable {
     //                FUNCTIONS FOR PUBLIC                        //
     ////////////////////////////////////////////////////////////////
 
-    /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
+    /// @notice user buys at rate of 0.3 then 33 BUSD will be deducted and 100 tokenX will be given
     function buyTokens(uint256 _tokens)
         external
         presaleOpen
@@ -153,7 +153,7 @@ contract Presale is Ownable {
     // we need to prevent token owner taking out funds by giving tokenX and getting BUSD
     function sellTokens(uint256 _tokens)
         external
-        presaleCancelOrPresaleEndedAndSoftcapNotReached
+        presaleCancelledOrPresaleEndedAndSoftcapNotReached
     {
         tokenXSoldBy[msg.sender] += _tokens;
         require(
@@ -331,12 +331,6 @@ contract Presale is Ownable {
         return presaleEnded() && !softcapReached();
     }
 
-    // require(
-    //     !presaleIsCancelled ||
-    //         (block.timestamp > presaleCloseAt && tokenXSold >= softcap),
-    //     "Presale should not be cancelled or Presale should be closed and softcap should met"
-    // );
-
     // helper modifiers
 
     modifier presaleNotCancelled() {
@@ -345,7 +339,10 @@ contract Presale is Ownable {
     }
 
     modifier hardcapReachedOrPresaleEndedAndSoftcapReached() {
-        require(hardcapReached() || presaleEndedAndSoftcapReached());
+        require(
+            hardcapReached() || presaleEndedAndSoftcapReached(),
+            "Requirement: Hardcap Reached Or Presale Ended And Softcap Reached"
+        );
         _;
     }
 
@@ -390,7 +387,7 @@ contract Presale is Ownable {
         _;
     }
 
-    modifier presaleCancelOrPresaleEndedAndSoftcapNotReached() {
+    modifier presaleCancelledOrPresaleEndedAndSoftcapNotReached() {
         require(
             presaleIsCancelled || presaleEndedAndSoftcapNotReached(),
             "Presale should be cancelled or Presale should be ended and softcap should not met"
