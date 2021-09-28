@@ -17,11 +17,15 @@ contract PresaleFactory is Ownable {
     //                      VARIABLES                             //
     ////////////////////////////////////////////////////////////////
 
+    // Users need to hold some amount of tokens of parent company to buy tokens from the different presales
+    IERC20 tokenToHold;
+    uint256 amountTokenToHold;
+
     // list of presales created from this factory
     mapping(uint256 => Presale) public presales;
 
     // last presale created from this factory
-    uint256 public lastPresaleIndex = 0;
+    uint256 public lastPresaleIndex;
 
     // busd address
     IERC20 public busd;
@@ -30,8 +34,15 @@ contract PresaleFactory is Ownable {
     mapping(address => bool) public belongsToThisFactory;
 
     // this function is called when contract is created
-    constructor(address _parentCompany, IERC20 _busd) {
+    constructor(
+        address _parentCompany,
+        IERC20 _busd,
+        IERC20 _tokenToHold,
+        uint256 _amountTokenToHold
+    ) {
         busd = _busd;
+        tokenToHold = _tokenToHold;
+        amountTokenToHold = _amountTokenToHold;
         transferOwnership(_parentCompany);
     }
 
@@ -39,12 +50,10 @@ contract PresaleFactory is Ownable {
     struct Box {
         IERC20 tokenX;
         IERC20 lpTokenX;
-        IERC20 tokenToHold;
         //
         uint256 rate;
         uint256 hardcap;
         uint256 softcap;
-        uint256 amountTokenToHold;
         uint256 presaleOpenAt;
         uint256 presaleCloseAt;
         uint256 unlockTokensAt;
@@ -68,13 +77,13 @@ contract PresaleFactory is Ownable {
             Presale.Box(
                 __.tokenX,
                 __.lpTokenX,
-                __.tokenToHold,
+                tokenToHold,
                 busd,
                 msg.sender, // the person who is creating this presale is the owner of this presale
                 __.rate,
                 __.hardcap,
                 __.softcap,
-                __.amountTokenToHold,
+                amountTokenToHold,
                 __.presaleOpenAt,
                 __.presaleCloseAt,
                 __.unlockTokensAt,
@@ -101,6 +110,17 @@ contract PresaleFactory is Ownable {
             address(presale.lpTokenXLocker()),
             __.lpTokenXToLock
         );
+    }
+
+    function onlyOwner_editTokenToHold(IERC20 _tokenToHold) external onlyOwner {
+        tokenToHold = _tokenToHold;
+    }
+
+    function onlyOwner_editAmountTokenToHold(uint256 _amountTokenToHold)
+        external
+        onlyOwner
+    {
+        amountTokenToHold = _amountTokenToHold;
     }
 
     ////////////////////////////////////////////////////////////////

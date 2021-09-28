@@ -33,14 +33,21 @@ contract Presale is Ownable {
     uint256 public hardcap;
 
     uint256 public rate; // rate = 3 = 3 000 000 000 000 000 000, 0.3 = 3 00 000 000 000 000 000 // 0.3 busd = 1 TokenX
-    uint256 public tokenXSold = 0;
-    uint256 public presaleOpenAt;
-    uint256 public presaleCloseAt;
+    uint256 public tokenXSold;
     uint256 public amountTokenToHold;
 
+    uint256 public presaleOpenAt;
+    uint256 public presaleCloseAt;
+
     uint256 public participantsCount = 0;
+
     mapping(address => bool) private isParticipant;
+
     mapping(address => bool) public isWhitelisted;
+
+    // Bookkeeping like bank account
+    mapping(address => uint256) public tokenXSoldBy;
+    mapping(address => uint256) public tokenXBoughtBy;
 
     /// @notice The more trustworthy presale is the more presaleScore its has. presaleScore is assigned by the parent network only.
     uint8 public presaleScore = 1;
@@ -50,6 +57,7 @@ contract Presale is Ownable {
 
     bool public presaleIsApproved;
     bool public presaleIsBlacklisted;
+    bool public presaleIsCancelled;
     bool public onlyWhitelistedAllowed;
 
     event PresaleApproved(uint8 _presaleScore);
@@ -120,45 +128,41 @@ contract Presale is Ownable {
     //                  WRITE CONTRACT                            //
     ////////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////////
+    //                FUNCTIONS FOR PUBLIC                        //
+    ////////////////////////////////////////////////////////////////
+
     /// @notice user buys at rate of 0.3 then 33 BUSD or buyingToken will be deducted and 100 tokenX will be given
-    function buyTokens(uint256 _tokens) external {
-        require(
-            !presaleIsBlacklisted,
-            "Presale is rejected by the parent network."
-        );
-        require(block.timestamp > presaleOpenAt, "Presale is not opened.");
-        require(block.timestamp < presaleCloseAt, "Presale is closed.");
-        require(
-            presaleIsApproved,
-            "Presale is not approved by the parent network."
-        );
-        require(
-            tokenToHold.balanceOf(msg.sender) >= amountTokenToHold,
-            "You need to hold tokens to buy from presale."
-        );
+    function buyTokens(uint256 _tokens)
+        external
+        presaleOpen
+        userIsAllowed
+        presaleApproved
+        presaleNotCancelled
+        presaleNotBlacklisted
+        userHasAmountTokenToHold
+    {
+        buyTokensBookkeeping(_tokens);
 
         uint256 price = (_tokens * rate) / 1e18;
+        busd.transferFrom(msg.sender, address(this), price);
+        tokenX.transfer(msg.sender, _tokens);
+    }
+
+    // user can only sell tokens from the wallet where they purchased.
+    // we need to prevent token owner taking out funds by giving tokenX and getting BUSD
+    function sellTokens(uint256 _tokens)
+        external
+        presaleCancelOrPresaleEndedAndSoftcapNotReached
+    {
+        tokenXSoldBy[msg.sender] += _tokens;
         require(
-            busd.balanceOf(msg.sender) >= price,
-            "You have less BUSD available."
+            tokenXBoughtBy[msg.sender] >= tokenXSoldBy[msg.sender],
+            "You have to sell tokens less or equal amount than you bought"
         );
 
-        if (onlyWhitelistedAllowed) {
-            require(
-                isWhitelisted[msg.sender],
-                "You should become whitelisted to continue."
-            );
-        }
-
-        // count participants
-        if (!isParticipant[msg.sender]) {
-            isParticipant[msg.sender] = true;
-            participantsCount++;
-        }
-
-        tokenXSold += _tokens;
-        busd.transferFrom(msg.sender, address(this), price);
-        tokenX.transfer(msg.sender, _tokens); // try with _msgsender on truufle test and ethgas reporter
+        busd.transfer(msg.sender, _tokens / rate);
+        tokenX.transferFrom(msg.sender, address(this), _tokens);
     }
 
     ////////////////////////////////////////////////////////////////
@@ -173,6 +177,7 @@ contract Presale is Ownable {
         _;
     }
 
+    /// @notice Parent network will approve presale and assign a score to presale based on their photo, social media, driving liscense
     function onlyParent_editPresaleIsApproved(
         bool _presaleIsApproved,
         uint8 _presaleScore
@@ -182,6 +187,7 @@ contract Presale is Ownable {
         emit PresaleApproved(_presaleScore);
     }
 
+    /// @notice Parent network will assign a score to presale based on their photo, social media, driving liscense
     function onlyParent_editPresaleScore(uint8 _presaleScore)
         external
         onlyParent
@@ -201,7 +207,27 @@ contract Presale is Ownable {
     ////////////////////////////////////////////////////////////////
 
     // todo
-    function onlyOwner_withdrawBUSD() external {}
+    // hardcapReached presaleEndedAndSoftcapReached
+    function onlyOwner_withdrawBUSD()
+        external
+        onlyOwner
+        presaleNotCancelled
+        hardcapReachedOrPresaleEndedAndSoftcapReached
+    {
+        uint256 contractBalance = tokenX.balanceOf(address(this));
+        tokenX.transfer(msg.sender, contractBalance);
+    }
+
+    function onlyOwner_UnlockUnsoldTokens() external onlyOwner {
+        uint256 contractBalance = tokenX.balanceOf(address(this));
+        tokenX.transfer(msg.sender, contractBalance);
+        emit UnlockedUnsoldTokens(contractBalance);
+    }
+
+    function onlyOwner_CancelPresale() external onlyOwner {
+        require(!presaleIsCancelled, "Presale already cancelled");
+        presaleIsCancelled = true;
+    }
 
     function onlyOwner_setAmountTokenToHold(uint256 _amountTokenToHold)
         external
@@ -209,12 +235,6 @@ contract Presale is Ownable {
     {
         amountTokenToHold = _amountTokenToHold;
         emit AmountTokenToHoldChanged(_amountTokenToHold);
-    }
-
-    function onlyOwner_UnlockUnsoldTokens() external onlyOwner {
-        uint256 contractBalance = tokenX.balanceOf(address(this));
-        tokenX.transfer(msg.sender, contractBalance);
-        emit UnlockedUnsoldTokens(contractBalance);
     }
 
     function onlyOwner_editOnlyWhitelistedAllowed(bool _onlyWhitelistedAllowed)
@@ -287,5 +307,109 @@ contract Presale is Ownable {
     function AAA_developers() external pure returns (string memory) {
         return
             "Smart Contract belong to this DAPP: https://shield-launchpad.netlify.app/ Smart contract made in Pakistan by Muneeb Zubair Khan, Whatsapp +923014440289, Telegram @thinkmuneeb, The UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash. Discord timon#1213. Project done with TrippyBlue and ShieldNet Team.";
+    }
+
+    // helper functions
+
+    function hardcapReached() public view returns (bool) {
+        return tokenXSold >= hardcap;
+    }
+
+    function softcapReached() public view returns (bool) {
+        return tokenXSold >= softcap;
+    }
+
+    function presaleEnded() public view returns (bool) {
+        return block.timestamp > presaleCloseAt;
+    }
+
+    function presaleEndedAndSoftcapReached() public view returns (bool) {
+        return presaleEnded() && softcapReached();
+    }
+
+    function presaleEndedAndSoftcapNotReached() public view returns (bool) {
+        return presaleEnded() && !softcapReached();
+    }
+
+    // require(
+    //     !presaleIsCancelled ||
+    //         (block.timestamp > presaleCloseAt && tokenXSold >= softcap),
+    //     "Presale should not be cancelled or Presale should be closed and softcap should met"
+    // );
+
+    // helper modifiers
+
+    modifier presaleNotCancelled() {
+        require(!presaleIsCancelled, "Presale should not be cancelled.");
+        _;
+    }
+
+    modifier hardcapReachedOrPresaleEndedAndSoftcapReached() {
+        require(hardcapReached() || presaleEndedAndSoftcapReached());
+        _;
+    }
+
+    modifier presaleOpen() {
+        require(block.timestamp > presaleOpenAt, "Presale is not opened yet.");
+        require(block.timestamp < presaleCloseAt, "Presale is closed.");
+        _;
+    }
+
+    modifier presaleNotBlacklisted() {
+        require(
+            !presaleIsBlacklisted,
+            "Presale is blacklisted by the parent network."
+        );
+        _;
+    }
+
+    modifier presaleApproved() {
+        require(
+            presaleIsApproved,
+            "Presale is not approved by the parent network."
+        );
+        _;
+    }
+
+    modifier userHasAmountTokenToHold() {
+        // need to code these require statements in UI, so users do not get exceptions on metamask wallet
+        require(
+            tokenToHold.balanceOf(msg.sender) >= amountTokenToHold,
+            "You need to hold tokens to buy from presale."
+        );
+        _;
+    }
+
+    modifier userIsAllowed() {
+        if (onlyWhitelistedAllowed) {
+            require(
+                isWhitelisted[msg.sender],
+                "You should become whitelisted to continue."
+            );
+        }
+        _;
+    }
+
+    modifier presaleCancelOrPresaleEndedAndSoftcapNotReached() {
+        require(
+            presaleIsCancelled || presaleEndedAndSoftcapNotReached(),
+            "Presale should be cancelled or Presale should be ended and softcap should not met"
+        );
+        _;
+    }
+
+    // helper function private
+    function buyTokensBookkeeping(uint256 _tokens) private {
+        // count tokenXSold
+        tokenXSold += _tokens;
+
+        // count tokenXBoughtBy each address, so we can return BUSD if they want
+        tokenXBoughtBy[msg.sender] += _tokens;
+
+        // count participants
+        if (!isParticipant[msg.sender]) {
+            isParticipant[msg.sender] = true;
+            participantsCount++;
+        }
     }
 }

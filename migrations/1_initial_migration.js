@@ -90,6 +90,8 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
     PresaleFactory,
     (_parentCompany = owner),
     busd.address,
+    (tokenToHold_ = busd.address),
+    (amountTokenToHold_ = 0),
   );
 
   // if (!(network === 'bscMainnet' || network === 'mainnet')) {

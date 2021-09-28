@@ -41,10 +41,15 @@ contract(
         { from: busdOwner },
       );
 
+      // make factory
       const presaleFactory = await PresaleFactory.new(
         parentCompany,
         busd.address,
+        (tokenToHold_ = busd.address),
+        (amountTokenToHold_ = 0),
       );
+
+      // Setup environment before buying from presale:
 
       // give 100$ to client to buy token X
       await busd.transfer(client, toWei('1200'), {
@@ -72,17 +77,16 @@ contract(
         from: tokenXOwner,
       });
 
+      // create a presale
       const rate = 0.2;
       await presaleFactory.createERC20Presale(
         [
           tokenX.address,
           lpToken.address,
-          lpToken.address, // tokenToHold,
           //
           toWei(rate),
           toWei(100), // hardcap
           toWei(100), // softcap
-          toWei(0), // amountTokenToHold
           0, // presale open at
           MAX_INT, // presale close at
           0, // unlockTokensAt
@@ -99,23 +103,28 @@ contract(
         },
       );
 
+      // get the newly created presale
       const presaleAddress = await presaleFactory.presales(0);
-      const presale = await Presale.at(presaleAddress);
+      const presaleTokenX = await Presale.at(presaleAddress);
 
-      // client of tokenX approves presale address to spend his BUSD
-      await busd.approve(presale.address, MAX_INT, { from: client });
+      // client of tokenX approves this presale to spend his BUSD
+      await busd.approve(presaleTokenX.address, MAX_INT, { from: client });
 
       const beforeTokenXOfClient = await balanceOf(tokenX, client);
       const beforeBusdOfClient = await balanceOf(busd, client);
 
       // parent company approves the presale is Genuine and not fake
-      await presale.onlyParent_editPresaleIsApproved(true, 3, {
-        from: parentCompany,
-      });
+      await presaleTokenX.onlyParent_editPresaleIsApproved(
+        true,
+        (_score_ = 3),
+        {
+          from: parentCompany,
+        },
+      );
 
       // now client of token X will spend his BUSD to buy tokenX
-      const tokenXToBuy = 100;
-      await presale.buyTokens(toWei(tokenXToBuy), { from: client });
+      const tokenXToBuy = 10;
+      await presaleTokenX.buyTokens(toWei(tokenXToBuy), { from: client });
 
       const afterTokenXOfClient = await balanceOf(tokenX, client);
       const afterBusdOfClient = await balanceOf(busd, client);
@@ -127,21 +136,54 @@ contract(
       const price = rate * tokenXToBuy;
       assert.equal(afterBusdOfClient, beforeBusdOfClient - price);
 
+      // Now client has successfully bought tokens
+
+      // Now try withdraw for owner and the client
+
+      // in case of presale is not ended. owner can not withdraw tokens. client can not withdraw tokens.
+      {
+        // owner withdraw
+        await assertExceptionOccurs(
+          async () =>
+            await presaleTokenX.onlyOwner_withdrawBUSD({ from: tokenXOwner }),
+        );
+        // client withdraw
+        // await assertExceptionOccurs(
+        //   async () => await presaleTokenX.sellTokens({ from: client }),
+        // );
+      }
+
+      // in case of cancelled presale. owner can not withdraw tokens. client can withdraw tokens.
       // {
-      //   const res = await presaleFactory.getPresales(0, 30);
-      //   console.log('res all sales: ', res);
+      //   // cancel presale
+      //   await presale.cancelPresale({ from: tokenXOwner });
+      //   // owner withdraw
+      //   await assertExceptionOccurs(() =>
+      //     presaleTokenX.onlyOwner_withdrawBUSD({ from: tokenXOwner }),
+      //   );
+      //   // client withdraw
+      //   await presaleTokenX.sellTokens({ from: client });
       // }
-      // {
-      //   const res = await presaleFactory.getPresaleDetails(presale.address);
-      //   console.log('res: ', res);
-      // }
-      // {
-      //   const res = await presaleFactory.getPresaleMediaLinks(presale.address);
-      //   console.log('res: ', res.split(delimitter));
-      // }
+
+      // in case of presale is ended. softcap met. owner can withdraw tokens. client can not withdraw tokens.
+
+      // in case of presale is ended. softcap not met. owner can not withdraw tokens. client can withdraw tokens.
     });
   },
 );
+
+// made this function in many hours. learnt that first go with simple stuff then slowly complicate.
+const assertExceptionOccurs = async func => {
+  let assertValue = true;
+  try {
+    await func();
+    assertValue = false;
+    assert(assertValue);
+  } catch (e) {
+    assert(assertValue);
+    // console.log('e.message: ', e.message);
+  }
+};
 
 const balanceOf = async (token, account) =>
   Number(fromWei((await token.balanceOf(account)).toString()));
@@ -154,3 +196,16 @@ const MAX_INT =
 
 const delimitter = '@$@L';
 const socialMedia = `https://www.facebook.com/muneeb.qureshi.50951${delimitter}https://twitter.com/muneeb_butt9?lang=en${delimitter}https://www.instagram.com/muneeb_butt/?hl=en${delimitter}https://docs.google.com/document/d/1_buydr48_P5PSzLc7d1i5DqXA7jpn5dZVNEP_42Birs/edit`;
+
+// {
+//   const res = await presaleFactory.getPresales(0, 30);
+//   console.log('res all sales: ', res);
+// }
+// {
+//   const res = await presaleFactory.getPresaleDetails(presale.address);
+//   console.log('res: ', res);
+// }
+// {
+//   const res = await presaleFactory.getPresaleMediaLinks(presale.address);
+//   console.log('res: ', res.split(delimitter));
+// }
