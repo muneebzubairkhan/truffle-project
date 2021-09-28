@@ -13,7 +13,7 @@ contract(
     parentCompany, // the company who provides the services of launchpad
   ]) => {
     // make it like real test case, input: buyTokens(100), expected output: person charged 100*0.3 = $30 and gets 100 tokens
-    it('Create Presale Factory, Make Presale, call buyTokens(100) and see ', async () => {
+    it('Create Presale Factory, Make Presale, buyTokens(100) and see ', async () => {
       // Variables Init
       // token X
       const tokenX = await ERC20Token.new(
@@ -109,7 +109,7 @@ contract(
       const beforeBusdOfClient = await balanceOf(busd, client);
 
       // parent company approves the presale is Genuine and not fake
-      await presale.onlyParentCompanyFunction_editPresaleIsApproved(true, {
+      await presale.onlyParent_editPresaleIsApproved(true, 3, {
         from: parentCompany,
       });
 

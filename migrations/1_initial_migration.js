@@ -98,7 +98,7 @@ const defaultDeploy = async (deployer, network, [owner, addr1, addr2]) => {
 
   //   const presaleAddress = await presaleFactory.presales(0);
   //   const presale = await Presale.at(presaleAddress);
-  //   await presale.onlyParentCompanyFunction_editPresaleIsApproved(true);
+  //   await presale.onlyParent_editPresaleIsApproved(true);
   // }
 
   makeHelperCodeForUIDev(network, {

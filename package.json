@@ -15,7 +15,7 @@
     "c": "truffle compile",
     "t": "truffle test",
     "____": "_____",
-    "testRegular": "nodemon --watch contracts --exec \"truffle test\" contracts/Presale.sol",
+    "testRegular": "nodemon --watch contracts --exec \"truffle test\" --ext .sol",
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" contracts/Presale.sol",
     "_____": "_____",
     "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
