@@ -52,18 +52,18 @@ contract(
       // Setup environment before buying from presale:
 
       // give 100$ to client to buy token X
-      await busd.transfer(client, toWei('1200'), {
+      await busd.transfer(client, toWei(2000), {
         from: busdOwner,
       });
 
       // 100LP for locking
-      await lpToken.transfer(tokenXOwner, toWei('1200'), {
+      await lpToken.transfer(tokenXOwner, toWei(2000), {
         from: tokenXOwner,
       });
 
       // 100 tokenX for selling
       // 100 tokenX for locking
-      await tokenX.transfer(tokenXOwner, toWei('1400'), {
+      await tokenX.transfer(tokenXOwner, toWei(2000), {
         from: tokenXOwner,
       });
 
@@ -78,7 +78,7 @@ contract(
       });
 
       // create a presale
-      const rate = 0.2;
+      const rate = 1;
       await presaleFactory.createERC20Presale(
         [
           tokenX.address,
@@ -141,30 +141,36 @@ contract(
       // Now try withdraw for owner and the client
 
       // in case of PRESALE IS NOT ENDED. owner can not withdraw tokens. client can not withdraw tokens.
-      {
-        // owner withdraw
-        await assertExceptionOccurs(
-          async () =>
-            await presaleTokenX.onlyOwner_withdrawBUSD({ from: tokenXOwner }),
-        );
-        // client withdraw
-        await assertExceptionOccurs(
-          async () =>
-            await presaleTokenX.sellTokens(toWei(5), { from: client }),
-        );
-      }
-
-      // in case of CANCELLED PRESALE. owner can not withdraw tokens. client can withdraw tokens.
       // {
-      //   // cancel presale
-      //   await presale.cancelPresale({ from: tokenXOwner });
       //   // owner withdraw
-      //   await assertExceptionOccurs(() =>
-      //     presaleTokenX.onlyOwner_withdrawBUSD({ from: tokenXOwner }),
+      //   await assertExceptionOccurs(
+      //     async () =>
+      //       await presaleTokenX.onlyOwner_withdrawBUSD({ from: tokenXOwner }),
       //   );
       //   // client withdraw
-      //   await presaleTokenX.sellTokens({ from: client });
+      //   await assertExceptionOccurs(
+      //     async () =>
+      //       await presaleTokenX.sellTokens(toWei(5), { from: client }),
+      //   );
       // }
+
+      // await seeBalanceOf('... ', tokenX, presaleTokenX);
+
+      // in case of CANCELLED PRESALE. owner can not withdraw tokens. client can withdraw tokens.
+      {
+        // cancel presale
+        await presaleTokenX.onlyOwner_cancelPresale({ from: tokenXOwner });
+        // owner withdraw
+        await assertExceptionOccurs(() =>
+          presaleTokenX.onlyOwner_withdrawBUSD({ from: tokenXOwner }),
+        );
+        // client withdraw, dependency: client needs to approve presale contract to spend client's tokenX
+        // dependency
+        await tokenX.approve(presaleTokenX.address, MAX_INT, { from: client });
+
+        // mainwork
+        await presaleTokenX.sellTokens(toWei(10), { from: client });
+      }
 
       // in case of PRESALE IS ENDED. SOFTCAP MET. owner can withdraw tokens. client can not withdraw tokens.
 
@@ -187,7 +193,12 @@ const assertExceptionOccurs = async func => {
 };
 
 const balanceOf = async (token, account) =>
-  Number(fromWei((await token.balanceOf(account)).toString()));
+  Number(
+    fromWei((await token.balanceOf(account.address || account)).toString()),
+  );
+
+const seeBalanceOf = async (tag, token, account) =>
+  console.log(tag, await balanceOf(token, account));
 
 const toWei = n => web3.utils.toWei('' + n);
 const fromWei = n => web3.utils.fromWei('' + n);

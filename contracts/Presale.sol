@@ -156,12 +156,14 @@ contract Presale is Ownable {
         presaleCancelledOrPresaleEndedAndSoftcapNotReached
     {
         tokenXSoldBy[msg.sender] += _tokens;
+
         require(
             tokenXBoughtBy[msg.sender] >= tokenXSoldBy[msg.sender],
             "You have to sell tokens less or equal amount than you bought"
         );
 
-        busd.transfer(msg.sender, _tokens / rate);
+        uint256 price = (_tokens * rate) / 1e18;
+        busd.transfer(msg.sender, price);
         tokenX.transferFrom(msg.sender, address(this), _tokens);
     }
 
@@ -218,13 +220,13 @@ contract Presale is Ownable {
         tokenX.transfer(msg.sender, contractBalance);
     }
 
-    function onlyOwner_UnlockUnsoldTokens() external onlyOwner {
+    function onlyOwner_unlockUnsoldTokens() external onlyOwner {
         uint256 contractBalance = tokenX.balanceOf(address(this));
         tokenX.transfer(msg.sender, contractBalance);
         emit UnlockedUnsoldTokens(contractBalance);
     }
 
-    function onlyOwner_CancelPresale() external onlyOwner {
+    function onlyOwner_cancelPresale() external onlyOwner {
         require(!presaleIsCancelled, "Presale already cancelled");
         presaleIsCancelled = true;
     }
