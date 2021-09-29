@@ -73,8 +73,8 @@ contract Presale is Ownable {
         address presaleOwner;
         //
         uint256 rate;
-        uint256 hardcap;
         uint256 softcap;
+        uint256 hardcap;
         uint256 amountTokenToHold;
         uint256 presaleOpenAt;
         uint256 presaleCloseAt;
@@ -86,14 +86,20 @@ contract Presale is Ownable {
     }
 
     constructor(Box memory __) {
+        require(
+            __.presaleOpenAt + 90 days <= __.presaleCloseAt,
+            "Presale close time should be more than or equal to 90 days after the start time"
+        );
+        require(__.softcap < __.hardcap, "Hardcap should be more than softcap");
+
         tokenX = __.tokenX;
         lpTokenX = __.lpTokenX;
         tokenToHold = __.tokenToHold;
         busd = __.busd;
         factory = msg.sender; // only trust those presales who address exist in factory contract // go to factory address and see presale address belong to that factory or not. use method: belongsToThisFactory
 
-        hardcap = __.hardcap;
         softcap = __.softcap;
+        hardcap = __.hardcap;
         rate = __.rate;
         presaleOpenAt = __.presaleOpenAt;
         presaleCloseAt = __.presaleCloseAt;
@@ -168,6 +174,61 @@ contract Presale is Ownable {
     }
 
     ////////////////////////////////////////////////////////////////
+    //                 ONLY OWNER FUNCTIONS                       //
+    ////////////////////////////////////////////////////////////////
+
+    function onlyOwner_withdrawBUSD()
+        external
+        onlyOwner
+        presaleNotCancelled
+        hardcapReachedOrPresaleEndedAndSoftcapReached
+    {
+        uint256 contractBalance = tokenX.balanceOf(address(this));
+        tokenX.transfer(msg.sender, contractBalance);
+    }
+
+    function onlyOwner_unlockUnsoldTokens()
+        external
+        onlyOwner
+        presaleCancelledOrPresaleEnded
+    {
+        uint256 contractBalance = tokenX.balanceOf(address(this));
+        tokenX.transfer(msg.sender, contractBalance);
+        emit UnlockedUnsoldTokens(contractBalance);
+    }
+
+    function onlyOwner_cancelPresale() external onlyOwner {
+        require(!presaleIsCancelled, "Presale already cancelled");
+        require(!hardcapReached(), "Hardcap reached, can not cancell now");
+        presaleIsCancelled = true;
+    }
+
+    function onlyOwner_setAmountTokenToHold(uint256 _amountTokenToHold)
+        external
+        onlyOwner
+    {
+        amountTokenToHold = _amountTokenToHold;
+        emit AmountTokenToHoldChanged(_amountTokenToHold);
+    }
+
+    function onlyOwner_editOnlyWhitelistedAllowed(bool _onlyWhitelistedAllowed)
+        external
+        onlyOwner
+    {
+        onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
+    }
+
+    /// @dev pass true to add to whitelist, pass false to remove from whitelist
+    function onlyOwner_editWhitelist(address[] memory _addresses, bool _approve)
+        external
+        onlyOwner
+    {
+        for (uint256 i = 0; i < _addresses.length; i++) {
+            isWhitelisted[_addresses[i]] = _approve;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////
     //            ONLY PARENT COMPANY FUNCTIONS                   //
     ////////////////////////////////////////////////////////////////
 
@@ -202,58 +263,6 @@ contract Presale is Ownable {
         onlyParent
     {
         presaleIsBlacklisted = _presaleIsBlacklisted;
-    }
-
-    ////////////////////////////////////////////////////////////////
-    //                 ONLY OWNER FUNCTIONS                       //
-    ////////////////////////////////////////////////////////////////
-
-    // todo
-    // hardcapReached presaleEndedAndSoftcapReached
-    function onlyOwner_withdrawBUSD()
-        external
-        onlyOwner
-        presaleNotCancelled
-        hardcapReachedOrPresaleEndedAndSoftcapReached
-    {
-        uint256 contractBalance = tokenX.balanceOf(address(this));
-        tokenX.transfer(msg.sender, contractBalance);
-    }
-
-    function onlyOwner_unlockUnsoldTokens() external onlyOwner {
-        uint256 contractBalance = tokenX.balanceOf(address(this));
-        tokenX.transfer(msg.sender, contractBalance);
-        emit UnlockedUnsoldTokens(contractBalance);
-    }
-
-    function onlyOwner_cancelPresale() external onlyOwner {
-        require(!presaleIsCancelled, "Presale already cancelled");
-        presaleIsCancelled = true;
-    }
-
-    function onlyOwner_setAmountTokenToHold(uint256 _amountTokenToHold)
-        external
-        onlyOwner
-    {
-        amountTokenToHold = _amountTokenToHold;
-        emit AmountTokenToHoldChanged(_amountTokenToHold);
-    }
-
-    function onlyOwner_editOnlyWhitelistedAllowed(bool _onlyWhitelistedAllowed)
-        external
-        onlyOwner
-    {
-        onlyWhitelistedAllowed = _onlyWhitelistedAllowed;
-    }
-
-    /// @dev pass true to add to whitelist, pass false to remove from whitelist
-    function onlyOwner_editWhitelist(address[] memory _addresses, bool _approve)
-        external
-        onlyOwner
-    {
-        for (uint256 i = 0; i < _addresses.length; i++) {
-            isWhitelisted[_addresses[i]] = _approve;
-        }
     }
 
     ////////////////////////////////////////////////////////////////
@@ -343,7 +352,7 @@ contract Presale is Ownable {
     modifier hardcapReachedOrPresaleEndedAndSoftcapReached() {
         require(
             hardcapReached() || presaleEndedAndSoftcapReached(),
-            "Requirement: Hardcap Reached Or Presale Ended And Softcap Reached"
+            "Hardcap should reach or presale ends with softcap reach."
         );
         _;
     }
@@ -393,6 +402,14 @@ contract Presale is Ownable {
         require(
             presaleIsCancelled || presaleEndedAndSoftcapNotReached(),
             "Presale should be cancelled or Presale should be ended and softcap should not met"
+        );
+        _;
+    }
+
+    modifier presaleCancelledOrPresaleEnded() {
+        require(
+            presaleIsCancelled || presaleEnded(),
+            "Presale should be cancelled or ended"
         );
         _;
     }

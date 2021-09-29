@@ -52,8 +52,8 @@ contract PresaleFactory is Ownable {
         IERC20 lpTokenX;
         //
         uint256 rate;
-        uint256 hardcap;
         uint256 softcap;
+        uint256 hardcap;
         uint256 presaleOpenAt;
         uint256 presaleCloseAt;
         uint256 unlockTokensAt;
@@ -77,15 +77,20 @@ contract PresaleFactory is Ownable {
             Presale.Box(
                 __.tokenX,
                 __.lpTokenX,
+                //
                 tokenToHold,
                 busd,
                 msg.sender, // the person who is creating this presale is the owner of this presale
+                //
                 __.rate,
-                __.hardcap,
                 __.softcap,
+                __.hardcap,
+                //
                 amountTokenToHold,
+                //
                 __.presaleOpenAt,
                 __.presaleCloseAt,
+                //
                 __.unlockTokensAt,
                 __.onlyWhitelistedAllowed,
                 __.whitelistAddresses,
