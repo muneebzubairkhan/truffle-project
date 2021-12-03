@@ -18,6 +18,7 @@
     "testRegular": "nodemon --exec \"truffle test && yarn beep1\" --ext \".test.js .sol\"",
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" --ext .sol",
     "_____": "_____",
+    "verify":"truffle run verify %npm_package_selectedContracts% --network bscTestnet",
     "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify %npm_package_selectedContracts% --network bscMainnet",
     "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify %npm_package_selectedContracts% --network rinkeby",
@@ -27,7 +28,7 @@
     "beep1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
     "beep2": "start wmplayer \"C:\\Windows\\Media\\Alarm10.wav\" && timeout 5 && taskkill /im wmplayer.exe"
   },
-  "selectedContracts": "Migrations Presale PresaleFactory Locker",
+  "selectedContracts": " NFTMarket Biding",
   "allContracts": "Migrations ERC20Token ERC20TokenFactory Presale PresaleFactory Locker",
   "keywords": [],
   "author": "",
