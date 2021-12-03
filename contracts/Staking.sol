@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.6.12;
+pragma solidity 0.8.7;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 // BirdFarm is the master of RewardToken. He can make RewardToken and he is a fair guy.
@@ -20,9 +18,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @notice You can use this contract to deposit pool tokens and get rewards
 /// @dev Admin can add a new Pool, users can deposit pool tokens, harvestReward, withdraw pool tokens
 contract BirdFarm is Ownable {
-    using SafeMath for uint256;
-    using SafeERC20 for IERC20;
-
     // Info of each user.
     struct UserInfo {
         uint256 amount; // How many pool tokens the user has provided.
@@ -67,6 +62,7 @@ contract BirdFarm is Ownable {
 
     /// @dev Info of each user that stakes pool tokens.
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
+    mapping(IERC721 => mapping(uint256 => address)) public nftOwnerOf;
 
     /// @dev Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
@@ -95,7 +91,7 @@ contract BirdFarm is Ownable {
     /// @dev when some one harvests reward tokens from contract
     event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
 
-    constructor(IERC20 _rewardToken) public {
+    constructor(IERC20 _rewardToken) {
         rewardToken = _rewardToken;
     }
 
@@ -124,7 +120,7 @@ contract BirdFarm is Ownable {
         uint256 lastRewardBlock = block.number > startBlock
             ? block.number
             : startBlock;
-        totalAllocPoint = totalAllocPoint.add(_allocPoint);
+        totalAllocPoint = totalAllocPoint + _allocPoint;
         poolInfo.push(
             PoolInfo({
                 poolToken: _poolToken,
@@ -148,9 +144,9 @@ contract BirdFarm is Ownable {
         if (_withUpdate) {
             massUpdatePools();
         }
-        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
-            _allocPoint
-        );
+        totalAllocPoint =
+            totalAllocPoint -
+            (poolInfo[_pid].allocPoint + _allocPoint);
         poolInfo[_pid].allocPoint = _allocPoint;
     }
 
@@ -168,14 +164,14 @@ contract BirdFarm is Ownable {
         if (from < startBlock && startBlock < to) from = startBlock;
 
         if (to <= bonusEndBlock) {
-            return to.sub(from).mul(BONUS_MULTIPLIER);
+            return (to - from) * (BONUS_MULTIPLIER);
         } else if (from >= bonusEndBlock) {
-            return to.sub(from);
+            return to - from;
         } else {
             return
-                bonusEndBlock.sub(from).mul(BONUS_MULTIPLIER).add(
-                    to.sub(bonusEndBlock)
-                );
+                (bonusEndBlock - from) *
+                BONUS_MULTIPLIER +
+                (to - bonusEndBlock);
         }
     }
 
@@ -198,20 +194,17 @@ contract BirdFarm is Ownable {
                 pool.lastRewardBlock,
                 block.number
             );
-            uint256 rewardTokenReward = multiplier
-                .mul(rewardPerBlock)
-                .mul(pool.allocPoint)
-                .div(totalAllocPoint);
-            accRewardTokenPerShare = accRewardTokenPerShare.add(
-                rewardTokenReward.mul(1e12).div(poolSupply)
-            );
+            uint256 rewardTokenReward = (multiplier *
+                (rewardPerBlock) *
+                (pool.allocPoint)) / (totalAllocPoint);
+            accRewardTokenPerShare =
+                accRewardTokenPerShare +
+                ((rewardTokenReward * 1e12) / (poolSupply));
         }
         return
-            user.reward.add(
-                user.amount.mul(accRewardTokenPerShare).div(1e12).sub(
-                    user.rewardDebt
-                )
-            );
+            user.reward +
+            (((user.amount * accRewardTokenPerShare) / 1e12) -
+                (user.rewardDebt));
     }
 
     /// @notice Update reward vairables for all pools. Be careful of gas spending!
@@ -241,20 +234,19 @@ contract BirdFarm is Ownable {
         }
 
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 rewardTokenReward = multiplier
-            .mul(rewardPerBlock)
-            .mul(pool.allocPoint)
-            .div(totalAllocPoint);
-        pool.accRewardTokenPerShare = pool.accRewardTokenPerShare.add(
-            rewardTokenReward.mul(1e12).div(poolSupply)
-        );
+        uint256 rewardTokenReward = (multiplier *
+            (rewardPerBlock) *
+            (pool.allocPoint)) / (totalAllocPoint);
+        pool.accRewardTokenPerShare =
+            pool.accRewardTokenPerShare +
+            ((rewardTokenReward * (1e12)) / (poolSupply));
         pool.lastRewardBlock = block.number;
     }
 
     /// @notice deposit tokens to get rewards
     /// @dev deposit pool tokens to BirdFarm for reward tokens allocation.
     /// @param _pid pool id
-    /// @param _amount how many tokens you want to stake
+    /// @param _tokenId how many tokens you want to stake
     function deposit(uint256 _pid, uint256 _tokenId) external {
         uint256 _amount = 1;
         PoolInfo storage pool = poolInfo[_pid];
@@ -264,18 +256,16 @@ contract BirdFarm is Ownable {
 
         updatePool(_pid);
 
-        uint256 pending = user
-            .amount
-            .mul(pool.accRewardTokenPerShare)
-            .div(1e12)
-            .sub(user.rewardDebt);
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
+            1e12 -
+            user.rewardDebt;
         user.reward += pending;
 
         stakedTokens += _amount;
-        user.amount = user.amount.add(_amount);
-        user.rewardDebt = user.amount.mul(pool.accRewardTokenPerShare).div(
-            1e12
-        );
+        user.amount = user.amount + (_amount);
+        user.rewardDebt =
+            (user.amount * (pool.accRewardTokenPerShare)) /
+            (1e12);
         pool.poolToken.safeTransferFrom(
             address(msg.sender),
             address(this),
@@ -287,36 +277,41 @@ contract BirdFarm is Ownable {
     /// @notice get the tokens back from BardFarm
     /// @dev withdraw or unstake pool tokens from BidFarm
     /// @param _pid pool id
-    /// @param _amount how many pool tokens you want to unstake
+    /// @param  _tokenId how many pool tokens you want to unstake
     function withdraw(uint256 _pid, uint256 _tokenId) external {
         uint256 _amount = 1;
         require(
-    
-            now > usersCanUnstakeAtTime,
+            block.timestamp > usersCanUnstakeAtTime,
             "Can not withdraw/unstake at this time."
         );
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        require(nftOwnerOf[pool.poolToken][_tokenId]==msg.sender, "you are not owner");
+        require(
+            nftOwnerOf[pool.poolToken][_tokenId] == msg.sender,
+            "you are not owner"
+        );
 
         require(
             user.amount >= _amount,
             "You do not have enough pool tokens staked."
         );
         updatePool(_pid);
-        uint256 pending = user
-            .amount
-            .mul(pool.accRewardTokenPerShare)
-            .div(1e12)
-            .sub(user.rewardDebt);
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
+            1e12 -
+            user.rewardDebt;
+
         user.reward += pending;
 
         stakedTokens -= _amount;
-        user.amount = user.amount.sub(_amount);
-        user.rewardDebt = user.amount.mul(pool.accRewardTokenPerShare).div(
-            1e12
+        user.amount = user.amount - (_amount);
+        user.rewardDebt =
+            (user.amount * (pool.accRewardTokenPerShare)) /
+            (1e12);
+        pool.poolToken.safeTransferFrom(
+            address(this),
+            address(msg.sender),
+            _tokenId
         );
-        pool.poolToken.safeTransfer(address(msg.sender), _tokenId);
         emit Withdraw(msg.sender, _pid, _tokenId);
     }
 
@@ -324,38 +319,40 @@ contract BirdFarm is Ownable {
     /// @dev harvest reward tokens from BidFarm and update pool variables
     /// @param _pid pool id
     function harvest(uint256 _pid) external {
-        require(now > usersCanHarvestAtTime, "Can not harvest at this time.");
+        require(
+            block.timestamp > usersCanHarvestAtTime,
+            "Can not harvest at this time."
+        );
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
-        uint256 pending = user
-            .amount
-            .mul(pool.accRewardTokenPerShare)
-            .div(1e12)
-            .sub(user.rewardDebt);
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
+            1e12 -
+            user.rewardDebt;
+
         user.reward += pending;
         uint256 rewardToGiveNow = user.reward;
         user.reward = 0;
 
-        user.rewardDebt = user.amount.mul(pool.accRewardTokenPerShare).div(
-            1e12
-        );
+        user.rewardDebt =
+            (user.amount * (pool.accRewardTokenPerShare)) /
+            (1e12);
 
-        rewardToken.safeTransfer(msg.sender, rewardToGiveNow);
+        rewardToken.transfer(msg.sender, rewardToGiveNow);
         emit Harvest(msg.sender, _pid, pending);
     }
 
     function configTheEndRewardBlock() internal {
-        endBlock = block.number.add(
-            (rewardToken.balanceOf(address(this)).div(rewardPerBlock))
-        );
+        endBlock =
+            block.number +
+            ((rewardToken.balanceOf(address(this)) / (rewardPerBlock)));
     }
 
     /// @notice owner puts reward tokens in contract
     /// @dev owner can add reward token to contract so that it can be distributed to users
     /// @param _amount amount of reward tokens
     function addRewardTokensToContract(uint256 _amount) external onlyOwner {
-        uint256 rewardEndsInBlocks = _amount.div(rewardPerBlock);
+        uint256 rewardEndsInBlocks = _amount / (rewardPerBlock);
 
         uint256 lastEndBlock = endBlock == 0 ? block.number : endBlock;
         endBlock = lastEndBlock + rewardEndsInBlocks;
@@ -377,7 +374,7 @@ contract BirdFarm is Ownable {
         external
         onlyOwner
     {
-        _token.safeTransfer(msg.sender, _amount);
+        _token.transfer(msg.sender, _amount);
         emit OwnerWithdraw(_token, _amount);
     }
 
