@@ -43,7 +43,7 @@ contract BirdFarm is Ownable {
 
     // Info of each pool.
     struct PoolInfo {
-        IERC20 poolToken; // Address of pool token contract.
+        IERC721 poolToken; // Address of pool token contract.
         uint256 allocPoint; // How many allocation points assigned to this pool. REWARD_TOKENs to distribute per block.
         uint256 lastRewardBlock; // Last block number that REWARD_TOKENs distribution occurs.
         uint256 accRewardTokenPerShare; // Accumulated REWARD_TOKENs per share, times 1e12. See below.
@@ -85,7 +85,7 @@ contract BirdFarm is Ownable {
     uint256 public usersCanHarvestAtTime = 0 seconds;
 
     // to store only unique pool tokens in pools
-    mapping(IERC20 => bool) private uniqueTokenInPool;
+    mapping(IERC721 => bool) private uniqueTokenInPool;
 
     /// @dev when some one deposits pool tokens to contract
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
@@ -113,7 +113,7 @@ contract BirdFarm is Ownable {
     /// @param _withUpdate if true then it updates the reward tokens to be given for each of the tokens staked
     function add(
         uint256 _allocPoint,
-        IERC20 _poolToken,
+        IERC721 _poolToken,
         bool _withUpdate
     ) external onlyOwner {
         require(!uniqueTokenInPool[_poolToken], "Token already added");
@@ -253,7 +253,8 @@ contract BirdFarm is Ownable {
     /// @dev deposit pool tokens to BirdFarm for reward tokens allocation.
     /// @param _pid pool id
     /// @param _amount how many tokens you want to stake
-    function deposit(uint256 _pid, uint256 _amount) external {
+    function deposit(uint256 _pid, uint256 _tokenId) external {
+        uint256 _amount = 1;
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(_amount > 0, "Must deposit amount more than zero.");
@@ -274,17 +275,17 @@ contract BirdFarm is Ownable {
         pool.poolToken.safeTransferFrom(
             address(msg.sender),
             address(this),
-            _amount
+            _tokenId
         ); 
-        emit Deposit(msg.sender, _pid, _amount);
+        emit Deposit(msg.sender, _pid, _tokenId);
     }
 
     /// @notice get the tokens back from BardFarm
     /// @dev withdraw or unstake pool tokens from BidFarm
     /// @param _pid pool id
     /// @param _amount how many pool tokens you want to unstake
-    function withdraw(uint256 _pid, uint256 _amount) external {
-        require(_amount > 0, "Must withdraw amount more than zero.");
+    function withdraw(uint256 _pid, uint256 _tokenId) external {
+        uint256 _amount = 1;
         require(
             now > usersCanUnstakeAtTime,
             "Can not withdraw/unstake at this time."
@@ -307,8 +308,8 @@ contract BirdFarm is Ownable {
         user.rewardDebt = user.amount.mul(pool.accRewardTokenPerShare).div(
             1e12
         );
-        pool.poolToken.safeTransfer(address(msg.sender), _amount);
-        emit Withdraw(msg.sender, _pid, _amount);
+        pool.poolToken.safeTransfer(address(msg.sender), _tokenId);
+        emit Withdraw(msg.sender, _pid, _tokenId);
     }
 
     /// @notice harvest reward tokens from BardFarm
