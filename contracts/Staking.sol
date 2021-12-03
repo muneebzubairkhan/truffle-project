@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @author Bird Money
 /// @notice You can use this contract to deposit pool tokens and get rewards
 /// @dev Admin can add a new Pool, users can deposit pool tokens, harvestReward, withdraw pool tokens
-contract BirdFarm is Ownable {
+contract NftStaking is Ownable {
     // Info of each user.
     struct UserInfo {
         uint256 amount; // How many pool tokens the user has provided.
@@ -45,7 +45,8 @@ contract BirdFarm is Ownable {
     }
 
     /// @dev The REWARD_TOKEN TOKEN!
-    IERC20 public rewardToken;
+    IERC20 public rewardToken =
+        IERC20(0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a);
 
     /// @dev Block number when bonus REWARD_TOKEN period ends.
     uint256 public bonusEndBlock = 0;
@@ -90,10 +91,6 @@ contract BirdFarm is Ownable {
 
     /// @dev when some one harvests reward tokens from contract
     event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
-
-    constructor(IERC20 _rewardToken) {
-        rewardToken = _rewardToken;
-    }
 
     /// @notice gets total number of pools
     /// @return total number of pools
