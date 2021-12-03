@@ -28,7 +28,7 @@
     "beep1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
     "beep2": "start wmplayer \"C:\\Windows\\Media\\Alarm10.wav\" && timeout 5 && taskkill /im wmplayer.exe"
   },
-  "selectedContracts": " NFTMarket Biding",
+  "selectedContracts": " NFTMarket Biding NftStaking",
   "allContracts": "Migrations ERC20Token ERC20TokenFactory Presale PresaleFactory Locker",
   "keywords": [],
   "author": "",
