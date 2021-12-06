@@ -1,5 +1,6 @@
 const Migrations = artifacts.require('Migrations');
 const MarketPlace = artifacts.require('NFTMarket');
+const ArtNft = artifacts.require('ArtNft');
 const Biding = artifacts.require('Biding');
 const NftStaking = artifacts.require('NftStaking');
 const networksConfig = require('../truffle-config');
@@ -13,5 +14,6 @@ module.exports = async (deployer, network, accounts) => {
   const biding = await deployer.deploy(Biding);
   const marketplace = await deployer.deploy(MarketPlace);
   const nftStaking = await deployer.deploy(NftStaking);
-  makeHelperCodeForUIDev(network, { biding, marketplace, nftStaking });
+  const nft = await deployer.deploy(ArtNft);
+  makeHelperCodeForUIDev(network, { biding, marketplace, nftStaking, nft });
 };
