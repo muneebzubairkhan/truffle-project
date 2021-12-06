@@ -19,7 +19,7 @@
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" --ext .sol",
     "_____": "_____",
     "verify":"truffle run verify %npm_package_selectedContracts% --network bscTestnet",
-    "startBscTestnet": "truffle migrate --network bscTestnet --reset && truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
+    "startBscTestnet": "truffle migrate --network bscTestnet --all --reset && truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify %npm_package_selectedContracts% --network bscMainnet",
     "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify %npm_package_selectedContracts% --network rinkeby",
     "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify %npm_package_selectedContracts% --network mainnet",

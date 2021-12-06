@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.7;
-
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @author Bird Money
 /// @notice You can use this contract to deposit pool tokens and get rewards
 /// @dev Admin can add a new Pool, users can deposit pool tokens, harvestReward, withdraw pool tokens
-contract NftStaking is Ownable {
+contract NftStaking is Ownable, IERC721Receiver {
     // Info of each user.
     struct UserInfo {
         uint256 amount; // How many pool tokens the user has provided.
@@ -172,6 +172,17 @@ contract NftStaking is Ownable {
         }
     }
 
+    // get pid from token address
+    function getPidOfToken(address _token) external view returns (uint256) {
+        for (uint256 index = 0; index < poolInfo.length; index++) {
+            if (address(poolInfo[index].poolToken) == _token) {
+                return index;
+            }
+        }
+
+        return type(uint256).max;
+    }
+
     /// @notice get reward tokens to show on UI
     /// @dev calculates reward tokens of a user with repect to pool id
     /// @param _pid the pool id
@@ -263,7 +274,7 @@ contract NftStaking is Ownable {
         user.rewardDebt =
             (user.amount * (pool.accRewardTokenPerShare)) /
             (1e12);
-        pool.poolToken.safeTransferFrom(
+        pool.poolToken.transferFrom(
             address(msg.sender),
             address(this),
             _tokenId
@@ -304,7 +315,7 @@ contract NftStaking is Ownable {
         user.rewardDebt =
             (user.amount * (pool.accRewardTokenPerShare)) /
             (1e12);
-        pool.poolToken.safeTransferFrom(
+        pool.poolToken.transferFrom(
             address(this),
             address(msg.sender),
             _tokenId
@@ -465,4 +476,13 @@ contract NftStaking is Ownable {
     /// @dev End Reward Block Changed
     /// @param endBlock block when rewards are ended to be distributed per block to community or users
     event EndRewardBlockChanged(uint256 endBlock);
+
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes memory
+    ) public virtual override returns (bytes4) {
+        return this.onERC721Received.selector;
+    }
 }
