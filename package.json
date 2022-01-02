@@ -1,26 +1,22 @@
 {
-  "name": "simple-erc20",
+  "name": "cute-smart-contracts",
   "version": "1.0.0",
   "description": "",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
   },
-  "selectedContracts": "ArtNft NFTMarket Biding NftStaking",
+  "selectedContracts": "SnowiesClub",
+  "selectedNetwork": "fuji",
+  "allContracts": "Migrations SnowiesClub",
   "scripts": {
-    "start": "truffle test",
-    "s": "yarn start",
-    "d": "yarn startBscTestnet && yarn beep1",
-    "g": "ganache-cli",
-    "m": "truffle migrate --reset && yarn beep1",
-    "c": "truffle compile",
-    "t": "truffle test",
+    "start": "truffle migrate --reset --network development",
     "____": "_____",
     "testRegular": "nodemon --exec \"truffle test && yarn beep1\" --ext \".test.js .sol\"",
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" --ext .sol",
     "_____": "_____",
-    "verify":"truffle run verify %npm_package_selectedContracts% --network bscTestnet",
-    "startBscTestnet": "truffle migrate --network bscTestnet --all --reset && truffle run verify Migrations Presale PresaleFactory Locker --network bscTestnet",
+    "verify": "truffle run verify %npm_package_selectedContracts% --network %npm_package_selectedNetwork%",
+    "startBscTestnet": "truffle migrate --network bscTestnet --all --reset && truffle run verify %npm_package_selectedContracts% --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify %npm_package_selectedContracts% --network bscMainnet",
     "startRinkeby": "truffle migrate --network rinkeby --reset && truffle run verify %npm_package_selectedContracts% --network rinkeby",
     "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify %npm_package_selectedContracts% --network mainnet",
@@ -29,19 +25,16 @@
     "beep1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
     "beep2": "start wmplayer \"C:\\Windows\\Media\\Alarm10.wav\" && timeout 5 && taskkill /im wmplayer.exe"
   },
-  "allContracts": "Migrations ERC20Token ERC20TokenFactory Presale PresaleFactory Locker",
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@openzeppelin/contracts": "^4.4.0",
-    "@truffle/hdwallet-provider": "^1.2.2",
+    "@openzeppelin/contracts": "^4.4.1",
+    "@truffle/hdwallet-provider": "^2.0.0",
     "dotenv": "^10.0.0",
     "eth-gas-reporter": "^0.2.22",
-    "global": "^4.4.0",
-    "hdwallet": "^0.7.3",
     "nodemon": "^2.0.13",
-    "truffle-plugin-verify": "^0.5.8",
+    "truffle-plugin-verify": "^0.5.20",
     "web3-utils": "^1.5.3"
   }
 }

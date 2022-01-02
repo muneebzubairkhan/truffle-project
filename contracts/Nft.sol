@@ -1,80 +1,33 @@
 // Hi. If you have any questions or comments in this smart contract please let me know at:
-// Whatsapp +923014440289, Telegram @thinkmuneeb, discord: timon#1213, I'm Muneeb Zubair Khan
+// muneeb.zubair.hash@gmail.com, Whatsapp +923014440289, Telegram @thinkmuneeb, discord: timon#1213, I'm Muneeb Zubair Khan
 //
 //
 // Smart Contract Made by Muneeb Zubair Khan
-// The UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash.
+// The UI is made by Abraham Peter, abraham.peter.hash@gmail.com, Whatsapp +923004702553, Telegram @Abrahampeterhash.
 //
 //
 //
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.11;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract ArtNft is ERC721("Art Nft", "NFT") {
-    string public baseURI;
+// todo: 
+// * ipfs pic
+// * test contract full minted.
+contract SnowiesClub is ERC721("Snowies Club", "SNOC") {
     bool public isSaleActive;
-    uint256 public circulatingSupply;
-    address public owner = msg.sender;
-    uint256 public itemPrice = 0.08 ether;
-    uint256 public itemPricePresale = 0.06 ether;
-    uint256 public constant totalSupply = 10_333;
+    uint256 public itemPrice = 0.125 ether;
 
-    address public marketing = 0x15b5C64EA09dC8cdc1ad31869d2Aa64f5Dd80377;
+    uint256 public circulatingSupply;
+    uint256 public reservedSupply = 130;
+    uint256 public totalSupply = 10_030;
+
+    address public owner = 0x1f6482D3175981CF2a6b9562876fF995b188790c;
     address public dev = 0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C;
 
-    bool public isAllowListActive;
-    uint256 public allowListMaxMint = 3;
-    mapping(address => bool) public onAllowList;
-    mapping(address => uint256) public allowListClaimedBy;
-
-    constructor () public {
-        
-    }
-    ////////////////////
-    //   ALLOWLIST    //
-    ////////////////////
-    function addToAllowList(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onAllowList[addresses[i]] = true;
-    }
-
-    function removeFromAllowList(address[] calldata addresses)
-        external
-        onlyOwner
-    {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onAllowList[addresses[i]] = false;
-    }
-
-    ////////////////////
-    //    PRESALE     //
-    ////////////////////
-
-    // Purchase multiple NFTs at once
-    function purchasePresaleTokens(uint256 _howMany)
-        external
-        payable
-        tokensAvailable(_howMany)
-    {
-        require(isAllowListActive, "Allowlist is not active");
-        require(onAllowList[msg.sender], "You are not in allowlist");
-        require(
-            allowListClaimedBy[msg.sender] + _howMany <= allowListMaxMint,
-            "Purchase exceeds max allowed"
-        );
-        require(
-            msg.value >= _howMany * itemPricePresale,
-            "Try to send more ETH"
-        );
-
-        allowListClaimedBy[msg.sender] += _howMany;
-
-        for (uint256 i = 0; i < _howMany; i++)
-            _mint(msg.sender, ++circulatingSupply);
-    }
+    string public baseURI = "ipfs://QmUTcWZYRHjVNA864jyoiUxGwD3WfoKUge6f3aWRm332Tq/";
 
     ////////////////////
     //  PUBLIC SALE   //
@@ -87,8 +40,10 @@ contract ArtNft is ERC721("Art Nft", "NFT") {
         tokensAvailable(_howMany)
     {
         require(isSaleActive, "Sale is not active");
-        require(_howMany > 0 && _howMany <= 10, "Mint min 1, max 10");
-        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
+        require(_howMany <= 10, "Mint max 10");
+        require(msg.value == _howMany * itemPrice, "Send exact tokens");
+
+        if(_howMany == 10) _howMany++; // some one mints 10 he get 1 nft extra
 
         for (uint256 i = 0; i < _howMany; i++)
             _mint(msg.sender, ++circulatingSupply);
@@ -110,28 +65,16 @@ contract ArtNft is ERC721("Art Nft", "NFT") {
     function withdrawETH() external onlyOwner {
         uint256 balance = address(this).balance;
 
-        uint256 _35_percent = (balance * 0.35 ether) / 1 ether;
-        uint256 _63_percent = (balance * 0.63 ether) / 1 ether;
-        uint256 _2_percent = (balance * 0.02 ether) / 1 ether;
+        uint256 _15_percent = (balance * 0.15 ether) / 1 ether;
+        uint256 _85_percent = (balance * 0.85 ether) / 1 ether;
 
-        payable(msg.sender).transfer(_63_percent);
-        payable(marketing).transfer(_35_percent);
-        payable(dev).transfer(_2_percent);
+        payable(dev).transfer(_15_percent);
+        payable(owner).transfer(_85_percent);
     }
 
-    // set limit of allowlist
-    function setAllowListMaxMint(uint256 _allowListMaxMint) external onlyOwner {
-        allowListMaxMint = _allowListMaxMint;
-    }
-
-    // Change price in case of ETH price changes too much
+    // Change price in case of token prices changes too much
     function setPrice(uint256 _newPrice) external onlyOwner {
         itemPrice = _newPrice;
-    }
-
-    // Change presale price in case of ETH price changes too much
-    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
-        itemPricePresale = _itemPricePresale;
     }
 
     // Hide identity or show identity from here
@@ -159,33 +102,21 @@ contract ArtNft is ERC721("Art Nft", "NFT") {
             _mint(_sendNftsTo, ++circulatingSupply);
     }
 
-    function setIsAllowListActive(bool _isAllowListActive) external onlyOwner {
-        isAllowListActive = _isAllowListActive;
-    }
-
     ///////////////////
-    // Query Method  //
+    //  Helper Code  //
     ///////////////////
-
-    function tokensRemaining() public view returns (uint256) {
-        return totalSupply - circulatingSupply;
-    }
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 
-    ///////////////////
-    //  Helper Code  //
-    ///////////////////
-
     modifier tokensAvailable(uint256 _howMany) {
-        require(_howMany <= tokensRemaining(), "Try minting less tokens");
+        require(_howMany <= totalSupply - circulatingSupply - reservedSupply, "Try minting less tokens");
         _;
     }
 
     modifier onlyOwner() {
-        require(owner == msg.sender, "Ownable: caller is not the owner");
+        require(owner == msg.sender, "Caller is not the owner");
         _;
     }
 }
