@@ -111,7 +111,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.8.11",
+      version: "0.8.0",
       settings: {
         optimizer: {
           enabled: true,
@@ -124,5 +124,5 @@ module.exports = {
     reporter: "eth-gas-reporter",
   },
 };
-// truffle run verify SnowiesClub --network fuji
-// truffle migrate --reset --network fuji
+// sudo truffle run verify SnowiesClub --network fuji
+// sudo truffle migrate --reset --network fuji

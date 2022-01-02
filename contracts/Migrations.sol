@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.0;
 
 contract Migrations {
     function setCompleted(uint256 completed) public {}
