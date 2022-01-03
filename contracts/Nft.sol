@@ -13,9 +13,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-// todo: 
-// * ipfs pic
-// * test contract full minted.
 contract SnowiesClub is ERC721("Snowies Club", "SNOC") {
     bool public isSaleActive;
     uint256 public itemPrice = 0.125 ether;
@@ -27,7 +24,7 @@ contract SnowiesClub is ERC721("Snowies Club", "SNOC") {
     address public owner = 0xc18E78C0F67A09ee43007579018b2Db091116B4C;
     address public dev = 0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C;
 
-    string public baseURI = "ipfs://QmUTcWZYRHjVNA864jyoiUxGwD3WfoKUge6f3aWRm332Tq/";
+    string public baseURI = "ipfs://QmWF7xMCdMJvHq5G1mXHvJ97brA7VggWR7tT6Cu2vKvH2i/";
 
     constructor () {
         _mint(msg.sender, ++circulatingSupply);
