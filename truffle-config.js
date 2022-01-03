@@ -124,5 +124,7 @@ module.exports = {
     reporter: "eth-gas-reporter",
   },
 };
-// sudo truffle run verify SnowiesClub --network fuji
 // sudo truffle migrate --reset --network fuji
+// sudo truffle run verify SnowiesClub --network fuji
+
+// sudo truffle run verify SnowiesClub --network rinkeby
