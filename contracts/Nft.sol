@@ -19,9 +19,14 @@ contract NFT is ERC721Enumerable, Ownable {
   bool public paused = false;
   bool public revealed = false;
   bool public onlyWhitelisted = true;
-  address[] public whitelistedAddresses;
   mapping(address => uint256) public addressMintedBalance;
 
+    // white list variables
+    uint256 public itemPricePresale = 0.06 ether;
+    bool public isAllowListActive;
+    uint256 public allowListMaxMint = 3;
+    mapping(address => bool) public onAllowList;
+    mapping(address => uint256) public allowListClaimedBy;
 
   constructor(
     string memory _name,
@@ -38,6 +43,48 @@ contract NFT is ERC721Enumerable, Ownable {
     return baseURI;
   }
 
+    ////////////////////
+    //   ALLOWLIST    //
+    ////////////////////
+
+    function addToAllowList(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++)
+            onAllowList[addresses[i]] = true;
+    }
+
+    function removeFromAllowList(address[] calldata addresses)
+        external
+        onlyOwner
+    {
+        for (uint256 i = 0; i < addresses.length; i++)
+            onAllowList[addresses[i]] = false;
+    }
+
+    function purchasePresaleTokens(uint256 _mintAmount)
+        external
+        payable
+    {
+         require(_mintAmount > 0, "need to mint at least 1 NFT");
+        uint256 supply = totalSupply();
+        require(supply + _mintAmount <= maxSupply, "max NFT limit exceeded");
+        require(isAllowListActive, "Allowlist is not active");
+        require(onAllowList[msg.sender], "You are not in allowlist");
+        require(
+            allowListClaimedBy[msg.sender] + _mintAmount <= allowListMaxMint,
+            "Purchase exceeds max allowed"
+        );
+        require(
+            msg.value >= _mintAmount * itemPricePresale,
+            "Try to send more ETH"
+        );
+
+        allowListClaimedBy[msg.sender] += _mintAmount;
+
+        for (uint256 i = 1; i <= _mintAmount; i++)
+            _safeMint(msg.sender, supply + i);
+    
+    }
+
   // public
   function mint(uint256 _mintAmount) public payable {
     require(!paused, "the contract is paused");
@@ -45,30 +92,14 @@ contract NFT is ERC721Enumerable, Ownable {
     require(_mintAmount > 0, "need to mint at least 1 NFT");
     require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
     require(supply + _mintAmount <= maxSupply, "max NFT limit exceeded");
-
-    if (msg.sender != owner()) {
-        if(onlyWhitelisted == true) {
-            require(isWhitelisted(msg.sender), "user is not whitelisted");
-            uint256 ownerMintedCount = addressMintedBalance[msg.sender];
-            require(ownerMintedCount + _mintAmount <= nftPerAddressLimit, "max NFT per address exceeded");
-        }
-        require(msg.value >= cost * _mintAmount, "insufficient funds");
-    }
+    require(msg.value >= cost * _mintAmount, "insufficient funds");
     
-    for (uint256 i = 1; i <= _mintAmount; i++) {
-        addressMintedBalance[msg.sender]++;
-      _safeMint(msg.sender, supply + i);
-    }
+    for (uint256 i = 1; i <= _mintAmount; i++)
+       _safeMint(msg.sender, supply + i);
+
   }
   
-  function isWhitelisted(address _user) public view returns (bool) {
-    for (uint i = 0; i < whitelistedAddresses.length; i++) {
-      if (whitelistedAddresses[i] == _user) {
-          return true;
-      }
-    }
-    return false;
-  }
+  
 
   function walletOfOwner(address _owner)
     public
@@ -134,6 +165,20 @@ contract NFT is ERC721Enumerable, Ownable {
     notRevealedUri = _notRevealedURI;
   }
 
+    // set limit of allowlist
+    function setAllowListMaxMint(uint256 _allowListMaxMint) external onlyOwner {
+        allowListMaxMint = _allowListMaxMint;
+    }
+
+    // Change presale price in case of ETH price changes too much
+    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
+        itemPricePresale = _itemPricePresale;
+    }
+
+    function setIsAllowListActive(bool _isAllowListActive) external onlyOwner {
+        isAllowListActive = _isAllowListActive;
+    }
+
   function pause(bool _state) public onlyOwner {
     paused = _state;
   }
@@ -142,10 +187,6 @@ contract NFT is ERC721Enumerable, Ownable {
     onlyWhitelisted = _state;
   }
   
-  function whitelistUsers(address[] calldata _users) public onlyOwner {
-    delete whitelistedAddresses;
-    whitelistedAddresses = _users;
-  }
  
   function withdraw() public payable onlyOwner {
         (bool success, ) = payable(msg.sender).call{
