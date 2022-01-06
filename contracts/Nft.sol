@@ -1,123 +1,156 @@
-// Hi. If you have any questions or comments in this smart contract please let me know at:
-// muneeb.zubair.hash@gmail.com, Whatsapp +923014440289, Telegram @thinkmuneeb, discord: timon#1213, I'm Muneeb Zubair Khan
-//
-//
-// Smart Contract Made by Muneeb Zubair Khan
-// The UI is made by Abraham Peter, abraham.peter.hash@gmail.com, Whatsapp +923004702553, Telegram @Abrahampeterhash.
-//
-//
-//
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 
-pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+pragma solidity >=0.7.0 <0.9.0;
 
-contract SnowiesClub is ERC721("Snowies Club", "SNOC") {
-    bool public isSaleActive;
-    uint256 public itemPrice = 0.125 ether;
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-    uint256 public circulatingSupply;
-    uint256 public reservedSupply = 130;
-    uint256 public totalSupply = 10_030;
+contract NFT is ERC721Enumerable, Ownable {
+  using Strings for uint256;
 
-    address public owner = 0xc18E78C0F67A09ee43007579018b2Db091116B4C;
-    address public dev = 0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C;
+  string public baseURI;
+  string public baseExtension = ".json";
+  string public notRevealedUri;
+  uint256 public cost = 1 ether;
+  uint256 public maxSupply = 10000;
+  uint256 public maxMintAmount = 20;
+  uint256 public nftPerAddressLimit = 3;
+  bool public paused = false;
+  bool public revealed = false;
+  bool public onlyWhitelisted = true;
+  address[] public whitelistedAddresses;
+  mapping(address => uint256) public addressMintedBalance;
 
-    string public baseURI = "ipfs://QmWF7xMCdMJvHq5G1mXHvJ97brA7VggWR7tT6Cu2vKvH2i/";
 
-    constructor () {
-        _mint(msg.sender, ++circulatingSupply);
+  constructor(
+    string memory _name,
+    string memory _symbol,
+    string memory _initBaseURI,
+    string memory _initNotRevealedUri
+  ) ERC721(_name, _symbol) {
+    setBaseURI(_initBaseURI);
+    setNotRevealedURI(_initNotRevealedUri);
+  }
+
+  // internal
+  function _baseURI() internal view virtual override returns (string memory) {
+    return baseURI;
+  }
+
+  // public
+  function mint(uint256 _mintAmount) public payable {
+    require(!paused, "the contract is paused");
+    uint256 supply = totalSupply();
+    require(_mintAmount > 0, "need to mint at least 1 NFT");
+    require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
+    require(supply + _mintAmount <= maxSupply, "max NFT limit exceeded");
+
+    if (msg.sender != owner()) {
+        if(onlyWhitelisted == true) {
+            require(isWhitelisted(msg.sender), "user is not whitelisted");
+            uint256 ownerMintedCount = addressMintedBalance[msg.sender];
+            require(ownerMintedCount + _mintAmount <= nftPerAddressLimit, "max NFT per address exceeded");
+        }
+        require(msg.value >= cost * _mintAmount, "insufficient funds");
+    }
+    
+    for (uint256 i = 1; i <= _mintAmount; i++) {
+        addressMintedBalance[msg.sender]++;
+      _safeMint(msg.sender, supply + i);
+    }
+  }
+  
+  function isWhitelisted(address _user) public view returns (bool) {
+    for (uint i = 0; i < whitelistedAddresses.length; i++) {
+      if (whitelistedAddresses[i] == _user) {
+          return true;
+      }
+    }
+    return false;
+  }
+
+  function walletOfOwner(address _owner)
+    public
+    view
+    returns (uint256[] memory)
+  {
+    uint256 ownerTokenCount = balanceOf(_owner);
+    uint256[] memory tokenIds = new uint256[](ownerTokenCount);
+    for (uint256 i; i < ownerTokenCount; i++) {
+      tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
+    }
+    return tokenIds;
+  }
+
+  function tokenURI(uint256 tokenId)
+    public
+    view
+    virtual
+    override
+    returns (string memory)
+  {
+    require(
+      _exists(tokenId),
+      "ERC721Metadata: URI query for nonexistent token"
+    );
+    
+    if(revealed == false) {
+        return notRevealedUri;
     }
 
-    ////////////////////
-    //  PUBLIC SALE   //
-    ////////////////////
+    string memory currentBaseURI = _baseURI();
+    return bytes(currentBaseURI).length > 0
+        ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
+        : "";
+  }
 
-    // Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany)
-        external
-        payable
-        tokensAvailable(_howMany)
-    {
-        require(isSaleActive, "Sale is not active");
-        require(_howMany <= 10, "Mint max 10");
-        require(msg.value == _howMany * itemPrice, "Send exact tokens");
+  //only owner
+  function reveal() public onlyOwner {
+      revealed = true;
+  }
+  
+  function setNftPerAddressLimit(uint256 _limit) public onlyOwner {
+    nftPerAddressLimit = _limit;
+  }
+  
+  function setCost(uint256 _newCost) public onlyOwner {
+    cost = _newCost;
+  }
 
-        if(_howMany == 10) _howMany++; // some one mints 10 he get 1 nft extra
+  function setmaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner {
+    maxMintAmount = _newmaxMintAmount;
+  }
 
-        for (uint256 i = 0; i < _howMany; i++)
-            _mint(msg.sender, ++circulatingSupply);
-    }
+  function setBaseURI(string memory _newBaseURI) public onlyOwner {
+    baseURI = _newBaseURI;
+  }
 
-    //////////////////////////
-    // Only Owner Methods   //
-    //////////////////////////
+  function setBaseExtension(string memory _newBaseExtension) public onlyOwner {
+    baseExtension = _newBaseExtension;
+  }
+  
+  function setNotRevealedURI(string memory _notRevealedURI) public onlyOwner {
+    notRevealedUri = _notRevealedURI;
+  }
 
-    function stopSale() external onlyOwner {
-        isSaleActive = false;
-    }
-
-    function startSale() external onlyOwner {
-        isSaleActive = true;
-    }
-
-    // Owner can withdraw ETH from here
-    function withdrawETH() external onlyOwner {
-        uint256 balance = address(this).balance;
-
-        uint256 _15_percent = (balance * 0.15 ether) / 1 ether;
-        uint256 _85_percent = (balance * 0.85 ether) / 1 ether;
-
-        payable(dev).transfer(_15_percent);
-        payable(owner).transfer(_85_percent);
-    }
-
-    // Change price in case of token prices changes too much
-    function setPrice(uint256 _newPrice) external onlyOwner {
-        itemPrice = _newPrice;
-    }
-
-    // Hide identity or show identity from here
-    function setBaseURI(string memory __baseURI) external onlyOwner {
-        baseURI = __baseURI;
-    }
-
-    // Send NFTs to a list of addresses
-    function giftNftToList(address[] calldata _sendNftsTo)
-        external
-        onlyOwner
-        tokensAvailable(_sendNftsTo.length)
-    {
-        for (uint256 i = 0; i < _sendNftsTo.length; i++)
-            _mint(_sendNftsTo[i], ++circulatingSupply);
-    }
-
-    // Send NFTs to a single address
-    function giftNftToAddress(address _sendNftsTo, uint256 _howMany)
-        external
-        onlyOwner
-        tokensAvailable(_howMany)
-    {
-        for (uint256 i = 0; i < _howMany; i++)
-            _mint(_sendNftsTo, ++circulatingSupply);
-    }
-
-    ///////////////////
-    //  Helper Code  //
-    ///////////////////
-
-    function _baseURI() internal view override returns (string memory) {
-        return baseURI;
-    }
-
-    modifier tokensAvailable(uint256 _howMany) {
-        require(_howMany <= totalSupply - circulatingSupply - reservedSupply, "Try minting less tokens");
-        _;
-    }
-
-    modifier onlyOwner() {
-        require(owner == msg.sender, "Caller is not the owner");
-        _;
+  function pause(bool _state) public onlyOwner {
+    paused = _state;
+  }
+  
+  function setOnlyWhitelisted(bool _state) public onlyOwner {
+    onlyWhitelisted = _state;
+  }
+  
+  function whitelistUsers(address[] calldata _users) public onlyOwner {
+    delete whitelistedAddresses;
+    whitelistedAddresses = _users;
+  }
+ 
+  function withdraw() public payable onlyOwner {
+        (bool success, ) = payable(msg.sender).call{
+            value: address(this).balance
+        }("");
+        require(success);
     }
 }
