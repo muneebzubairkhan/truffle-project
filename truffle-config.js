@@ -1,4 +1,5 @@
 var HDWalletProvider = require("@truffle/hdwallet-provider");
+const { toWei } = require("web3-utils");
 require("dotenv").config();
 const MNEMONIC = process.env.MNEMONIC;
 const token = process.env.INFURA_TOKEN;
@@ -37,6 +38,18 @@ module.exports = {
       // confirmations: 5,
       skipDryRun: true,
       explorerUrl: "https://testnet.snowtrace.io/address/",
+      web3Provider: "https://api.avax-test.network/ext/bc/C/rpc",
+    },
+    avaxMainnet: {
+      provider: () =>
+        new HDWalletProvider(MNEMONIC, "https://api.avax.network/ext/bc/C/rpc"),
+      network_id: 1,
+      timeoutBlocks: 200,
+      // confirmations: 5,
+      gas: 3000000,
+      gasPrice: toWei("25", "gwei"),
+      skipDryRun: true,
+      explorerUrl: "https://snowtrace.io/address/",
       web3Provider: "https://api.avax-test.network/ext/bc/C/rpc",
     },
 
@@ -126,5 +139,7 @@ module.exports = {
 };
 // sudo truffle migrate --reset --network fuji
 // sudo truffle run verify SnowiesClub --network fuji
+// sudo truffle migrate --reset --network avaxMainnet
+// sudo truffle run verify SnowiesClub@0x91feC052341750d3C6DaE4E8fD258D05f82C47a0 --network avaxMainne
 
 // sudo truffle run verify SnowiesClub --network rinkeby
