@@ -5,7 +5,7 @@ const { makeHelperCodeForUIDev: makeUiCode } = require('./helper');
 module.exports = async (deployer, network, accounts) => {
   // if (network === "development") return;
 
-  await deployer.deploy(Migrations);
+  // await deployer.deploy(Migrations);
   const nft = await deployer.deploy(SnowiesClub);
   makeUiCode(network, { nft });
 };

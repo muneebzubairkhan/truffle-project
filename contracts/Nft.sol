@@ -21,7 +21,7 @@ contract SnowiesClub is ERC721("Snowies Club", "SNOC") {
     uint256 public reservedSupply = 130;
     uint256 public totalSupply = 10_030;
 
-    address public owner = 0xc18E78C0F67A09ee43007579018b2Db091116B4C;
+    address public owner = 0x1f6482D3175981CF2a6b9562876fF995b188790c;
     address public dev = 0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C;
 
     string public baseURI = "ipfs://QmWF7xMCdMJvHq5G1mXHvJ97brA7VggWR7tT6Cu2vKvH2i/";
