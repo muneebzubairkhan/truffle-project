@@ -31,10 +31,9 @@ abstract contract ERC20Pausable is Ownable, Pausable, ERC20("Rarible", "RARI") {
 contract RariToken is ERC20Pausable {
     bool public mintStopped = false;
 
-    function mint(address account, uint256 amount) public onlyOwner returns (bool) {
+    function mint(address account, uint256 amount) public onlyOwner {
         require(!mintStopped, "mint is stopped");
         _mint(account, amount);
-        return true;
     }
 
     function stopMint() public onlyOwner {
