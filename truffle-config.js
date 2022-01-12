@@ -142,4 +142,9 @@ module.exports = {
 // sudo truffle migrate --reset --network avaxMainnet
 // sudo truffle run verify SnowiesClub@0x91feC052341750d3C6DaE4E8fD258D05f82C47a0 --network avaxMainne
 
+// sudo truffle run verify NftStaking@0x4ab87EdbbA8855DC328305453f35c6C12C1Fac67 --network rinkeby
+// sudo truffle run verify NftStaking@0x813BC1Cf2Ab6566FCD0b82c9309645b29c3D950C --network rinkeby
+
 // sudo truffle run verify SnowiesClub --network rinkeby
+
+// truffle-flattener <solidity-files>
