@@ -34,7 +34,7 @@ const makeHelperCodeForUIDev = (network, contracts) => {
   res += '//\n//=========================\n\n';
   res += makeContractObjects(web3Provider, contracts);
 
-  fs.writeFile('smart-contracts.js', res, (e) => console.log(e.message));
+  fs.writeFile('smart-contracts.js', res, (e) => e && console.log(e.message));
 };
 
 // capitalizeFirstLetter
