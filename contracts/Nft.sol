@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.7.0 <0.9.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+
+// todo add weight for merged penguins
+// done: depositMany nfts
 
 // BirdFarm is the master of RewardToken. He can make RewardToken and he is a fair guy.
 //
@@ -18,7 +20,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 /// @author Bird Money
 /// @notice You can use this contract to deposit pool tokens and get rewards
 /// @dev Admin can add a new Pool, users can deposit pool tokens, harvestReward, withdraw pool tokens
-contract NftStaking is Ownable, ReentrancyGuard, IERC721Receiver {
+contract NftStaking is Ownable, IERC721Receiver {
     // Info of each user.
     struct UserInfo {
         uint256 amount; // How many pool tokens the user has provided.
@@ -85,13 +87,33 @@ contract NftStaking is Ownable, ReentrancyGuard, IERC721Receiver {
     mapping(IERC721 => bool) private uniqueTokenInPool;
 
     /// @dev when some one deposits pool tokens to contract
-    event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
+    event Deposit(
+        address indexed user,
+        uint256 indexed pid,
+        uint256[] tokenIds
+    );
+
+     event Deposit(
+        address indexed user,
+        uint256 indexed pid,
+        uint256 tokenId
+    );
 
     /// @dev when some one withdraws pool tokens from contract
-    event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
+    event Withdraw(
+        address indexed user,
+        uint256 indexed pid,
+        uint256[] tokenIds
+    );
+
+    event Withdraw(address indexed user, uint256 indexed pid, uint256 tokenIds);
 
     /// @dev when some one harvests reward tokens from contract
     event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
+
+    constructor() {
+        add(10000, IERC721(0x4BD39d433bb884e28AA49402ED33479d0Cf720A1), true);
+    }
 
     /// @notice gets total number of pools
     /// @return total number of pools
@@ -108,7 +130,7 @@ contract NftStaking is Ownable, ReentrancyGuard, IERC721Receiver {
         uint256 _allocPoint,
         IERC721 _poolToken,
         bool _withUpdate
-    ) external onlyOwner {
+    ) public onlyOwner {
         require(!uniqueTokenInPool[_poolToken], "Token already added");
         uniqueTokenInPool[_poolToken] = true;
 
@@ -219,9 +241,8 @@ contract NftStaking is Ownable, ReentrancyGuard, IERC721Receiver {
     /// @notice Update reward vairables for all pools. Be careful of gas spending!
     function massUpdatePools() public {
         uint256 length = poolInfo.length;
-        for (uint256 pid = 0; pid < length; ++pid) {
+        for (uint256 pid = 0; pid < length; ++pid)
             updatePool(pid);
-        }
     }
 
     uint256 private stakedTokens = 0;
@@ -284,13 +305,39 @@ contract NftStaking is Ownable, ReentrancyGuard, IERC721Receiver {
         emit Deposit(msg.sender, _pid, _tokenId);
     }
 
-    function depositMany(uint256[] memory _pids, uint256[] memory _tokenIds)
-        external
-        
-    {
-        for (uint256 i = 0; i <= _tokenIds.length; i++) {
-            deposit(_pids[i], _tokenIds[i]);
-        }
+    function depositMany(uint256 _pid, uint256[] memory _tokenIds) public {
+        require(_tokenIds.length > 0, "minimum 1 tokenId");
+
+        uint256 _amount = _tokenIds.length;
+        // _amount++ on specific penguins
+
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+
+        for (uint256 i = 0; i < _tokenIds.length; i++)
+            nftOwnerOf[pool.poolToken][_tokenIds[i]] = msg.sender;
+
+        updatePool(_pid);
+
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
+            1e12 -
+            user.rewardDebt;
+        user.reward += pending;
+
+        stakedTokens += _amount;
+        user.amount = user.amount + _amount;
+        user.rewardDebt =
+            (user.amount * (pool.accRewardTokenPerShare)) /
+            (1e12);
+        // addToList(msg.sender, _tokenId); // only for ui not for computation
+
+        for (uint256 i = 0; i < _tokenIds.length; i++)
+            pool.poolToken.transferFrom(
+                address(msg.sender),
+                address(this),
+                _tokenIds[i]
+            );
+        emit Deposit(msg.sender, _pid, _tokenIds);
     }
 
     /// @notice get the tokens back from BardFarm
@@ -310,6 +357,7 @@ contract NftStaking is Ownable, ReentrancyGuard, IERC721Receiver {
             "you are not owner"
         );
 
+        nftOwnerOf[pool.poolToken][_tokenId] = address(0);
         require(
             user.amount >= _amount,
             "You do not have enough pool tokens staked."
@@ -326,35 +374,179 @@ contract NftStaking is Ownable, ReentrancyGuard, IERC721Receiver {
         user.rewardDebt =
             (user.amount * (pool.accRewardTokenPerShare)) /
             (1e12);
+
+        // harvest reward
+        require(
+            block.timestamp > usersCanHarvestAtTime,
+            "Can not harvest at this time."
+        );
+        pending = (user.amount * (pool.accRewardTokenPerShare)) /
+            1e12 -
+            user.rewardDebt;
+
+        user.reward += pending;
+        uint256 rewardToGiveNow = user.reward;
+        user.reward = 0;
+
+        user.rewardDebt =
+            (user.amount * (pool.accRewardTokenPerShare)) / 1e12;
+
+        rewardToken.transfer(msg.sender, rewardToGiveNow);
         pool.poolToken.transferFrom(
             address(this),
             address(msg.sender),
             _tokenId
         );
+
+        emit Harvest(msg.sender, _pid, pending);
+
         emit Withdraw(msg.sender, _pid, _tokenId);
     }
 
-    function withdrawMany(uint256[] memory _pids, uint256[] memory _tokenIds)
-        external
-        nonReentrant
-    {
-        for (uint256 i = 0; i <= _tokenIds.length; i++) {
-            withdraw(_pids[i], _tokenIds[i]);
+    function withdrawMany(uint256 _pid, uint256[] memory _tokenIds) public {
+        require(_tokenIds.length > 0, "minimum 1 tokenId");
+        uint256 _amount = _tokenIds.length;
+        require(
+            block.timestamp > usersCanUnstakeAtTime,
+            "Can not withdraw/unstake at this time."
+        );
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            require(
+                nftOwnerOf[pool.poolToken][_tokenIds[i]] == msg.sender,
+                "you are not owner"
+            );
+            nftOwnerOf[pool.poolToken][_tokenIds[i]] = address(0);
         }
+
+        updatePool(_pid);
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
+            1e12 -
+            user.rewardDebt;
+
+        user.reward += pending;
+
+        stakedTokens -= _amount;
+        user.amount = user.amount - _amount;
+        user.rewardDebt = (user.amount * (pool.accRewardTokenPerShare)) / 1e12;
+
+        // harvest
+
+        require(
+            block.timestamp > usersCanHarvestAtTime,
+            "Can not harvest at this time."
+        );
+        pending = (user.amount * pool.accRewardTokenPerShare) /
+            1e12 -
+            user.rewardDebt;
+
+        user.reward += pending;
+        uint256 rewardToGiveNow = user.reward;
+        user.reward = 0;
+
+        user.rewardDebt = (user.amount * (pool.accRewardTokenPerShare)) / 1e12;
+
+        rewardToken.transfer(msg.sender, rewardToGiveNow);
+        emit Harvest(msg.sender, _pid, pending);
+    
+
+        for (uint256 i = 0; i < _tokenIds.length; i++)
+            pool.poolToken.transferFrom(
+                address(this),
+                address(msg.sender),
+                _tokenIds[i]
+            );
+
+        emit Withdraw(msg.sender, _pid, _tokenIds);
     }
 
     function depositWithdrawMany(
-        uint256[] memory _pidsD,
+        uint256 _pidD,
         uint256[] memory _tokenIdsD,
-        uint256[] memory _pidsW,
+        uint256 _pidW,
         uint256[] memory _tokenIdsW
-    ) external nonReentrant {
-        for (uint256 i = 0; i <= _tokenIdsD.length; i++) {
-            deposit(_pidsD[i], _tokenIdsD[i]);
-        }
-        for (uint256 i = 0; i <= _tokenIdsW.length; i++) {
-            deposit(_pidsW[i], _tokenIdsW[i]);
-        }
+    ) external {
+        depositMany(_pidD, _tokenIdsD);
+        withdrawMany(_pidW, _tokenIdsW);
+    }
+
+    function depositManyDifferentTokens(
+        uint256 _pidD1,
+        uint256[] memory _tokenIdsD1,
+        uint256 _pidD2,
+        uint256[] memory _tokenIdsD2,
+        uint256 _pidD3,
+        uint256[] memory _tokenIdsD3,
+        uint256 _pidD4,
+        uint256[] memory _tokenIdsD4,
+        uint256 _pidD5,
+        uint256[] memory _tokenIdsD5
+    ) external {
+        if(_tokenIdsD1.length > 0) depositMany(_pidD1, _tokenIdsD1);
+        if(_tokenIdsD2.length > 0) depositMany(_pidD2, _tokenIdsD2);
+        if(_tokenIdsD3.length > 0) depositMany(_pidD3, _tokenIdsD3);
+        if(_tokenIdsD4.length > 0) depositMany(_pidD4, _tokenIdsD4);
+        if(_tokenIdsD5.length > 0) depositMany(_pidD5, _tokenIdsD5);
+    }
+
+    struct Box {
+        uint256 _pid1;
+        uint256[]  _tokenIds1;
+        uint256 _pid2;
+        uint256[]  _tokenIds2;
+        uint256 _pid3;
+        uint256[]  _tokenIds3;
+        uint256 _pid4;
+        uint256[]  _tokenIds4;
+        uint256 _pid5;
+        uint256[]  _tokenIds5;
+        uint256 _pidD1;
+        uint256[]  _tokenIdsD1;
+        uint256 _pidD2;
+        uint256[]  _tokenIdsD2;
+        uint256 _pidD3;
+        uint256[]  _tokenIdsD3;
+        uint256 _pidD4;
+        uint256[]  _tokenIdsD4;
+        uint256 _pidD5;
+        uint256[]  _tokenIdsD5;
+    }
+
+    function depositWithdrawManyDifferentTokens(
+       Box memory __
+    ) external {
+        if(__._tokenIdsD1.length > 0) depositMany(__._pidD1, __._tokenIdsD1);
+        if(__._tokenIdsD2.length > 0) depositMany(__._pidD2, __._tokenIdsD2);
+        if(__._tokenIdsD3.length > 0) depositMany(__._pidD3, __._tokenIdsD3);
+        if(__._tokenIdsD4.length > 0) depositMany(__._pidD4, __._tokenIdsD4);
+        if(__._tokenIdsD5.length > 0) depositMany(__._pidD5, __._tokenIdsD5);
+
+        if(__._tokenIds1.length > 0) withdrawMany(__._pid1, __._tokenIds1);
+        if(__._tokenIds2.length > 0) withdrawMany(__._pid2, __._tokenIds2);
+        if(__._tokenIds3.length > 0) withdrawMany(__._pid3, __._tokenIds3);
+        if(__._tokenIds4.length > 0) withdrawMany(__._pid4, __._tokenIds4);
+        if(__._tokenIds5.length > 0) withdrawMany(__._pid5, __._tokenIds5);
+    }
+
+    function withdrawManyDifferentTokens(
+        uint256 _pid1,
+        uint256[] memory _tokenIds1,
+        uint256 _pid2,
+        uint256[] memory _tokenIds2,
+        uint256 _pid3,
+        uint256[] memory _tokenIds3,
+        uint256 _pid4,
+        uint256[] memory _tokenIds4,
+        uint256 _pid5,
+        uint256[] memory _tokenIds5
+    ) external {
+        if(_tokenIds1.length > 0) withdrawMany(_pid1, _tokenIds1);
+        if(_tokenIds2.length > 0) withdrawMany(_pid2, _tokenIds2);
+        if(_tokenIds3.length > 0) withdrawMany(_pid3, _tokenIds3);
+        if(_tokenIds4.length > 0) withdrawMany(_pid4, _tokenIds4);
+        if(_tokenIds5.length > 0) withdrawMany(_pid5, _tokenIds5);
     }
 
     /// @notice harvest reward tokens from BardFarm
