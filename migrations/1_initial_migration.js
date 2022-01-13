@@ -1,11 +1,11 @@
 const Migrations = artifacts.require('Migrations');
-const SnowiesClub = artifacts.require('SnowiesClub');
+const IglooToken = artifacts.require('IglooToken');
 const { makeHelperCodeForUIDev: makeUiCode } = require('./helper');
 
 module.exports = async (deployer, network, accounts) => {
   // if (network === "development") return;
 
-  // await deployer.deploy(Migrations);
-  const nft = await deployer.deploy(SnowiesClub, { from: accounts[1] });
+  await deployer.deploy(Migrations);
+  const nft = await deployer.deploy(IglooToken);
   makeUiCode(network, { nft });
 };

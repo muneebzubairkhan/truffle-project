@@ -139,7 +139,9 @@ module.exports = {
 };
 // sudo truffle migrate --reset --network fuji
 // sudo truffle run verify SnowiesClub --network fuji
+
 // sudo truffle migrate --reset --network avaxMainnet
 // sudo truffle run verify SnowiesClub@0x91feC052341750d3C6DaE4E8fD258D05f82C47a0 --network avaxMainne
 
-// sudo truffle run verify SnowiesClub --network rinkeby
+// sudo truffle migrate --reset --network rinkeby
+// sudo truffle run verify IglooToken --network rinkeby

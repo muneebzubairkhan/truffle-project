@@ -2,33 +2,16 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-abstract contract ERC20Pausable is Ownable, Pausable, ERC20("Rarible", "RARI") {
-    function transfer(address to, uint256 value) public override whenNotPaused returns (bool) {
-        return super.transfer(to, value);
+contract IglooToken is Ownable, Pausable, ERC20("IGLOO", "IG") {
+    constructor() {
+        _mint(msg.sender, 1 * 1e9 * 1e18); // 1 Billion Supply = 1 * 9 zeros * 18 zeros
     }
 
-    function transferFrom(address from, address to, uint256 value) public override whenNotPaused returns (bool) {
-        return super.transferFrom(from, to, value);
-    }
-
-    function approve(address spender, uint256 value) public override whenNotPaused returns (bool) {
-        return super.approve(spender, value);
-    }
-
-    function increaseAllowance(address spender, uint256 addedValue) public override whenNotPaused returns (bool) {
-        return super.increaseAllowance(spender, addedValue);
-    }
-
-    function decreaseAllowance(address spender, uint256 subtractedValue) public override whenNotPaused returns (bool) {
-        return super.decreaseAllowance(spender, subtractedValue);
-    }
-}
-
-contract RariToken is ERC20Pausable {
+    // minting
     bool public mintStopped = false;
 
     function mint(address account, uint256 amount) public onlyOwner {
@@ -38,5 +21,34 @@ contract RariToken is ERC20Pausable {
 
     function stopMint() public onlyOwner {
         mintStopped = true;
+    }
+
+    // white list
+    mapping(address => bool) private whitelist;
+
+    function setWhitelist(address[] calldata minters) external onlyOwner {
+        for (uint256 i; i < minters.length; i++) whitelist[minters[i]] = true;
+    }
+
+    function whitelist_mint(address account, uint256 amount) external {
+        require(whitelist[msg.sender], "ERC20: sender must be whitelisted");
+        _mint(account, amount);
+    }
+
+    // ERC20Pausable
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override whenNotPaused {
+        super._beforeTokenTransfer(from, to, amount);
     }
 }
