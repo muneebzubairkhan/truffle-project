@@ -284,7 +284,10 @@ contract NftStaking is Ownable, ReentrancyGuard, IERC721Receiver {
         emit Deposit(msg.sender, _pid, _tokenId);
     }
 
-    function depositMany(uint256[] memory _pids, uint256[] memory _tokenIds) external nonReentrant {
+    function depositMany(uint256[] memory _pids, uint256[] memory _tokenIds)
+        external
+        
+    {
         for (uint256 i = 0; i <= _tokenIds.length; i++) {
             deposit(_pids[i], _tokenIds[i]);
         }
@@ -331,15 +334,21 @@ contract NftStaking is Ownable, ReentrancyGuard, IERC721Receiver {
         emit Withdraw(msg.sender, _pid, _tokenId);
     }
 
-    function withdrawMany(uint256[] memory _pids, uint256[] memory _tokenIds) external nonReentrant {
+    function withdrawMany(uint256[] memory _pids, uint256[] memory _tokenIds)
+        external
+        nonReentrant
+    {
         for (uint256 i = 0; i <= _tokenIds.length; i++) {
             withdraw(_pids[i], _tokenIds[i]);
         }
     }
 
-    function depositWithdrawMany(uint256[] memory _pidsD, uint256[] memory _tokenIdsD, 
-                                 uint256[] memory _pidsW, uint256[] memory _tokenIdsW) 
-                                external nonReentrant {
+    function depositWithdrawMany(
+        uint256[] memory _pidsD,
+        uint256[] memory _tokenIdsD,
+        uint256[] memory _pidsW,
+        uint256[] memory _tokenIdsW
+    ) external nonReentrant {
         for (uint256 i = 0; i <= _tokenIdsD.length; i++) {
             deposit(_pidsD[i], _tokenIdsD[i]);
         }
@@ -528,9 +537,58 @@ contract NftStaking is Ownable, ReentrancyGuard, IERC721Receiver {
                 if (owner == _owner) {
                     selectedTokenIdsList[selectedTokenIds] = i;
                     selectedTokenIds++;
-                    if(selectedTokenIds >= _maxNfts) break;
+                    if (selectedTokenIds >= _maxNfts) break;
                 }
             } catch {}
+        }
+
+        return selectedTokenIdsList;
+    }
+
+    // get a list of token ids to check they belong to an address or not
+    // return list of token ids that belong to this address
+    function GetNFTsForAddress(
+        address _owner,
+        address _nftAddress,
+        uint256[] memory _tokenIds,
+        uint256 _maxNfts
+    ) external view returns (uint256[] memory) {
+        uint256 selectedTokenIds = 0;
+        uint256[] memory selectedTokenIdsList = new uint256[](_maxNfts);
+
+        IERC721 nft = IERC721(_nftAddress);
+
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            try nft.ownerOf(_tokenIds[i]) returns (address owner) {
+                if (owner == _owner) {
+                    selectedTokenIdsList[selectedTokenIds] = _tokenIds[i];
+                    selectedTokenIds++;
+                    if (selectedTokenIds >= _maxNfts) break;
+                }
+            } catch {}
+        }
+
+        return selectedTokenIdsList;
+    }
+
+    function GetNFTsStakedForAddress(
+        address _owner,
+        uint256 _pid,
+        uint256 _tokenIdFrom,
+        uint256 _tokenIdTo,
+        uint256 _maxNfts
+    ) external view returns (uint256[] memory) {
+        PoolInfo storage pool = poolInfo[_pid];
+
+        uint256 selectedTokenIds = 0;
+        uint256[] memory selectedTokenIdsList = new uint256[](_maxNfts);
+
+        for (uint256 i = _tokenIdFrom; i <= _tokenIdTo; i++) {
+            if (nftOwnerOf[pool.poolToken][i] == _owner) {
+                selectedTokenIdsList[selectedTokenIds] = i;
+                selectedTokenIds++;
+                if (selectedTokenIds >= _maxNfts) break;
+            }
         }
 
         return selectedTokenIdsList;
