@@ -42,13 +42,19 @@ contract NftStaking is Ownable, IERC721Receiver {
 
     /// @dev The REWARD_TOKEN TOKEN!
     IERC20 public rewardToken =
-        IERC20(0xEf44f26371BF874b5D4c8b49914af169336bc957);
+        IERC20(0xB0BD45395895E006420D76370516a8d274a776E7);
 
     /// @dev Block number when bonus REWARD_TOKEN period ends.
     uint256 public bonusEndBlock = 0;
 
     /// @notice REWARD_TOKEN tokens created per block.
     /// @dev its equal to approx 1000 reward tokens per day
+    // 10,000 tokens
+    // 10 token per day for normal penguin
+    // 30 token per day for merged penguin
+    // 
+    // 6500 blocks per day, 
+    // 6500 * 0.15 = 975 tokens
     uint256 public rewardPerBlock = 0.15 ether;
 
     // Bonus muliplier for early rewardToken makers.
