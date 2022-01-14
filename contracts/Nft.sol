@@ -8,16 +8,10 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 // todo add weight for merged penguins
 // done: depositMany nfts
 
-// BirdFarm is the master of RewardToken. He can make RewardToken and he is a fair guy.
-//
-// Note that it's ownable and the owner wields tremendous power. The ownership
-// will be transferred to a governance smart contract once REWARD_TOKEN is sufficiently
-// distributed and the community can show to govern itself.
-//
 // Have fun reading it. Hopefully it's bug-free. God bless.
 
 /// @title Farming service for pool tokens
-/// @author Bird Money
+/// @author BP
 /// @notice You can use this contract to deposit pool tokens and get rewards
 /// @dev Admin can add a new Pool, users can deposit pool tokens, harvestReward, withdraw pool tokens
 contract NftStaking is Ownable, IERC721Receiver {
@@ -93,11 +87,7 @@ contract NftStaking is Ownable, IERC721Receiver {
         uint256[] tokenIds
     );
 
-     event Deposit(
-        address indexed user,
-        uint256 indexed pid,
-        uint256 tokenId
-    );
+    event Deposit(address indexed user, uint256 indexed pid, uint256 tokenId);
 
     /// @dev when some one withdraws pool tokens from contract
     event Withdraw(
@@ -241,8 +231,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @notice Update reward vairables for all pools. Be careful of gas spending!
     function massUpdatePools() public {
         uint256 length = poolInfo.length;
-        for (uint256 pid = 0; pid < length; ++pid)
-            updatePool(pid);
+        for (uint256 pid = 0; pid < length; ++pid) updatePool(pid);
     }
 
     uint256 private stakedTokens = 0;
@@ -250,7 +239,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @notice Update reward variables of the given pool to be up-to-date.
     /// @param _pid the pool id
     function updatePool(uint256 _pid) public {
-        if (stakedTokens == 0) configTheEndRewardBlock(); // to stop making reward when reward tokens are empty in BirdFarm
+        if (stakedTokens == 0) configTheEndRewardBlock(); // to stop making reward when reward tokens are empty in NftStaking
 
         PoolInfo storage pool = poolInfo[_pid];
 
@@ -274,7 +263,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     }
 
     /// @notice deposit tokens to get rewards
-    /// @dev deposit pool tokens to BirdFarm for reward tokens allocation.
+    /// @dev deposit pool tokens to NftStaking for reward tokens allocation.
     /// @param _pid pool id
     /// @param _tokenId how many tokens you want to stake
     function deposit(uint256 _pid, uint256 _tokenId) public {
@@ -380,16 +369,13 @@ contract NftStaking is Ownable, IERC721Receiver {
             block.timestamp > usersCanHarvestAtTime,
             "Can not harvest at this time."
         );
-        pending = (user.amount * (pool.accRewardTokenPerShare)) /
-            1e12 -
-            user.rewardDebt;
+        pending = (user.amount * pool.accRewardTokenPerShare) / 1e12 - user.rewardDebt;
 
         user.reward += pending;
         uint256 rewardToGiveNow = user.reward;
         user.reward = 0;
 
-        user.rewardDebt =
-            (user.amount * (pool.accRewardTokenPerShare)) / 1e12;
+        user.rewardDebt = (user.amount * pool.accRewardTokenPerShare) / 1e12;
 
         rewardToken.transfer(msg.sender, rewardToGiveNow);
         pool.poolToken.transferFrom(
@@ -399,7 +385,6 @@ contract NftStaking is Ownable, IERC721Receiver {
         );
 
         emit Harvest(msg.sender, _pid, pending);
-
         emit Withdraw(msg.sender, _pid, _tokenId);
     }
 
@@ -433,12 +418,12 @@ contract NftStaking is Ownable, IERC721Receiver {
         user.rewardDebt = (user.amount * (pool.accRewardTokenPerShare)) / 1e12;
 
         // harvest
-
         require(
             block.timestamp > usersCanHarvestAtTime,
             "Can not harvest at this time."
         );
-        pending = (user.amount * pool.accRewardTokenPerShare) /
+        pending =
+            (user.amount * pool.accRewardTokenPerShare) /
             1e12 -
             user.rewardDebt;
 
@@ -449,8 +434,6 @@ contract NftStaking is Ownable, IERC721Receiver {
         user.rewardDebt = (user.amount * (pool.accRewardTokenPerShare)) / 1e12;
 
         rewardToken.transfer(msg.sender, rewardToGiveNow);
-        emit Harvest(msg.sender, _pid, pending);
-    
 
         for (uint256 i = 0; i < _tokenIds.length; i++)
             pool.poolToken.transferFrom(
@@ -459,6 +442,7 @@ contract NftStaking is Ownable, IERC721Receiver {
                 _tokenIds[i]
             );
 
+        emit Harvest(msg.sender, _pid, pending);
         emit Withdraw(msg.sender, _pid, _tokenIds);
     }
 
@@ -484,50 +468,48 @@ contract NftStaking is Ownable, IERC721Receiver {
         uint256 _pidD5,
         uint256[] memory _tokenIdsD5
     ) external {
-        if(_tokenIdsD1.length > 0) depositMany(_pidD1, _tokenIdsD1);
-        if(_tokenIdsD2.length > 0) depositMany(_pidD2, _tokenIdsD2);
-        if(_tokenIdsD3.length > 0) depositMany(_pidD3, _tokenIdsD3);
-        if(_tokenIdsD4.length > 0) depositMany(_pidD4, _tokenIdsD4);
-        if(_tokenIdsD5.length > 0) depositMany(_pidD5, _tokenIdsD5);
+        if (_tokenIdsD1.length > 0) depositMany(_pidD1, _tokenIdsD1);
+        if (_tokenIdsD2.length > 0) depositMany(_pidD2, _tokenIdsD2);
+        if (_tokenIdsD3.length > 0) depositMany(_pidD3, _tokenIdsD3);
+        if (_tokenIdsD4.length > 0) depositMany(_pidD4, _tokenIdsD4);
+        if (_tokenIdsD5.length > 0) depositMany(_pidD5, _tokenIdsD5);
     }
 
     struct Box {
         uint256 _pid1;
-        uint256[]  _tokenIds1;
+        uint256[] _tokenIds1;
         uint256 _pid2;
-        uint256[]  _tokenIds2;
+        uint256[] _tokenIds2;
         uint256 _pid3;
-        uint256[]  _tokenIds3;
+        uint256[] _tokenIds3;
         uint256 _pid4;
-        uint256[]  _tokenIds4;
+        uint256[] _tokenIds4;
         uint256 _pid5;
-        uint256[]  _tokenIds5;
+        uint256[] _tokenIds5;
         uint256 _pidD1;
-        uint256[]  _tokenIdsD1;
+        uint256[] _tokenIdsD1;
         uint256 _pidD2;
-        uint256[]  _tokenIdsD2;
+        uint256[] _tokenIdsD2;
         uint256 _pidD3;
-        uint256[]  _tokenIdsD3;
+        uint256[] _tokenIdsD3;
         uint256 _pidD4;
-        uint256[]  _tokenIdsD4;
+        uint256[] _tokenIdsD4;
         uint256 _pidD5;
-        uint256[]  _tokenIdsD5;
+        uint256[] _tokenIdsD5;
     }
 
-    function depositWithdrawManyDifferentTokens(
-       Box memory __
-    ) external {
-        if(__._tokenIdsD1.length > 0) depositMany(__._pidD1, __._tokenIdsD1);
-        if(__._tokenIdsD2.length > 0) depositMany(__._pidD2, __._tokenIdsD2);
-        if(__._tokenIdsD3.length > 0) depositMany(__._pidD3, __._tokenIdsD3);
-        if(__._tokenIdsD4.length > 0) depositMany(__._pidD4, __._tokenIdsD4);
-        if(__._tokenIdsD5.length > 0) depositMany(__._pidD5, __._tokenIdsD5);
+    function depositWithdrawManyDifferentTokens(Box memory __) external {
+        if (__._tokenIdsD1.length > 0) depositMany(__._pidD1, __._tokenIdsD1);
+        if (__._tokenIdsD2.length > 0) depositMany(__._pidD2, __._tokenIdsD2);
+        if (__._tokenIdsD3.length > 0) depositMany(__._pidD3, __._tokenIdsD3);
+        if (__._tokenIdsD4.length > 0) depositMany(__._pidD4, __._tokenIdsD4);
+        if (__._tokenIdsD5.length > 0) depositMany(__._pidD5, __._tokenIdsD5);
 
-        if(__._tokenIds1.length > 0) withdrawMany(__._pid1, __._tokenIds1);
-        if(__._tokenIds2.length > 0) withdrawMany(__._pid2, __._tokenIds2);
-        if(__._tokenIds3.length > 0) withdrawMany(__._pid3, __._tokenIds3);
-        if(__._tokenIds4.length > 0) withdrawMany(__._pid4, __._tokenIds4);
-        if(__._tokenIds5.length > 0) withdrawMany(__._pid5, __._tokenIds5);
+        if (__._tokenIds1.length > 0) withdrawMany(__._pid1, __._tokenIds1);
+        if (__._tokenIds2.length > 0) withdrawMany(__._pid2, __._tokenIds2);
+        if (__._tokenIds3.length > 0) withdrawMany(__._pid3, __._tokenIds3);
+        if (__._tokenIds4.length > 0) withdrawMany(__._pid4, __._tokenIds4);
+        if (__._tokenIds5.length > 0) withdrawMany(__._pid5, __._tokenIds5);
     }
 
     function withdrawManyDifferentTokens(
@@ -542,11 +524,11 @@ contract NftStaking is Ownable, IERC721Receiver {
         uint256 _pid5,
         uint256[] memory _tokenIds5
     ) external {
-        if(_tokenIds1.length > 0) withdrawMany(_pid1, _tokenIds1);
-        if(_tokenIds2.length > 0) withdrawMany(_pid2, _tokenIds2);
-        if(_tokenIds3.length > 0) withdrawMany(_pid3, _tokenIds3);
-        if(_tokenIds4.length > 0) withdrawMany(_pid4, _tokenIds4);
-        if(_tokenIds5.length > 0) withdrawMany(_pid5, _tokenIds5);
+        if (_tokenIds1.length > 0) withdrawMany(_pid1, _tokenIds1);
+        if (_tokenIds2.length > 0) withdrawMany(_pid2, _tokenIds2);
+        if (_tokenIds3.length > 0) withdrawMany(_pid3, _tokenIds3);
+        if (_tokenIds4.length > 0) withdrawMany(_pid4, _tokenIds4);
+        if (_tokenIds5.length > 0) withdrawMany(_pid5, _tokenIds5);
     }
 
     /// @notice harvest reward tokens from BardFarm
