@@ -763,6 +763,8 @@ contract NftStaking is Ownable, IERC721Receiver {
         return selectedTokenIdsList;
     }
 
+    // get from a list, got from events in penguins
+
     function GetNFTsStakedForAddress(
         address _owner,
         uint256 _pid,
