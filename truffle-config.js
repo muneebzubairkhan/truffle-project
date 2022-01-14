@@ -15,6 +15,7 @@ module.exports = {
       port: 8545,
       network_id: "*",
       gas: 6721975,
+      gasPrice: toWei("60", "gwei"),
       explorerUrl: " ",
       web3Provider: "http://127.0.0.1/",
     },
