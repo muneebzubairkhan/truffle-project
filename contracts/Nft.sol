@@ -764,6 +764,27 @@ contract NftStaking is Ownable, IERC721Receiver {
     }
 
     // get from a list, got from events in penguins
+    function GetNFTsStakedForAddress(
+        address _owner,
+        uint256 _pid,
+        uint256[] memory _tokenIds,
+        uint256 _maxNfts
+    ) external view returns (uint256[] memory) {
+        PoolInfo storage pool = poolInfo[_pid];
+
+        uint256 selectedTokenIds = 0;
+        uint256[] memory selectedTokenIdsList = new uint256[](_maxNfts);
+
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            if (nftOwnerOf[pool.poolToken][_tokenIds[i]] == _owner) {
+                selectedTokenIdsList[selectedTokenIds] = _tokenIds[i];
+                selectedTokenIds++;
+                if (selectedTokenIds >= _maxNfts) break;
+            }
+        }
+
+        return selectedTokenIdsList;
+    }
 
     function GetNFTsStakedForAddress(
         address _owner,
