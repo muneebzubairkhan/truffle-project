@@ -28,9 +28,8 @@ contract NftStaking is Ownable, IERC721Receiver {
         //
         // Whenever a user deposits or withdraws pool tokens to a pool. Here's what happens:
         //   1. The pool's `accRewardTokenPerShare` (and `lastRewardBlock`) gets updated.
-        //   2. User receives the pending reward sent to his/her address.
-        //   3. User's `amount` gets updated.
-        //   4. User's `rewardDebt` gets updated.
+        //   2. User's `amount` gets updated.
+        //   3. User's `rewardDebt` gets updated.
     }
 
     // Info of each pool.
@@ -342,8 +341,8 @@ contract NftStaking is Ownable, IERC721Receiver {
         emit Deposit(msg.sender, _pid, _tokenIds);
     }
 
-    /// @notice get the tokens back from BardFarm
-    /// @dev withdraw or unstake pool tokens from BidFarm
+    /// @notice get the tokens back from this contract
+    /// @dev withdraw or unstake pool tokens from this contract
     /// @param _pid pool id
     /// @param  _tokenId how many pool tokens you want to unstake
     function withdraw(uint256 _pid, uint256 _tokenId) public {
@@ -549,8 +548,8 @@ contract NftStaking is Ownable, IERC721Receiver {
         if (_tokenIds5.length > 0) withdrawMany(_pid5, _tokenIds5);
     }
 
-    /// @notice harvest reward tokens from BardFarm
-    /// @dev harvest reward tokens from BidFarm and update pool variables
+    /// @notice harvest reward tokens from this contract
+    /// @dev harvest reward tokens from this contract and update pool variables
     /// @param _pid pool id
     function harvest(uint256 _pid) external {
         require(
