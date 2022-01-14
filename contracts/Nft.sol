@@ -80,6 +80,18 @@ contract NftStaking is Ownable, IERC721Receiver {
 
     mapping(IERC721 => bool) private uniqueTokenInPool;
 
+    // penguin weights, merged penguins gets more reward than ordinary penguin
+    // todo try test uint8 vs uint256 in gas vs bool, vs read gas in tx
+    mapping(uint256 => uint8) private penguinsWeights;
+
+    function setPenguinsWeights(
+        uint256[] calldata _tokenIds,
+        uint8[] calldata _weights
+    ) external onlyOwner {
+        for (uint256 i; i < _tokenIds.length; i++)
+            penguinsWeights[_tokenIds[i]] = _weights[i];
+    }
+
     /// @dev when some one deposits pool tokens to contract
     event Deposit(
         address indexed user,
@@ -268,10 +280,10 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @param _tokenId how many tokens you want to stake
     function deposit(uint256 _pid, uint256 _tokenId) public {
         uint256 _amount = 1;
+        _amount += penguinsWeights[_tokenId];
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         nftOwnerOf[pool.poolToken][_tokenId] = msg.sender;
-        require(_amount > 0, "Must deposit amount more than zero.");
 
         updatePool(_pid);
 
@@ -280,7 +292,7 @@ contract NftStaking is Ownable, IERC721Receiver {
             user.rewardDebt;
         user.reward += pending;
 
-        stakedTokens += _amount;
+        stakedTokens += 1; // deposit single token
         user.amount = user.amount + (_amount);
         user.rewardDebt =
             (user.amount * (pool.accRewardTokenPerShare)) /
@@ -298,13 +310,14 @@ contract NftStaking is Ownable, IERC721Receiver {
         require(_tokenIds.length > 0, "minimum 1 tokenId");
 
         uint256 _amount = _tokenIds.length;
-        // _amount++ on specific penguins
 
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
 
-        for (uint256 i = 0; i < _tokenIds.length; i++)
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
             nftOwnerOf[pool.poolToken][_tokenIds[i]] = msg.sender;
+            _amount += penguinsWeights[_tokenIds[i]];
+        }
 
         updatePool(_pid);
 
@@ -313,7 +326,7 @@ contract NftStaking is Ownable, IERC721Receiver {
             user.rewardDebt;
         user.reward += pending;
 
-        stakedTokens += _amount;
+        stakedTokens += _tokenIds.length;
         user.amount = user.amount + _amount;
         user.rewardDebt =
             (user.amount * (pool.accRewardTokenPerShare)) /
@@ -335,6 +348,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @param  _tokenId how many pool tokens you want to unstake
     function withdraw(uint256 _pid, uint256 _tokenId) public {
         uint256 _amount = 1;
+        _amount += penguinsWeights[_tokenId];
         require(
             block.timestamp > usersCanUnstakeAtTime,
             "Can not withdraw/unstake at this time."
@@ -358,7 +372,7 @@ contract NftStaking is Ownable, IERC721Receiver {
 
         user.reward += pending;
 
-        stakedTokens -= _amount;
+        stakedTokens -= 1; // withdraw single token
         user.amount = user.amount - (_amount);
         user.rewardDebt =
             (user.amount * (pool.accRewardTokenPerShare)) /
@@ -369,7 +383,10 @@ contract NftStaking is Ownable, IERC721Receiver {
             block.timestamp > usersCanHarvestAtTime,
             "Can not harvest at this time."
         );
-        pending = (user.amount * pool.accRewardTokenPerShare) / 1e12 - user.rewardDebt;
+        pending =
+            (user.amount * pool.accRewardTokenPerShare) /
+            1e12 -
+            user.rewardDebt;
 
         user.reward += pending;
         uint256 rewardToGiveNow = user.reward;
@@ -404,6 +421,7 @@ contract NftStaking is Ownable, IERC721Receiver {
                 "you are not owner"
             );
             nftOwnerOf[pool.poolToken][_tokenIds[i]] = address(0);
+            _amount += penguinsWeights[_tokenIds[i]];
         }
 
         updatePool(_pid);
@@ -413,7 +431,7 @@ contract NftStaking is Ownable, IERC721Receiver {
 
         user.reward += pending;
 
-        stakedTokens -= _amount;
+        stakedTokens -= _tokenIds.length;
         user.amount = user.amount - _amount;
         user.rewardDebt = (user.amount * (pool.accRewardTokenPerShare)) / 1e12;
 
