@@ -28,8 +28,8 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     mapping(uint256 => IERC721) depositToken;
     mapping(uint256 => uint256[7]) rewardRate;
 
-    constructor(){
-      addPoolToken(IERC721(0x4BD39d433bb884e28AA49402ED33479d0Cf720A1));
+    constructor() {
+        addPoolToken(IERC721(0x4BD39d433bb884e28AA49402ED33479d0Cf720A1));
     }
 
     function addPoolToken(IERC721 _depositToken) public {
@@ -57,7 +57,6 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     //     // number of tokens Per day
     //     rewardRate = [50, 60, 75, 100, 150, 500, 0];
     // }
-
 
     function setRate(
         uint256 pid,
@@ -117,7 +116,7 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         return tokenIds;
     }
 
-        function GetNFTsForAddress(
+    function GetNFTsForAddress(
         address _owner,
         address _nftAddress,
         uint256 _tokenIdFrom,
@@ -167,7 +166,6 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
 
         return selectedTokenIdsList;
     }
-
 
     function findRate(uint256 pid, uint256 tokenId)
         public
