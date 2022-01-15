@@ -33,7 +33,7 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         addPoolToken(IERC721(0xDA95B6347602226f603869e1719a668440aC18aC));
     }
 
-    function addPoolToken(IERC721 _depositToken) public {
+    function addPoolToken(IERC721 _depositToken) public onlyOwner {
         EXPIRATION[pidsLen] = 1000 ether;
         depositToken[pidsLen] = _depositToken;
         rewardRate[pidsLen++] = [10, 30, 40, 50, 60, 120, 0];
