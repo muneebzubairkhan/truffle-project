@@ -91,16 +91,16 @@ module.exports = {
     //   },
     //   network_id: '1'
     // },
-    // ropsten: {
-    //   provider: () => {
-    //     return new HDWalletProvider(
-    //       MNEMONIC,
-    //       'https://ropsten.infura.io/v3/' + token
-    //     );
-    //   },
-    //   network_id: '3',
-    //   skipDryRun: true
-    // },
+    ropsten: {
+      provider: () => {
+        return new HDWalletProvider(
+          MNEMONIC,
+          'https://ropsten.infura.io/v3/' + token
+        );
+      },
+      network_id: '3',
+      skipDryRun: true
+    },
 
     // kovan: {
     //   provider: () => {
