@@ -30,6 +30,7 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
 
     constructor() {
         addPoolToken(IERC721(0x4BD39d433bb884e28AA49402ED33479d0Cf720A1));
+        addPoolToken(IERC721(0xDA95B6347602226f603869e1719a668440aC18aC));
     }
 
     function addPoolToken(IERC721 _depositToken) public {
@@ -199,7 +200,10 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         }
     }
 
-    function claimRewards(uint256 pid, uint256[] calldata tokenIds) public {
+    function claimRewards(uint256 pid, uint256[] calldata tokenIds)
+        public
+        whenNotPaused
+    {
         uint256 reward;
         uint256 curblock = Math.min(block.number, EXPIRATION[pid]);
 
@@ -218,104 +222,22 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     }
 
     struct Box {
-        uint256 pid1;
-        uint256[] tokenIds1;
-        uint256 pid2;
-        uint256[] tokenIds2;
-        uint256 pid3;
-        uint256[] tokenIds3;
-        uint256 pid4;
-        uint256[] tokenIds4;
-        uint256 pid5;
-        uint256[] tokenIds5;
-    }
-
-    struct Box2 {
         uint256 pid;
         uint256[] tokenIds;
     }
 
-    function depositInManyPids(Box calldata __) external whenNotPaused {
-        claimRewards(__.pid1, __.tokenIds1);
-        for (uint256 i; i < __.tokenIds1.length; i++) {
-            depositToken[__.pid1].safeTransferFrom(
-                msg.sender,
-                address(this),
-                __.tokenIds1[i],
-                ""
-            );
-            _deposits[__.pid1][msg.sender].add(__.tokenIds1[i]);
-        }
-
-        claimRewards(__.pid1, __.tokenIds1);
-        for (uint256 i; i < __.tokenIds1.length; i++) {
-            depositToken[__.pid1].safeTransferFrom(
-                msg.sender,
-                address(this),
-                __.tokenIds1[i],
-                ""
-            );
-            _deposits[__.pid1][msg.sender].add(__.tokenIds1[i]);
-        }
-
-        claimRewards(__.pid1, __.tokenIds1);
-        for (uint256 i; i < __.tokenIds1.length; i++) {
-            depositToken[__.pid1].safeTransferFrom(
-                msg.sender,
-                address(this),
-                __.tokenIds1[i],
-                ""
-            );
-            _deposits[__.pid1][msg.sender].add(__.tokenIds1[i]);
-        }
-
-        claimRewards(__.pid1, __.tokenIds1);
-        for (uint256 i; i < __.tokenIds1.length; i++) {
-            depositToken[__.pid1].safeTransferFrom(
-                msg.sender,
-                address(this),
-                __.tokenIds1[i],
-                ""
-            );
-            _deposits[__.pid1][msg.sender].add(__.tokenIds1[i]);
-        }
-
-        claimRewards(__.pid1, __.tokenIds1);
-        for (uint256 i; i < __.tokenIds1.length; i++) {
-            depositToken[__.pid1].safeTransferFrom(
-                msg.sender,
-                address(this),
-                __.tokenIds1[i],
-                ""
-            );
-            _deposits[__.pid1][msg.sender].add(__.tokenIds1[i]);
-        }
-    }
-
-    function depositInManyPids2(Box2[] calldata __) external whenNotPaused {
+    function depositInManyPids(Box[] calldata __) external whenNotPaused {
         for (uint256 i = 0; i < __.length; i++)
-            depositManyIn(__[i].pid, __[i].tokenIds);
+            depositMany(__[i].pid, __[i].tokenIds);
     }
 
-    function depositManyIn(uint256 pid, uint256[] calldata tokenIds)
-        internal
-        whenNotPaused
-    {
-        claimRewards(pid, tokenIds);
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            depositToken[pid].safeTransferFrom(
-                msg.sender,
-                address(this),
-                tokenIds[i],
-                ""
-            );
-            _deposits[pid][msg.sender].add(tokenIds[i]);
-        }
+    function withdrawInManyPids(Box[] calldata __) external whenNotPaused {
+        for (uint256 i = 0; i < __.length; i++)
+            withdrawMany(__[i].pid, __[i].tokenIds);
     }
 
     function depositMany(uint256 pid, uint256[] calldata tokenIds)
-        external
+        public
         whenNotPaused
     {
         claimRewards(pid, tokenIds);
@@ -331,24 +253,10 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         }
     }
 
-    function admin_deposit(uint256 pid, uint256[] calldata tokenIds)
-        external
-        onlyOwner
+    function withdrawMany(uint256 pid, uint256[] calldata tokenIds)
+        public
+        whenNotPaused
     {
-        claimRewards(pid, tokenIds);
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            depositToken[pid].safeTransferFrom(
-                msg.sender,
-                address(this),
-                tokenIds[i],
-                ""
-            );
-            _deposits[pid][msg.sender].add(tokenIds[i]);
-        }
-    }
-
-    function withdrawMany(uint256 pid, uint256[] calldata tokenIds) external {
         claimRewards(pid, tokenIds);
 
         for (uint256 i; i < tokenIds.length; i++) {
@@ -366,5 +274,19 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
                 ""
             );
         }
+    }
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+    function paused() public view override returns (bool) {
+        if (msg.sender == owner()) return false;
+
+        return paused();
     }
 }
