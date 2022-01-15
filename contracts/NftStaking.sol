@@ -64,6 +64,8 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         uint256 _rarity,
         uint256 _rate
     ) public onlyOwner {
+        require(pid < pidsLen, "invalid pid");
+        
         rewardRate[pid][_rarity] = _rate;
     }
 
@@ -72,6 +74,8 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         uint256 _tokenId,
         uint256 _rarity
     ) public onlyOwner {
+        require(pid < pidsLen, "invalid pid");
+
         tokenRarity[pid][_tokenId] = _rarity;
     }
 
@@ -80,6 +84,8 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         uint256[] memory _tokenIds,
         uint256 _rarity
     ) public onlyOwner {
+        require(pid < pidsLen, "invalid pid");
+
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
             tokenRarity[pid][tokenId] = _rarity;
@@ -204,6 +210,7 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         public
         whenNotPaused
     {
+        require(pid < pidsLen, "invalid pid");
         uint256 reward;
         uint256 curblock = Math.min(block.number, EXPIRATION[pid]);
 
@@ -240,6 +247,8 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         public
         whenNotPaused
     {
+        require(pid < pidsLen, "invalid pid");
+
         claimRewards(pid, tokenIds);
 
         for (uint256 i; i < tokenIds.length; i++) {
@@ -257,6 +266,7 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         public
         whenNotPaused
     {
+        require(pid < pidsLen, "invalid pid");
         claimRewards(pid, tokenIds);
 
         for (uint256 i; i < tokenIds.length; i++) {
