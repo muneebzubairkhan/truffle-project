@@ -4,67 +4,93 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-interface IglooToken {
+interface IERC20 {
     function whitelist_mint(address account, uint256 amount) external;
 }
 
-contract NftStaking is IERC721Receiver, Ownable {
+contract NftStaking is IERC721Receiver, Ownable, Pausable {
     using EnumerableSet for EnumerableSet.UintSet;
 
-    address public ERC20_CONTRACT = address(0);
-    address public ERC721_CONTRACT = address(0);
-    uint256 public EXPIRATION = 1000 ether; //expiry block number (avg 15s per block)
-    
-    mapping(address => EnumerableSet.UintSet) private _deposits;
-    mapping(address => mapping(uint256 => uint256)) public depositBlocks;
-    mapping (uint256 => uint256) public tokenRarity;
-    uint256[7] public rewardRate = [50, 60, 75, 100, 150, 500, 0];   
-    bool started = false;
+    IERC20 public erc20 = IERC20(address(0));
+
+    // pool ids
+    uint256 public pidsLen;
+    // struct replacement
+    mapping(uint256 => mapping(address => mapping(uint256 => uint256))) depositBlocks;
+    mapping(uint256 => mapping(address => EnumerableSet.UintSet)) _deposits;
+    mapping(uint256 => mapping(uint256 => uint256)) tokenRarity;
+    mapping(uint256 => uint256) EXPIRATION; // explain it
+    mapping(uint256 => IERC721) depositToken;
+    mapping(uint256 => uint256[7]) rewardRate;
+
+    constructor(){
+      addPoolToken(IERC721(0x4BD39d433bb884e28AA49402ED33479d0Cf720A1));
+    }
+
+    function addPoolToken(IERC721 _depositToken) public {
+        EXPIRATION[pidsLen] = 1000 ether;
+        depositToken[pidsLen] = _depositToken;
+        rewardRate[pidsLen] = [10, 30, 40, 50, 60, 120, 0];
+    }
+
+    // get pid from token address
+    function getPidOfToken(IERC721 token) external view returns (uint256) {
+        for (uint256 i = 0; i < pidsLen; i++)
+            if (depositToken[i] == token) return i;
+
+        return type(uint256).max;
+    }
 
     // constructor(
     //     address _erc20,
-    //     address _erc721,
+    //     address _depositToken,
     //     uint256 _expiration
     // ) {
     //     ERC20_CONTRACT = _erc20;
-    //     ERC721_CONTRACT = _erc721;
+    //     ERC721_CONTRACT = _depositToken;
     //     EXPIRATION = block.number + _expiration;
     //     // number of tokens Per day
     //     rewardRate = [50, 60, 75, 100, 150, 500, 0];
-    //     started = false;
     // }
 
-    function setRate(uint256 _rarity, uint256 _rate) public onlyOwner() {
-        rewardRate[_rarity] = _rate;
+    function setRate(
+        uint256 pid,
+        uint256 _rarity,
+        uint256 _rate
+    ) public onlyOwner {
+        rewardRate[pid][_rarity] = _rate;
     }
 
-    function setRarity(uint256 _tokenId, uint256 _rarity) public onlyOwner() {
-        tokenRarity[_tokenId] = _rarity;
+    function setRarity(
+        uint256 pid,
+        uint256 _tokenId,
+        uint256 _rarity
+    ) public onlyOwner {
+        tokenRarity[pid][_tokenId] = _rarity;
     }
 
-    function setBatchRarity(uint256[] memory _tokenIds, uint256 _rarity) public onlyOwner() {
+    function setBatchRarity(
+        uint256 pid,
+        uint256[] memory _tokenIds,
+        uint256 _rarity
+    ) public onlyOwner {
         for (uint256 i; i < _tokenIds.length; i++) {
             uint256 tokenId = _tokenIds[i];
-            tokenRarity[tokenId] = _rarity;
+            tokenRarity[pid][tokenId] = _rarity;
         }
     }
 
-    function setExpiration(uint256 _expiration) public onlyOwner() {
-        EXPIRATION = _expiration;
+    function setExpiration(uint256 pid, uint256 _expiration) public onlyOwner {
+        EXPIRATION[pid] = _expiration;
     }
 
-    
-    function toggleStart() public onlyOwner() {
-        started = !started;
-    }
-
-    function setTokenAddress(address _tokenAddress) public onlyOwner() {
-        // Used to change rewards token if needed
-        ERC20_CONTRACT = _tokenAddress;
+    function setRewardTokenAddress(IERC20 _erc20) public onlyOwner {
+        erc20 = _erc20;
     }
 
     function onERC721Received(
@@ -76,135 +102,120 @@ contract NftStaking is IERC721Receiver, Ownable {
         return IERC721Receiver.onERC721Received.selector;
     }
 
-    function depositsOf(address account)
+    function depositsOf(uint256 pid, address account)
         external
         view
         returns (uint256[] memory)
     {
-        EnumerableSet.UintSet storage depositSet = _deposits[account];
+        EnumerableSet.UintSet storage depositSet = _deposits[pid][account];
         uint256[] memory tokenIds = new uint256[](depositSet.length());
 
-        for (uint256 i; i < depositSet.length(); i++) {
+        for (uint256 i; i < depositSet.length(); i++)
             tokenIds[i] = depositSet.at(i);
-        }
 
         return tokenIds;
     }
 
-    function findRate(uint256 tokenId)
+    function findRate(uint256 pid, uint256 tokenId)
         public
         view
-        returns (uint256 rate) 
+        returns (uint256 rate)
     {
-        uint256 rarity = tokenRarity[tokenId];
-        uint256 perDay = rewardRate[rarity];
-        
-        // 6000 blocks per day
-        // perDay / 6000 = reward per block
+        uint256 rarity = tokenRarity[pid][tokenId];
+        uint256 perDay = rewardRate[pid][rarity];
+
+        // 6000 blocks per day, perDay / 6000 = reward per block
 
         rate = (perDay * 1e18) / 6000;
-        
         return rate;
     }
 
-    function pendingRewardToken(uint pid, address account, uint256[] memory tokenIds)
-        public
-        view
-        returns (uint256[] memory rewards)
-    {
+    function pendingRewardToken(
+        uint256 pid,
+        address account,
+        uint256[] memory tokenIds
+    ) public view returns (uint256[] memory rewards) {
         rewards = new uint256[](tokenIds.length);
 
         for (uint256 i; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
-            uint256 rate = findRate(tokenId);
+            uint256 rate = findRate(pid, tokenId);
             rewards[i] =
                 rate *
-                (_deposits[account].contains(tokenId) ? 1 : 0) *
-                (Math.min(block.number, EXPIRATION) -
-                    depositBlocks[account][tokenId]);
+                (_deposits[pid][account].contains(tokenId) ? 1 : 0) *
+                (Math.min(block.number, EXPIRATION[pid]) -
+                    depositBlocks[pid][account][tokenId]);
         }
     }
 
-    // // pool ids
-    // uint public pids;
-
-    // function addPoolToken
-
-    // get pid from token address
-    function getPidOfToken(address token) external view returns (uint256) {
-      return 0;
-        // for (uint256 index = 0; index < poolInfo.length; index++) {
-        //     if (address(poolInfo[index].poolToken) == _token) {
-        //         return index;
-        //     }
-        // }
-
-        // return type(uint256).max;
-    }
-
-    function claimRewards(uint pid, uint256[] calldata tokenIds) public {
+    function claimRewards(uint256 pid, uint256[] calldata tokenIds) public {
         uint256 reward;
-        uint256 curblock = Math.min(block.number, EXPIRATION);
+        uint256 curblock = Math.min(block.number, EXPIRATION[pid]);
 
-        uint256[] memory rewards = pendingRewardToken(pid, msg.sender, tokenIds);
+        uint256[] memory rewards = pendingRewardToken(
+            pid,
+            msg.sender,
+            tokenIds
+        );
 
         for (uint256 i; i < tokenIds.length; i++) {
             reward += rewards[i];
-            depositBlocks[msg.sender][tokenIds[i]] = curblock;
+            depositBlocks[pid][msg.sender][tokenIds[i]] = curblock;
         }
 
-        if (reward > 0) {
-            IglooToken(ERC20_CONTRACT).whitelist_mint(msg.sender, reward);
-        }
+        if (reward > 0) erc20.whitelist_mint(msg.sender, reward);
     }
 
-    function depositMany(uint pid, uint256[] calldata tokenIds) external {
-        require(started, 'StakeSeals: Staking contract not started yet');
-
+    function depositMany(uint256 pid, uint256[] calldata tokenIds)
+        external
+        whenNotPaused
+    {
         claimRewards(pid, tokenIds);
-        
+
         for (uint256 i; i < tokenIds.length; i++) {
-            IERC721(ERC721_CONTRACT).safeTransferFrom(
+            depositToken[pid].safeTransferFrom(
                 msg.sender,
                 address(this),
                 tokenIds[i],
-                ''
+                ""
             );
-            _deposits[msg.sender].add(tokenIds[i]);
+            _deposits[pid][msg.sender].add(tokenIds[i]);
         }
     }
 
-    function admin_deposit(uint pid, uint256[] calldata tokenIds) onlyOwner() external {
+    function admin_deposit(uint256 pid, uint256[] calldata tokenIds)
+        external
+        onlyOwner
+    {
         claimRewards(pid, tokenIds);
-        
 
         for (uint256 i; i < tokenIds.length; i++) {
-            IERC721(ERC721_CONTRACT).safeTransferFrom(
+            depositToken[pid].safeTransferFrom(
                 msg.sender,
                 address(this),
                 tokenIds[i],
-                ''
+                ""
             );
-            _deposits[msg.sender].add(tokenIds[i]);
+            _deposits[pid][msg.sender].add(tokenIds[i]);
         }
     }
 
-    function withdrawMany(uint pid, uint256[] calldata tokenIds) external {
+    function withdrawMany(uint256 pid, uint256[] calldata tokenIds) external {
         claimRewards(pid, tokenIds);
 
         for (uint256 i; i < tokenIds.length; i++) {
             require(
-                _deposits[msg.sender].contains(tokenIds[i]),
-                'StakeSeals: Token not deposited'
+                _deposits[pid][msg.sender].contains(tokenIds[i]),
+                "Token not deposited"
             );
 
-            _deposits[msg.sender].remove(tokenIds[i]);
+            _deposits[pid][msg.sender].remove(tokenIds[i]);
 
-            IERC721(ERC721_CONTRACT).safeTransferFrom(
+            depositToken[pid].safeTransferFrom(
                 address(this),
                 msg.sender,
                 tokenIds[i],
-                ''
+                ""
             );
         }
     }
