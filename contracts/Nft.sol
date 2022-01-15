@@ -217,6 +217,103 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         if (reward > 0) erc20.whitelist_mint(msg.sender, reward);
     }
 
+    struct Box {
+        uint256 pid1;
+        uint256[] tokenIds1;
+        uint256 pid2;
+        uint256[] tokenIds2;
+        uint256 pid3;
+        uint256[] tokenIds3;
+        uint256 pid4;
+        uint256[] tokenIds4;
+        uint256 pid5;
+        uint256[] tokenIds5;
+    }
+
+    struct Box2 {
+        uint256 pid;
+        uint256[] tokenIds;
+    }
+
+    function depositInManyPids(Box calldata __) external whenNotPaused {
+        claimRewards(__.pid1, __.tokenIds1);
+        for (uint256 i; i < __.tokenIds1.length; i++) {
+            depositToken[__.pid1].safeTransferFrom(
+                msg.sender,
+                address(this),
+                __.tokenIds1[i],
+                ""
+            );
+            _deposits[__.pid1][msg.sender].add(__.tokenIds1[i]);
+        }
+
+        claimRewards(__.pid1, __.tokenIds1);
+        for (uint256 i; i < __.tokenIds1.length; i++) {
+            depositToken[__.pid1].safeTransferFrom(
+                msg.sender,
+                address(this),
+                __.tokenIds1[i],
+                ""
+            );
+            _deposits[__.pid1][msg.sender].add(__.tokenIds1[i]);
+        }
+
+        claimRewards(__.pid1, __.tokenIds1);
+        for (uint256 i; i < __.tokenIds1.length; i++) {
+            depositToken[__.pid1].safeTransferFrom(
+                msg.sender,
+                address(this),
+                __.tokenIds1[i],
+                ""
+            );
+            _deposits[__.pid1][msg.sender].add(__.tokenIds1[i]);
+        }
+
+        claimRewards(__.pid1, __.tokenIds1);
+        for (uint256 i; i < __.tokenIds1.length; i++) {
+            depositToken[__.pid1].safeTransferFrom(
+                msg.sender,
+                address(this),
+                __.tokenIds1[i],
+                ""
+            );
+            _deposits[__.pid1][msg.sender].add(__.tokenIds1[i]);
+        }
+
+        claimRewards(__.pid1, __.tokenIds1);
+        for (uint256 i; i < __.tokenIds1.length; i++) {
+            depositToken[__.pid1].safeTransferFrom(
+                msg.sender,
+                address(this),
+                __.tokenIds1[i],
+                ""
+            );
+            _deposits[__.pid1][msg.sender].add(__.tokenIds1[i]);
+        }
+    }
+
+    function depositInManyPids2(Box2[] calldata __) external whenNotPaused {
+        for (uint256 i = 0; i < __.length; i++)
+            depositManyIn(__[i].pid, __[i].tokenIds);
+    }
+
+    function depositManyIn(uint256 pid, uint256[] calldata tokenIds)
+        internal
+        whenNotPaused
+    {
+        claimRewards(pid, tokenIds);
+
+        for (uint256 i; i < tokenIds.length; i++) {
+            depositToken[pid].safeTransferFrom(
+                msg.sender,
+                address(this),
+                tokenIds[i],
+                ""
+            );
+            _deposits[pid][msg.sender].add(tokenIds[i]);
+        }
+    }
+
     function depositMany(uint256 pid, uint256[] calldata tokenIds)
         external
         whenNotPaused
