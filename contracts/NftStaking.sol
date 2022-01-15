@@ -16,11 +16,11 @@ interface IERC20 {
 contract NftStaking is IERC721Receiver, Ownable, Pausable {
     using EnumerableSet for EnumerableSet.UintSet;
 
-    IERC20 public erc20 = IERC20(0x2eC91e6941A1C0da8cB27B86168b1935dB0f1dCE);
+    IERC20 public erc20;
 
     // pool ids
     uint256 public pidsLen;
-    // struct replacement
+    /// @dev struct replacement
     mapping(uint256 => mapping(address => mapping(uint256 => uint256))) depositBlocks;
     mapping(uint256 => mapping(address => EnumerableSet.UintSet)) _deposits;
     mapping(uint256 => mapping(uint256 => uint256)) tokenRarity;
@@ -29,8 +29,8 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     mapping(uint256 => uint256[7]) rewardRate;
 
     constructor() {
-        addPoolToken(IERC721(0x4BD39d433bb884e28AA49402ED33479d0Cf720A1));
-        addPoolToken(IERC721(0xDA95B6347602226f603869e1719a668440aC18aC));
+        addPoolToken(IERC721(0x350b4CdD07CC5836e30086b993D27983465Ec014)); // penguin nft
+        addPoolToken(IERC721(0x48E2CC829BfC611E822134a42D4F7646Ae51b2da)); // sardine nft
     }
 
     function addPoolToken(IERC721 _depositToken) public onlyOwner {
@@ -46,18 +46,6 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
 
         return type(uint256).max;
     }
-
-    // constructor(
-    //     address _erc20,
-    //     address _depositToken,
-    //     uint256 _expiration
-    // ) {
-    //     ERC20_CONTRACT = _erc20;
-    //     ERC721_CONTRACT = _depositToken;
-    //     EXPIRATION = block.number + _expiration;
-    //     // number of tokens Per day
-    //     rewardRate = [50, 60, 75, 100, 150, 500, 0];
-    // }
 
     function setRate(
         uint256 pid,
