@@ -58,6 +58,7 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     //     rewardRate = [50, 60, 75, 100, 150, 500, 0];
     // }
 
+
     function setRate(
         uint256 pid,
         uint256 _rarity,
@@ -115,6 +116,58 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
 
         return tokenIds;
     }
+
+        function GetNFTsForAddress(
+        address _owner,
+        address _nftAddress,
+        uint256 _tokenIdFrom,
+        uint256 _tokenIdTo,
+        uint256 _maxNfts
+    ) external view returns (uint256[] memory) {
+        uint256 selectedTokenIds = 0;
+        uint256[] memory selectedTokenIdsList = new uint256[](_maxNfts);
+
+        IERC721 nft = IERC721(_nftAddress);
+
+        for (uint256 i = _tokenIdFrom; i <= _tokenIdTo; i++) {
+            try nft.ownerOf(i) returns (address owner) {
+                if (owner == _owner) {
+                    selectedTokenIdsList[selectedTokenIds] = i;
+                    selectedTokenIds++;
+                    if (selectedTokenIds >= _maxNfts) break;
+                }
+            } catch {}
+        }
+
+        return selectedTokenIdsList;
+    }
+
+    // get a list of token ids to check they belong to an address or not
+    // return list of token ids that belong to this address
+    function GetNFTsForAddress(
+        address _owner,
+        address _nftAddress,
+        uint256[] memory _tokenIds,
+        uint256 _maxNfts
+    ) external view returns (uint256[] memory) {
+        uint256 selectedTokenIds = 0;
+        uint256[] memory selectedTokenIdsList = new uint256[](_maxNfts);
+
+        IERC721 nft = IERC721(_nftAddress);
+
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            try nft.ownerOf(_tokenIds[i]) returns (address owner) {
+                if (owner == _owner) {
+                    selectedTokenIdsList[selectedTokenIds] = _tokenIds[i];
+                    selectedTokenIds++;
+                    if (selectedTokenIds >= _maxNfts) break;
+                }
+            } catch {}
+        }
+
+        return selectedTokenIdsList;
+    }
+
 
     function findRate(uint256 pid, uint256 tokenId)
         public
