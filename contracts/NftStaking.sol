@@ -285,6 +285,6 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     function paused() public view override returns (bool) {
         if (msg.sender == owner()) return false;
 
-        return paused();
+        return super.paused();
     }
 }
