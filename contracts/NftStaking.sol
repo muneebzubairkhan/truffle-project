@@ -231,6 +231,27 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
             withdrawMany(__[i].pid, __[i].tokenIds);
     }
 
+    struct RewardBox {
+        uint256[] rewards;
+    }
+
+    function pendingRewardTokenInManyPids(address account, Box[] calldata __)
+        public
+        view
+        returns (RewardBox[] memory)
+    {
+        RewardBox[] memory rewardBoxList = new RewardBox[](__.length);
+
+        for (uint256 i = 0; i < __.length; i++)
+            rewardBoxList[i].rewards = pendingRewardToken(
+                __[i].pid,
+                account,
+                __[i].tokenIds
+            );
+
+        return rewardBoxList;
+    }
+
     function depositMany(uint256 pid, uint256[] calldata tokenIds)
         public
         whenNotPaused
