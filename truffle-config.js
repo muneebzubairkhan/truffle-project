@@ -141,6 +141,6 @@ module.exports = {
 };
 
 // sudo truffle migrate --reset --network rinkeby
-// sudo truffle run verify NftStaking --network rinkeby
+// sudo truffle run verify NftStaking@0xC7Da7c471D42bEBD5932D618D2632F26850f470d --network rinkeby
 
 // truffle-flattener <solidity-files>

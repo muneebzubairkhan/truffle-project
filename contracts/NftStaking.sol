@@ -16,7 +16,7 @@ interface IERC20 {
 contract NftStaking is IERC721Receiver, Ownable, Pausable {
     using EnumerableSet for EnumerableSet.UintSet;
 
-    IERC20 public erc20 = IERC20(0xc3D6F4b97292f8d48344B36268BDd7400180667E);  
+    IERC20 public erc20 = IERC20(0x2311a1D192ca03f92696a8005a2c618276921E53);  
 
     // pool ids
     uint256 public pidsLen;
@@ -29,8 +29,8 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     mapping(uint256 => uint256[7]) rewardRate;
 
     constructor() {
-        addPoolToken(IERC721(0x350b4CdD07CC5836e30086b993D27983465Ec014)); // penguin nft
-        addPoolToken(IERC721(0x48E2CC829BfC611E822134a42D4F7646Ae51b2da)); // sardine nft
+        addPoolToken(IERC721(0x4BD39d433bb884e28AA49402ED33479d0Cf720A1)); // penguin nft
+        addPoolToken(IERC721(0xDA95B6347602226f603869e1719a668440aC18aC)); // sardine nft
     }
 
     function addPoolToken(IERC721 _depositToken) public onlyOwner {
