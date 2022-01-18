@@ -16,7 +16,7 @@ interface IERC20 {
 contract NftStaking is IERC721Receiver, Ownable, Pausable {
     using EnumerableSet for EnumerableSet.UintSet;
 
-    IERC20 public erc20 = IERC20(0xcD16de4C985EFEcaCEe0FC44851F0FddedC95ad9);  
+    IERC20 public erc20 = IERC20(0xc3D6F4b97292f8d48344B36268BDd7400180667E);  
 
     // pool ids
     uint256 public pidsLen;
