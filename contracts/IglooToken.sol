@@ -11,9 +11,9 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 contract IglooToken is Ownable, Pausable, ERC20("IGLOO", "IG"), ERC20Burnable {
     // 10 igloo per day on staking penguin
 
-    constructor () {
-        whitelist[0x9A31A088797157141BCB058E7eADEB04558603A0] = true; // whitelist staking contract
-    }
+    // constructor () {
+    //     whitelist[0x9A31A088797157141BCB058E7eADEB04558603A0] = true; // whitelist staking contract
+    // }
 
     // mint limit
     uint mintingLimit = 1 * 1e9 * 1e18; // 1 Billion Supply = 1 * 9 zeros * 18 zeros = (1 * 9 zeros = 1 Billion) * (18 zeros = 18 decimals)

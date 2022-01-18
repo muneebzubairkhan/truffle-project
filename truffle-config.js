@@ -139,6 +139,6 @@ module.exports = {
   },
 };
 // sudo truffle migrate --reset --network rinkeby
-// sudo truffle run verify SnowiesClub --network rinkeby
+// sudo truffle run verify IglooToken@0x2311a1D192ca03f92696a8005a2c618276921E53 --network rinkeby
 
 // sudo truffle migrate --reset --network development
