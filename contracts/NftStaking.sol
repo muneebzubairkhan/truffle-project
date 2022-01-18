@@ -16,7 +16,7 @@ interface IERC20 {
 contract NftStaking is IERC721Receiver, Ownable, Pausable {
     using EnumerableSet for EnumerableSet.UintSet;
 
-    IERC20 public erc20;
+    IERC20 public erc20 = IERC20(0xcD16de4C985EFEcaCEe0FC44851F0FddedC95ad9);  
 
     // pool ids
     uint256 public pidsLen;
@@ -29,10 +29,8 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     mapping(uint256 => uint256[7]) rewardRate;
 
     constructor() {
-        addPoolToken(IERC721(0x4BD39d433bb884e28AA49402ED33479d0Cf720A1)); // penguin nft
-        addPoolToken(IERC721(0xDA95B6347602226f603869e1719a668440aC18aC)); // sardine nft
-        // addPoolToken(IERC721(0x350b4CdD07CC5836e30086b993D27983465Ec014)); // penguin nft
-        // addPoolToken(IERC721(0x48E2CC829BfC611E822134a42D4F7646Ae51b2da)); // sardine nft
+        addPoolToken(IERC721(0x350b4CdD07CC5836e30086b993D27983465Ec014)); // penguin nft
+        addPoolToken(IERC721(0x48E2CC829BfC611E822134a42D4F7646Ae51b2da)); // sardine nft
     }
 
     function addPoolToken(IERC721 _depositToken) public onlyOwner {
@@ -196,6 +194,28 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         }
     }
 
+    function claimRewards(uint256 pid, uint256[] calldata tokenIds)
+        public
+        whenNotPaused
+    {
+        require(pid < pidsLen, "invalid pid");
+        uint256 reward;
+        uint256 curblock = Math.min(block.number, EXPIRATION[pid]);
+
+        uint256[] memory rewards = pendingRewardToken(
+            pid,
+            msg.sender,
+            tokenIds
+        );
+
+        for (uint256 i; i < tokenIds.length; i++) {
+            reward += rewards[i];
+            depositBlocks[pid][msg.sender][tokenIds[i]] = curblock;
+        }
+
+        if (reward > 0) erc20.whitelist_mint(msg.sender, reward);
+    }
+
     struct Box {
         uint256 pid;
         uint256[] tokenIds;
@@ -217,23 +237,7 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     {
         require(pid < pidsLen, "invalid pid");
 
-        // claimRewards(pid, tokenIds);
-        uint256 reward;
-        uint256 curblock = Math.min(block.number, EXPIRATION[pid]);
-
-        uint256[] memory rewards = pendingRewardToken(
-            pid,
-            msg.sender,
-            tokenIds
-        );
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            reward += rewards[i];
-            depositBlocks[pid][msg.sender][tokenIds[i]] = curblock;
-        }
-
-        if (reward > 0) erc20.whitelist_mint(msg.sender, reward);
-        //
+        claimRewards(pid, tokenIds);
 
         for (uint256 i; i < tokenIds.length; i++) {
             depositToken[pid].safeTransferFrom(
@@ -251,23 +255,7 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         whenNotPaused
     {
         require(pid < pidsLen, "invalid pid");
-        // claimRewards(pid, tokenIds);
-        uint256 reward;
-        uint256 curblock = Math.min(block.number, EXPIRATION[pid]);
-
-        uint256[] memory rewards = pendingRewardToken(
-            pid,
-            msg.sender,
-            tokenIds
-        );
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            reward += rewards[i];
-            depositBlocks[pid][msg.sender][tokenIds[i]] = curblock;
-        }
-
-        if (reward > 0) erc20.whitelist_mint(msg.sender, reward);
-        //
+        claimRewards(pid, tokenIds);
 
         for (uint256 i; i < tokenIds.length; i++) {
             require(
