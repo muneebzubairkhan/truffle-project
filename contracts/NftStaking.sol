@@ -16,7 +16,7 @@ interface IERC20 {
 contract NftStaking is IERC721Receiver, Ownable, Pausable {
     using EnumerableSet for EnumerableSet.UintSet;
 
-    IERC20 public erc20 = IERC20(0xc3D6F4b97292f8d48344B36268BDd7400180667E);  
+    IERC20 public erc20 = IERC20(0xc3D6F4b97292f8d48344B36268BDd7400180667E);
 
     // pool ids
     uint256 public pidsLen;
@@ -53,7 +53,7 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
         uint256 _rate
     ) public onlyOwner {
         require(pid < pidsLen, "invalid pid");
-        
+
         rewardRate[pid][_rarity] = _rate;
     }
 
@@ -229,6 +229,27 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     function withdrawInManyPids(Box[] calldata __) external whenNotPaused {
         for (uint256 i = 0; i < __.length; i++)
             withdrawMany(__[i].pid, __[i].tokenIds);
+    }
+
+    struct RewardBox {
+        uint256[] rewards;
+    }
+
+    function pendingRewardTokenInManyPids(address account, Box[] calldata __)
+        public
+        view
+        returns (RewardBox[] memory)
+    {
+        RewardBox[] memory rewardBoxList = new RewardBox[](__.length);
+
+        for (uint256 i = 0; i < __.length; i++)
+            rewardBoxList[i].rewards = pendingRewardToken(
+                __[i].pid,
+                account,
+                __[i].tokenIds
+            );
+
+        return rewardBoxList;
     }
 
     function depositMany(uint256 pid, uint256[] calldata tokenIds)
