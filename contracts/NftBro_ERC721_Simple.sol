@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
-contract UFBro_simple is ERC721, ERC721Enumerable, Ownable {
+contract _1 is ERC721, ERC721Enumerable, Ownable {
     using Strings for uint256;
 
     string public baseURI;

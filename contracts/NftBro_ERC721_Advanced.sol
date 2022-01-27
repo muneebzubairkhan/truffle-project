@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract UfBro is ERC721A("Name Nft", "Symbol NFT", 100), Ownable {
+contract Contract1 is ERC721A("Name Nft", "Symbol NFT", 100), Ownable {
     using Strings for uint256;
 
     string public baseURI;
