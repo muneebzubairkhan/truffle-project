@@ -45,7 +45,6 @@ contract UfBro is ERC721A("Name Nft", "Symbol NFT", 100), Ownable {
         return baseURI;
     }
 
-   
     // public
     function mint(uint256 _mintAmount) public payable {
         require(!paused, "the contract is paused");
@@ -96,7 +95,7 @@ contract UfBro is ERC721A("Name Nft", "Symbol NFT", 100), Ownable {
                 ? string(
                     abi.encodePacked(
                         currentBaseURI,
-                        (tokenId + 1).toString(),
+                        tokenId.toString(),
                         baseExtension
                     )
                 )
