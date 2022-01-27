@@ -44,13 +44,9 @@ const up = s => s.charAt(0).toUpperCase() + s.slice(1);
 // obj is variables object (it contains variables)
 const makeContractObjects = (web3Provider, obj) => {
   const boiledWeb3 = `
-// if you want to do only get calls then you can use defaultWeb3.
 
 import Web3 from 'web3';
 
-export const defaultWeb3 = new Web3(
-  '${web3Provider}'
-);
   
   `;
 
@@ -72,7 +68,7 @@ export const ${varName}Abi = JSON.parse(
 );
 export const getContract${up(
     varName,
-  )} = ({web3= defaultWeb3, address= ${varName}Address}) => 
+  )} = (web3, address= ${varName}Address) => 
   new web3.eth.Contract(
     ${varName}Abi, address
   );
