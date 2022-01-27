@@ -14,6 +14,8 @@
     "____": "_____",
     "testRegular": "nodemon --exec \"truffle test && yarn beep1\" --ext \".test.js .sol\"",
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" --ext .sol",
+    "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate\" --ext .sol",
+    "runLocalBlockchain": "ganache-cli",
     "_____": "_____",
     "verify": "truffle run verify NftStaking --network %npm_package_selectedNetwork%",
     "startBscTestnet": "truffle migrate --network bscTestnet --all --reset && truffle run verify NftStaking --network bscTestnet",

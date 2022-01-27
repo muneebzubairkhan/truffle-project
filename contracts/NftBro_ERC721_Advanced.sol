@@ -20,13 +20,6 @@ contract UfBro is ERC721A("Name Nft", "Symbol NFT", 100), Ownable {
     bool public onlyWhitelisted = true;
     mapping(address => uint256) public addressMintedBalance;
 
-    // white list variables
-    uint256 public itemPricePresale = 0.025 ether;
-    bool public isAllowListActive;
-    uint256 public allowListMaxMint = 3;
-    mapping(address => bool) public onAllowList;
-    mapping(address => uint256) public allowListClaimedBy;
-
     //   constructor(
 
     //   ) ERC721("UFBro Aliens", "UFBRO") {
@@ -52,46 +45,7 @@ contract UfBro is ERC721A("Name Nft", "Symbol NFT", 100), Ownable {
         return baseURI;
     }
 
-    ////////////////////
-    //   ALLOWLIST    //
-    ////////////////////
-
-    function addToAllowList(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onAllowList[addresses[i]] = true;
-    }
-
-    function removeFromAllowList(address[] calldata addresses)
-        external
-        onlyOwner
-    {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onAllowList[addresses[i]] = false;
-    }
-
-    function purchasePresaleTokens(uint256 _mintAmount) external payable {
-        require(_mintAmount > 0, "need to mint at least 1 NFT");
-        uint256 supply = totalSupply();
-
-        require(supply <= 555, "Presale is sold out.");
-
-        require(supply + _mintAmount <= maxSupply, "max NFT limit exceeded");
-        require(isAllowListActive, "Allowlist is not active");
-        require(onAllowList[msg.sender], "You are not in allowlist");
-        require(
-            allowListClaimedBy[msg.sender] + _mintAmount <= allowListMaxMint,
-            "Purchase exceeds max allowed"
-        );
-        require(
-            msg.value >= _mintAmount * itemPricePresale,
-            "Try to send more ETH"
-        );
-
-        allowListClaimedBy[msg.sender] += _mintAmount;
-
-        _safeMint(msg.sender, _mintAmount);
-    }
-
+   
     // public
     function mint(uint256 _mintAmount) public payable {
         require(!paused, "the contract is paused");
@@ -179,20 +133,6 @@ contract UfBro is ERC721A("Name Nft", "Symbol NFT", 100), Ownable {
 
     function setNotRevealedURI(string memory _notRevealedURI) public onlyOwner {
         notRevealedUri = _notRevealedURI;
-    }
-
-    // set limit of allowlist
-    function setAllowListMaxMint(uint256 _allowListMaxMint) external onlyOwner {
-        allowListMaxMint = _allowListMaxMint;
-    }
-
-    // Change presale price in case of ETH price changes too much
-    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
-        itemPricePresale = _itemPricePresale;
-    }
-
-    function setIsAllowListActive(bool _isAllowListActive) external onlyOwner {
-        isAllowListActive = _isAllowListActive;
     }
 
     function pause(bool _state) public onlyOwner {
