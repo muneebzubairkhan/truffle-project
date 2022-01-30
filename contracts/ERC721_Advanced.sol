@@ -211,3 +211,4 @@ contract Nft is ERC721A("Non Fungible Token", "NFT") {
         _;
     }
 }
+
