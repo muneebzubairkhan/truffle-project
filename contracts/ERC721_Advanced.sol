@@ -13,37 +13,34 @@ pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
 
-contract LazyPandas_Advanced is ERC721A("LazyPandas", "LPS", 100) {
-    string public baseURI;
+contract Nft is ERC721A("Non Fungible Token", "NFT") {
+    string public baseURI =
+        "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
 
     bool public isSaleActive;
     uint256 public itemPrice = 0.15 ether;
     uint256 public itemPricePresale = 0.08 ether;
-    uint256 public constant maxSupply = 7999;
+    uint256 public immutable maxSupply = 7999;
 
-    address public owner = 0xc18E78C0F67A09ee43007579018b2Db091116B4C;
+    // address public owner = 0xc18E78C0F67A09ee43007579018b2Db091116B4C;
+    address public owner = msg.sender;
     address public dev = 0x903f0F7bBF9Ad74F50e58B5D32D2AcE3b358eA77;
 
     ///////////////////////////////
     //    PRESALE CODE STARTS    //
     ///////////////////////////////
 
-    bool public isAllowListActive;
-    uint256 public allowListMaxMint = 3;
-    mapping(address => bool) public onAllowList;
-    mapping(address => uint256) public allowListClaimedBy;
+    bool public isAllowlistActive;
+    uint256 public allowlistMaxMint = 3;
+    mapping(address => bool) public onAllowlist;
+    mapping(address => uint256) public allowlistClaimedBy;
 
-    function addToAllowList(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onAllowList[addresses[i]] = true;
-    }
-
-    function removeFromAllowList(address[] calldata addresses)
+    function addToAllowlist(address[] calldata addresses, bool _add)
         external
         onlyOwner
     {
         for (uint256 i = 0; i < addresses.length; i++)
-            onAllowList[addresses[i]] = false;
+            onAllowlist[addresses[i]] = _add;
     }
 
     // Purchase multiple NFTs at once
@@ -52,10 +49,10 @@ contract LazyPandas_Advanced is ERC721A("LazyPandas", "LPS", 100) {
         payable
         tokensAvailable(_howMany)
     {
-        require(isAllowListActive, "Allowlist is not active");
-        require(onAllowList[msg.sender], "You are not in allowlist");
+        require(isAllowlistActive, "Allowlist is not active");
+        require(onAllowlist[msg.sender], "You are not in allowlist");
         require(
-            allowListClaimedBy[msg.sender] + _howMany <= allowListMaxMint,
+            allowlistClaimedBy[msg.sender] + _howMany <= allowlistMaxMint,
             "Purchase exceeds max allowed"
         );
         require(
@@ -63,14 +60,14 @@ contract LazyPandas_Advanced is ERC721A("LazyPandas", "LPS", 100) {
             "Try to send more ETH"
         );
 
-        allowListClaimedBy[msg.sender] += _howMany;
-        
+        allowlistClaimedBy[msg.sender] += _howMany;
+
         _safeMint(msg.sender, _howMany);
     }
 
-     // set limit of allowlist
-    function setAllowListMaxMint(uint256 _allowListMaxMint) external onlyOwner {
-        allowListMaxMint = _allowListMaxMint;
+    // set limit of allowlist
+    function setAllowlistMaxMint(uint256 _allowlistMaxMint) external onlyOwner {
+        allowlistMaxMint = _allowlistMaxMint;
     }
 
     // Change presale price in case of ETH price changes too much
@@ -78,8 +75,8 @@ contract LazyPandas_Advanced is ERC721A("LazyPandas", "LPS", 100) {
         itemPricePresale = _itemPricePresale;
     }
 
-    function setIsAllowListActive(bool _isAllowListActive) external onlyOwner {
-        isAllowListActive = _isAllowListActive;
+    function setIsAllowlistActive(bool _isAllowlistActive) external onlyOwner {
+        isAllowlistActive = _isAllowlistActive;
     }
 
     ///////////////////////////////////
@@ -92,10 +89,7 @@ contract LazyPandas_Advanced is ERC721A("LazyPandas", "LPS", 100) {
         payable
         tokensAvailable(_howMany)
     {
-        require(
-            isSaleActive,
-            "Sale is not active"
-        );
+        require(isSaleActive, "Sale is not active");
         require(_howMany > 0 && _howMany <= 10, "Mint min 1, max 10");
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
 
@@ -136,13 +130,13 @@ contract LazyPandas_Advanced is ERC721A("LazyPandas", "LPS", 100) {
     ///////////////////////////////////
 
     // Send NFTs to a list of addresses
-    function giftNftToList(address[] calldata _sendNftsTo)
+    function giftNftToList(address[] calldata _sendNftsTo, uint256 _howMany)
         external
         onlyOwner
         tokensAvailable(_sendNftsTo.length)
     {
         for (uint256 i = 0; i < _sendNftsTo.length; i++)
-            _safeMint(_sendNftsTo[i], 1);
+            _safeMint(_sendNftsTo[i], _howMany);
     }
 
     // Send NFTs to a single address
@@ -153,22 +147,6 @@ contract LazyPandas_Advanced is ERC721A("LazyPandas", "LPS", 100) {
     {
         _safeMint(_sendNftsTo, _howMany);
     }
-
-    /*
-
-     function setSaleActive() external onlyOwner {
-        isSaleActive = true;
-    }
-
-    function setSaleNotActive() external onlyOwner {
-        isSaleActive = false;
-    }
-
-
-    function flipSale() public onlyOwner {
-        hasSaleStarted = !hasSaleStarted;
-    }
-    */
 
     ///////////////////
     // Query Method  //
@@ -192,7 +170,44 @@ contract LazyPandas_Advanced is ERC721A("LazyPandas", "LPS", 100) {
     }
 
     modifier onlyOwner() {
-        require(owner == msg.sender, "Ownable: caller is not the owner");
+        require(owner == msg.sender, "Caller is not the owner");
         _;
-    }    
+    }
+
+    /////////////////////
+    // Staking Method  //
+    /////////////////////
+
+    // tokenId => staked (yes or no)
+    mapping(uint256 => bool) public staked;
+    mapping(address => bool) public whitelisted;
+
+    function _beforeTokenTransfers(
+        address,
+        address,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal view override {
+        for (uint256 i = startTokenId; i < startTokenId + quantity; i++)
+            require(!staked[i], "Unstake tokenId it to transfer");
+    }
+
+    // stake / unstake nfts
+    function stakeNfts(uint256[] calldata _tokenIds, bool _stake)
+        external
+        onlyWhitelisted
+    {
+        for (uint256 i = 0; i < _tokenIds.length; i++)
+            staked[_tokenIds[i]] = _stake;
+    }
+
+    // add / remove from whitelist who can stake / unstake
+    function addToWhitelist(address _address, bool _add) external onlyOwner {
+        whitelisted[_address] = _add;
+    }
+
+    modifier onlyWhitelisted() {
+        require(whitelisted[msg.sender], "Caller is not whitelisted");
+        _;
+    }
 }

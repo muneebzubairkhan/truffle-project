@@ -34,7 +34,7 @@
     "@openzeppelin/contracts": "^4.4.1",
     "@truffle/hdwallet-provider": "^2.0.0",
     "dotenv": "^10.0.0",
-    "erc721a": "^1.0.0",
+    "erc721a": "latest",
     "eth-gas-reporter": "^0.2.22",
     "nodemon": "^2.0.13",
     "truffle-plugin-verify": "^0.5.20",
