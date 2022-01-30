@@ -43,12 +43,7 @@ const up = s => s.charAt(0).toUpperCase() + s.slice(1);
 // send variable in input as {someVariable}
 // obj is variables object (it contains variables)
 const makeContractObjects = (web3Provider, obj) => {
-  const boiledWeb3 = `
-
-import Web3 from 'web3';
-
-  
-  `;
+  const boiledWeb3 = ``;
 
   return (
     boiledWeb3 +
