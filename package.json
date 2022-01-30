@@ -12,7 +12,7 @@
   "scripts": {
     "start": "truffle migrate --reset --network development",
     "____": "_____",
-    "testRegular": "nodemon --exec \"truffle test && yarn beep1\" --ext \".test.js .sol\"",
+    "testRegular": "nodemon --exec \"truffle test\" --ext \".test.js .sol\"",
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" --ext .sol",
     "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate\" --ext .sol",
     "runLocalBlockchain": "ganache-cli",

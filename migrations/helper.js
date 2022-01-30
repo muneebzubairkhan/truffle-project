@@ -2,7 +2,7 @@ const fs = require('fs');
 const networksConfig = require('../truffle-config');
 
 // later add default values in params
-const makeHelperCodeForUIDev = (network, contracts) => {
+const makeUiCode = (network, contracts) => {
   let res = `// ${new Date().toLocaleString('en-US', {
     hour: 'numeric',
     minute: 'numeric',
@@ -89,4 +89,4 @@ const makeExplorerLink = (explorerUrl = ' ', obj) => {
 
 const stringify = JSON.stringify;
 
-module.exports = { makeHelperCodeForUIDev };
+module.exports = { makeUiCode };
