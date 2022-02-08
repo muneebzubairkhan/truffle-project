@@ -1,4 +1,5 @@
-// const Migrations = artifacts.require("Migrations");
+const Migrations = artifacts.require("Migrations");
+const Nft = artifacts.require("Nft");
 // const _Contract_1_ = artifacts.require("_Contract_1_");
 
 module.exports = async (deployer, network, accounts) => {
@@ -7,7 +8,8 @@ module.exports = async (deployer, network, accounts) => {
 
   // if (network !== "development") return;
 
-  // await deployer.deploy(Migrations);
+  await deployer.deploy(Migrations);
+  await deployer.deploy(Nft);
 
   // try {
   //   // await deployer.deploy(_Contract_1_);
