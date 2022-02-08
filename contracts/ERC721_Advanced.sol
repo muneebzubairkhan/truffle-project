@@ -1,30 +1,29 @@
-// Hi. If you have any questions or comments in this smart contract please let me know at:
-// Whatsapp +923014440289, Telegram @thinkmuneeb, discord: timon#1213, I'm Muneeb Zubair Khan
-//
-//
-// Smart Contract Made by Muneeb Zubair Khan
-// The UI is made by Abraham Peter, Whatsapp +923004702553, Telegram @Abrahampeterhash.
-//
-//
-//
+// UNDERGROUND APE CLUB
+
+// Website:  https://undergroundape.club/
+// Twitter:  https://twitter.com/undergroundapes
+// Medium:   https://medium.com/@undegroundapeclub
+// Discord:  https://discord.com/invite/undergroundapes
+// Opensea:  https://opensea.io/assets/0xb94b38fcb227350989f95f54f54f43b5fcc3ccff/0
+// Contract: https://etherscan.io/address/0xb94b38fcb227350989f95f54f54f43b5fcc3ccff#code
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract Nft is ERC721A("Non Fungible Token", "NFT") {
+contract UAC is ERC721A("Underground Ape Club", "UAC") {
     string public baseURI =
-        "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/";
+        "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
 
     bool public isSaleActive;
-    uint256 public itemPrice = 0.15 ether;
-    uint256 public itemPricePresale = 0.08 ether;
-    uint256 public immutable maxSupply = 7999;
+    uint256 public itemPrice = 0.06 ether;
+    uint256 public itemPricePresale = 0.03 ether;
+    uint256 public immutable maxSupply = 10000;
 
-    // address public owner = 0xc18E78C0F67A09ee43007579018b2Db091116B4C;
     address public owner = msg.sender;
-    address public dev = 0x903f0F7bBF9Ad74F50e58B5D32D2AcE3b358eA77;
 
     ///////////////////////////////
     //    PRESALE CODE STARTS    //
@@ -90,25 +89,21 @@ contract Nft is ERC721A("Non Fungible Token", "NFT") {
         tokensAvailable(_howMany)
     {
         require(isSaleActive, "Sale is not active");
-        require(_howMany > 0 && _howMany <= 10, "Mint min 1, max 10");
+        require(_howMany > 0 && _howMany <= 20, "Mint min 1, max 20");
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
 
         _safeMint(msg.sender, _howMany);
     }
 
     //////////////////////////
-    // Only Owner Methods   //
+    // ONLY OWNER METHODS   //
     //////////////////////////
 
     // Owner can withdraw from here
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
 
-        uint256 _70_percent = (balance * 0.70 ether) / 1 ether;
-        uint256 _30_percent = (balance * 0.30 ether) / 1 ether;
-
-        payable(owner).transfer(_70_percent);
-        payable(dev).transfer(_30_percent);
+        payable(owner).transfer(balance);
     }
 
     // Change price in case of ETH price changes too much
@@ -149,19 +144,32 @@ contract Nft is ERC721A("Non Fungible Token", "NFT") {
     }
 
     ///////////////////
-    // Query Method  //
+    // QUERY METHOD  //
     ///////////////////
 
     function tokensRemaining() public view returns (uint256) {
-        return maxSupply - totalSupply();
+        return maxSupply - totalSupply() - 200; // reserve 200 mints for the team
     }
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 
+    function walletOfOwner(address _owner)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        uint256 ownerTokenCount = balanceOf(_owner);
+        uint256[] memory tokenIds = new uint256[](ownerTokenCount);
+        for (uint256 i; i < ownerTokenCount; i++)
+            tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
+
+        return tokenIds;
+    }
+
     ///////////////////
-    //  Helper Code  //
+    //  HELPER CODE  //
     ///////////////////
 
     modifier tokensAvailable(uint256 _howMany) {
@@ -174,13 +182,28 @@ contract Nft is ERC721A("Non Fungible Token", "NFT") {
         _;
     }
 
-    /////////////////////
-    // Staking Method  //
-    /////////////////////
+    //////////////////////////////
+    // WHITELISTING FOR STAKING //
+    //////////////////////////////
 
     // tokenId => staked (yes or no)
-    mapping(uint256 => bool) public staked;
     mapping(address => bool) public whitelisted;
+
+    // add / remove from whitelist who can stake / unstake
+    function addToWhitelist(address _address, bool _add) external onlyOwner {
+        whitelisted[_address] = _add;
+    }
+
+    modifier onlyWhitelisted() {
+        require(whitelisted[msg.sender], "Caller is not whitelisted");
+        _;
+    }
+
+    /////////////////////
+    // STAKING METHOD  //
+    /////////////////////
+
+    mapping(uint256 => bool) public staked;
 
     function _beforeTokenTransfers(
         address,
@@ -201,14 +224,40 @@ contract Nft is ERC721A("Non Fungible Token", "NFT") {
             staked[_tokenIds[i]] = _stake;
     }
 
-    // add / remove from whitelist who can stake / unstake
-    function addToWhitelist(address _address, bool _add) external onlyOwner {
-        whitelisted[_address] = _add;
+    ///////////////////////////
+    // AUTO APPROVE OPENSEA  //
+    ///////////////////////////
+
+    // Opensea Registerar Mainnet 0xa5409ec958C83C3f309868babACA7c86DCB077c1
+    // Opensea Registerar Rinkeby 0xF57B2c51dED3A29e6891aba85459d600256Cf317
+    address openSeaRegistrar = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
+
+    function isApprovedForAll(address _owner, address _operator)
+        public
+        view
+        override
+        returns (bool)
+    {
+        if (ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator)
+            return true;
+
+        return super.isApprovedForAll(_owner, _operator);
     }
 
-    modifier onlyWhitelisted() {
-        require(whitelisted[msg.sender], "Caller is not whitelisted");
-        _;
+    // infuture address changes for opensea registrar
+    function editOpenSeaRegisterar(address _openSeaRegistrar)
+        external
+        onlyOwner
+    {
+        openSeaRegistrar = _openSeaRegistrar;
+    }
+
+    // just in case openSeaRegistrar is not present we use this contract
+    function proxies(address) external pure returns (address) {
+        return address(0);
     }
 }
 
+interface ProxyRegisterar {
+    function proxies(address) external view returns (address);
+}
