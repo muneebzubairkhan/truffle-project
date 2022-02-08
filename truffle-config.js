@@ -8,7 +8,6 @@ const token = process.env.INFURA_TOKEN;
 const AVAX_SCAN_KEY = process.env.AVAX_SCAN_KEY;
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY;
 const BSCSCAN_KEY = process.env.BSCSCAN_KEY;
-new ethGasReporter(()=>{})
 module.exports = {
   networks: {
     development: {
