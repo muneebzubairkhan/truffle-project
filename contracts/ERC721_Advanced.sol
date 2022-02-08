@@ -270,6 +270,19 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         whitelistMerkleRoot = _whitelistMerkleRoot;
     }
 
+    function inWhitelist(bytes32[] memory _proof, address _owner)
+        external
+        view
+        returns (bool)
+    {
+        return
+            MerkleProof.verify(
+                _proof,
+                whitelistMerkleRoot,
+                keccak256(abi.encodePacked(_owner))
+            );
+    }
+
     // Purchase multiple NFTs at once
     function purchasePresaleTokensMerkle(
         uint256 _howMany,
