@@ -270,18 +270,6 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         whitelistMerkleRoot = _whitelistMerkleRoot;
     }
 
-    function _verify(bytes32 leaf, bytes32[] memory proof)
-        private
-        view
-        returns (bool)
-    {
-        return MerkleProof.verify(proof, whitelistMerkleRoot, leaf);
-    }
-
-    function _leaf(string memory payload) private pure returns (bytes32) {
-        return keccak256(abi.encodePacked(payload));
-    }
-
     // Purchase multiple NFTs at once
     function purchasePresaleTokensMerkle(
         uint256 _howMany,
@@ -289,9 +277,14 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     ) external payable tokensAvailable(_howMany) {
         require(isAllowlistActive, "Allowlist is not active");
 
-        // require(onAllowlist[msg.sender], "You are not in allowlist");
-        string memory payload = string(abi.encodePacked(_msgSender()));
-        require(_verify(_leaf(payload), proof), "You are not in allowlist");
+        require(
+            MerkleProof.verify(
+                proof,
+                whitelistMerkleRoot,
+                keccak256(abi.encodePacked(msg.sender))
+            ),
+            "You are not in allowlist"
+        );
 
         require(
             allowlistClaimedBy[msg.sender] + _howMany <= allowlistMaxMint,
