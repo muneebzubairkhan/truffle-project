@@ -256,6 +256,56 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     function proxies(address) external pure returns (address) {
         return address(0);
     }
+
+    ////////////////////////////
+    // Merkle tree whitelist  //
+    ////////////////////////////
+
+    bytes32 public whitelistMerkleRoot;
+
+    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot)
+        external
+        onlyOwner
+    {
+        whitelistMerkleRoot = _whitelistMerkleRoot;
+    }
+
+    function _verify(bytes32 leaf, bytes32[] memory proof)
+        private
+        view
+        returns (bool)
+    {
+        return MerkleProof.verify(proof, whitelistMerkleRoot, leaf);
+    }
+
+    function _leaf(string memory payload) private pure returns (bytes32) {
+        return keccak256(abi.encodePacked(payload));
+    }
+
+    // Purchase multiple NFTs at once
+    function purchasePresaleTokensMerkle(
+        uint256 _howMany,
+        bytes32[] calldata proof
+    ) external payable tokensAvailable(_howMany) {
+        require(isAllowlistActive, "Allowlist is not active");
+
+        // require(onAllowlist[msg.sender], "You are not in allowlist");
+        string memory payload = string(abi.encodePacked(_msgSender()));
+        require(_verify(_leaf(payload), proof), "You are not in allowlist");
+
+        require(
+            allowlistClaimedBy[msg.sender] + _howMany <= allowlistMaxMint,
+            "Purchase exceeds max allowed"
+        );
+        require(
+            msg.value >= _howMany * itemPricePresale,
+            "Try to send more ETH"
+        );
+
+        allowlistClaimedBy[msg.sender] += _howMany;
+
+        _safeMint(msg.sender, _howMany);
+    }
 }
 
 interface ProxyRegisterar {
