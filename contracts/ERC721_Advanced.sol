@@ -242,3 +242,5 @@ contract PresaleUAC is UAC {
         presaleActiveTime = _presaleActiveTime;
     }
 }
+
+// 2860548 * 0.000000050 = 0.1430274
