@@ -21,53 +21,9 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     uint256 public saleActiveTime = block.timestamp + 30 seconds;
     uint256 public itemPrice = 0.06 ether;
 
-    uint256 public itemPricePresale = 0.03 ether;
 
     uint256 public constant maxSupply = 10000;
     address public constant owner = 0xc18E78C0F67A09ee43007579018b2Db091116B4C;
-
-    ///////////////////////////////
-    //    PRESALE CODE STARTS    //
-    ///////////////////////////////
-
-    uint256 public presaleActiveTime;
-    uint256 public presaleMaxMint = 3;
-    mapping(address => uint256) public presaleClaimedBy;
-    bytes32 public whitelistMerkleRoot;
-
-    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
-        whitelistMerkleRoot = _whitelistMerkleRoot;
-    }
-
-    function inWhitelist(bytes32[] memory _proof, address _owner) public view returns (bool) {
-        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
-    }
-
-    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable tokensAvailable(_howMany) {
-        require(inWhitelist(_proof, msg.sender), "You are not in presale");
-        require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
-
-        presaleClaimedBy[msg.sender] += _howMany;
-
-        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
-
-        _safeMint(msg.sender, _howMany);
-    }
-
-    // set limit of presale
-    function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
-        presaleMaxMint = _presaleMaxMint;
-    }
-
-    // Change presale price in case of ETH price changes too much
-    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
-        itemPricePresale = _itemPricePresale;
-    }
-
-    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
-        presaleActiveTime = _presaleActiveTime;
-    }
 
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
@@ -242,4 +198,50 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
 
 interface ProxyRegisterar {
     function proxies(address) external view returns (address);
+}
+
+contract PresaleUAC is UAC{
+    ///////////////////////////////
+    //    PRESALE CODE STARTS    //
+    ///////////////////////////////
+
+    uint256 public itemPricePresale = 0.03 ether;
+    uint256 public presaleActiveTime;
+    uint256 public presaleMaxMint = 3;
+    mapping(address => uint256) public presaleClaimedBy;
+    bytes32 public whitelistMerkleRoot;
+
+    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
+        whitelistMerkleRoot = _whitelistMerkleRoot;
+    }
+
+    function inWhitelist(bytes32[] memory _proof, address _owner) public view returns (bool) {
+        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
+    }
+
+    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable tokensAvailable(_howMany) {
+        require(inWhitelist(_proof, msg.sender), "You are not in presale");
+        require(block.timestamp > presaleActiveTime, "Presale is not active");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+
+        presaleClaimedBy[msg.sender] += _howMany;
+
+        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
+
+        _safeMint(msg.sender, _howMany);
+    }
+
+    // set limit of presale
+    function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
+        presaleMaxMint = _presaleMaxMint;
+    }
+
+    // Change presale price in case of ETH price changes too much
+    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
+        itemPricePresale = _itemPricePresale;
+    }
+
+    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
+        presaleActiveTime = _presaleActiveTime;
+    }
 }
