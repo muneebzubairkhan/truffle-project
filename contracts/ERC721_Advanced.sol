@@ -184,14 +184,14 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
 
     mapping(uint256 => bool) public staked;
 
-    function _beforeTokenTransfers( address,  address,
+    function _beforeTokenTransfers(
+        address,
+        address,
         uint256 startTokenId,
         uint256 quantity
     ) internal view override {
         for (uint256 i = startTokenId; i < startTokenId + quantity; i++) require(!staked[i], "Unstake tokenId it to transfer");
     }
-
-
 
     // stake / unstake nfts
     function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelisted {
