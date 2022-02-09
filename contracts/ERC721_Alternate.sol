@@ -185,3 +185,5 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
 interface ProxyRegisterar {
     function proxies(address) external view returns (address);
 }
+
+// 2870871 * 0.000000035 = 0.1005 ETH to deploy at gas 35
