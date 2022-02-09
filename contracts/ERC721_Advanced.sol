@@ -165,9 +165,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     address openSeaRegistrar = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        if (ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator) return true;
-
-        return super.isApprovedForAll(_owner, _operator);
+        return ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator ? true : super.isApprovedForAll(_owner, _operator);
     }
 
     // infuture address changes for opensea registrar
