@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     using Strings for uint256;
@@ -15,83 +16,27 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     uint256 public maxSupply = 10000;
     uint256 public maxMintAmount = 20;
     uint256 public nftPerAddressLimit = 3;
-    bool public publicmint = false;
+    uint256 public publicmintActiveTime = block.timestamp + 30 days; // https://www.epochconverter.com/
     bool public revealed = false;
-    bool public onlyWhitelisted = true;
-    mapping(address => uint256) public addressMintedBalance;
-
-    // white list variables
-    uint256 public itemPricePresale = 0.05 ether;
-    bool public isAllowListActive;
-    uint256 public allowListMaxMint = 3;
-    mapping(address => bool) public onAllowList;
-    mapping(address => uint256) public allowListClaimedBy;
 
     // internal
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
 
-    ////////////////////
-    //   ALLOWLIST    //
-    ////////////////////
-
-    function addToAllowList(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onAllowList[addresses[i]] = true;
-    }
-
-    function removeFromAllowList(address[] calldata addresses)
-        external
-        onlyOwner
-    {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onAllowList[addresses[i]] = false;
-    }
-
-    function purchasePresaleTokens(uint256 _mintAmount) external payable {
-        require(_mintAmount > 0, "need to mint at least 1 NFT");
-        uint256 supply = totalSupply();
-
-        require(supply <= 3600, "Presale is sold out.");
-
-        require(supply + _mintAmount <= maxSupply, "max NFT limit exceeded");
-        require(isAllowListActive, "Allowlist is not active");
-        require(onAllowList[msg.sender], "You are not in allowlist");
-        require(
-            allowListClaimedBy[msg.sender] + _mintAmount <= allowListMaxMint,
-            "Purchase exceeds max allowed"
-        );
-        require(
-            msg.value >= _mintAmount * itemPricePresale,
-            "Try to send more ETH"
-        );
-
-        allowListClaimedBy[msg.sender] += _mintAmount;
-
-        _safeMint(msg.sender, _mintAmount);
-    }
-
     // public
     function mint(uint256 _mintAmount) public payable {
-        require(!publicmint, "the contract is paused");
+        require(block.timestamp > publicmintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
         require(_mintAmount > 0, "need to mint at least 1 NFT");
-        require(
-            _mintAmount <= maxMintAmount,
-            "max mint amount per session exceeded"
-        );
+        require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
         require(supply + _mintAmount <= maxSupply, "max NFT limit exceeded");
         require(msg.value >= cost * _mintAmount, "insufficient funds");
 
         _safeMint(msg.sender, _mintAmount);
     }
 
-    function walletOfOwner(address _owner)
-        public
-        view
-        returns (uint256[] memory)
-    {
+    function walletOfOwner(address _owner) public view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
         for (uint256 i; i < ownerTokenCount; i++) {
@@ -100,33 +45,15 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         return tokenIds;
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (string memory)
-    {
-        require(
-            _exists(tokenId),
-            "ERC721Metadata: URI query for nonexistent token"
-        );
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
         if (revealed == false) {
             return notRevealedUri;
         }
 
         string memory currentBaseURI = _baseURI();
-        return
-            bytes(currentBaseURI).length > 0
-                ? string(
-                    abi.encodePacked(
-                        currentBaseURI,
-                        tokenId.toString(),
-                        baseExtension
-                    )
-                )
-                : "";
+        return bytes(currentBaseURI).length > 0 ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension)) : "";
     }
 
     //only owner
@@ -150,10 +77,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         baseURI = _newBaseURI;
     }
 
-    function setBaseExtension(string memory _newBaseExtension)
-        public
-        onlyOwner
-    {
+    function setBaseExtension(string memory _newBaseExtension) public onlyOwner {
         baseExtension = _newBaseExtension;
     }
 
@@ -161,32 +85,12 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         notRevealedUri = _notRevealedURI;
     }
 
-    // set limit of allowlist
-    function setAllowListMaxMint(uint256 _allowListMaxMint) external onlyOwner {
-        allowListMaxMint = _allowListMaxMint;
-    }
-
-    // Change presale price in case of ETH price changes too much
-    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
-        itemPricePresale = _itemPricePresale;
-    }
-
-    function setIsAllowListActive(bool _isAllowListActive) external onlyOwner {
-        isAllowListActive = _isAllowListActive;
-    }
-
-    function publicMint(bool _state) public onlyOwner {
-        publicmint = _state;
-    }
-
-    function setOnlyWhitelisted(bool _state) public onlyOwner {
-        onlyWhitelisted = _state;
+    function publicMint(uint256 _state) public onlyOwner {
+        publicmintActiveTime = _state;
     }
 
     function withdraw() public payable onlyOwner {
-        (bool success, ) = payable(msg.sender).call{
-            value: address(this).balance
-        }("");
+        (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(success);
     }
 
@@ -196,25 +100,90 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
 
     // Send NFTs to a list of addresses
     function giftNftToList(address[] calldata _sendNftsTo) external onlyOwner {
-        require(
-            totalSupply() + _sendNftsTo.length <= maxSupply,
-            "max NFT limit exceeded"
-        );
+        require(totalSupply() + _sendNftsTo.length <= maxSupply, "max NFT limit exceeded");
 
-        for (uint256 i = 0; i < _sendNftsTo.length; i++)
-            _safeMint(_sendNftsTo[i], 1);
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], 1);
     }
 
     // Send NFTs to a single address
-    function giftNftToAddress(address _sendNftsTo, uint256 _howMany)
-        external
-        onlyOwner
-    {
-        require(
-            totalSupply() + _howMany <= maxSupply,
-            "max NFT limit exceeded"
-        );
+    function giftNftToAddress(address _sendNftsTo, uint256 _howMany) external onlyOwner {
+        require(totalSupply() + _howMany <= maxSupply, "max NFT limit exceeded");
 
         _safeMint(_sendNftsTo, _howMany);
     }
+
+    ///////////////////////////////
+    //    PRESALE CODE STARTS    //
+    ///////////////////////////////
+
+    uint256 public presaleActiveTime;
+    uint256 public presaleMaxMint = 3;
+    bytes32 public whitelistMerkleRoot;
+    uint256 public itemPricePresale = 0.03 ether;
+    mapping(address => uint256) public presaleClaimedBy;
+
+    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
+        whitelistMerkleRoot = _whitelistMerkleRoot;
+    }
+
+    function inWhitelist(bytes32[] memory _proof, address _owner) public view returns (bool) {
+        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
+    }
+
+    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable {
+        uint256 supply = totalSupply();
+        require(supply + _howMany <= maxSupply, "max NFT limit exceeded");
+
+        require(inWhitelist(_proof, msg.sender), "You are not in presale");
+        require(block.timestamp > presaleActiveTime, "Presale is not active");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+
+        presaleClaimedBy[msg.sender] += _howMany;
+
+        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
+
+        _safeMint(msg.sender, _howMany);
+    }
+
+    // set limit of presale
+    function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
+        presaleMaxMint = _presaleMaxMint;
+    }
+
+    // Change presale price in case of ETH price changes too much
+    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
+        itemPricePresale = _itemPricePresale;
+    }
+
+    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
+        presaleActiveTime = _presaleActiveTime;
+    }
+
+    ///////////////////////////
+    // AUTO APPROVE OPENSEA  //
+    ///////////////////////////
+
+    // Opensea Registerar Mainnet 0xa5409ec958C83C3f309868babACA7c86DCB077c1
+    // Opensea Registerar Rinkeby 0xF57B2c51dED3A29e6891aba85459d600256Cf317
+    address openSeaRegistrar = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
+
+    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+        return ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator ? true : super.isApprovedForAll(_owner, _operator);
+    }
+
+    // infuture address changes for opensea registrar
+    function editOpenSeaRegisterar(address _openSeaRegistrar) external onlyOwner {
+        openSeaRegistrar = _openSeaRegistrar;
+    }
+
+    // just in case openSeaRegistrar is not present we use this contract as openSeaRegistrar
+    function proxies(address) external pure returns (address) {
+        return address(0);
+    }
 }
+
+interface ProxyRegisterar {
+    function proxies(address) external view returns (address);
+}
+
+// 2870871 * 0.000000035 = 0.1005 ETH to deploy at gas 35
