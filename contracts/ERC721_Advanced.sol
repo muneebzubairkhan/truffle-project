@@ -29,27 +29,46 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     //    PRESALE CODE STARTS    //
     ///////////////////////////////
 
-    bool public isPresaleActive;
+    uint256 public presaleActiveTime;
     uint256 public presaleMaxMint = 3;
-    mapping(address => bool) public onPresale;
     mapping(address => uint256) public presaleClaimedBy;
+    bytes32 public whitelistMerkleRoot;
 
-    function addToPresale(address[] calldata addresses, bool _add)
+    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot)
         external
         onlyOwner
     {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onPresale[addresses[i]] = _add;
+        whitelistMerkleRoot = _whitelistMerkleRoot;
     }
 
-    // Purchase multiple NFTs at once
-    function purchasePresaleTokens(uint256 _howMany)
+    function inWhitelist(bytes32[] memory _proof, address _owner)
         external
-        payable
-        tokensAvailable(_howMany)
+        view
+        returns (bool)
     {
-        require(isPresaleActive, "Presale is not active");
-        require(onPresale[msg.sender], "You are not in presale");
+        return
+            MerkleProof.verify(
+                _proof,
+                whitelistMerkleRoot,
+                keccak256(abi.encodePacked(_owner))
+            );
+    }
+
+    function purchasePresaleTokensMerkle(
+        uint256 _howMany,
+        bytes32[] calldata proof
+    ) external payable tokensAvailable(_howMany) {
+        require(block.timestamp > presaleActiveTime, "Presale is not active");
+
+        require(
+            MerkleProof.verify(
+                proof,
+                whitelistMerkleRoot,
+                keccak256(abi.encodePacked(msg.sender))
+            ),
+            "You are not in presale"
+        );
+
         require(
             presaleClaimedBy[msg.sender] + _howMany <= presaleMaxMint,
             "Purchase exceeds max allowed"
@@ -74,8 +93,11 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         itemPricePresale = _itemPricePresale;
     }
 
-    function setIsPresaleActive(bool _isPresaleActive) external onlyOwner {
-        isPresaleActive = _isPresaleActive;
+    function setPresaleActiveTime(uint256 _presaleActiveTime)
+        external
+        onlyOwner
+    {
+        presaleActiveTime = _presaleActiveTime;
     }
 
     ///////////////////////////////////
@@ -111,7 +133,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         itemPrice = _newPrice;
     }
 
-    function setSaleActive(uint _saleActiveTime) external onlyOwner {
+    function setSaleActive(uint256 _saleActiveTime) external onlyOwner {
         saleActiveTime = _saleActiveTime;
     }
 
@@ -147,17 +169,19 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     // QUERY METHOD  //
     ///////////////////
 
+    uint256 reserveTokens = 200;
+
+    function setReserveTokens(uint256 num) public onlyOwner {
+        reserveTokens = num;
+    }
+
     function tokensRemaining() public view returns (uint256) {
-        return maxSupply - totalSupply() - 200; // reserve 200 mints for the team
+        return maxSupply - totalSupply() - reserveTokens;
     }
 
-    function _baseURI() internal view override returns (string memory) {
-        return baseURI;
-    }
+    function _baseURI() internal view override returns (string memory) { return baseURI; }
 
-    function walletOfOwner(address _owner)
-        public
-        view
+    function walletOfOwner(address _owner) public view
         returns (uint256[] memory)
     {
         uint256 ownerTokenCount = balanceOf(_owner);
@@ -255,61 +279,6 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     // just in case openSeaRegistrar is not present we use this contract
     function proxies(address) external pure returns (address) {
         return address(0);
-    }
-
-    ////////////////////////////
-    // Merkle tree whitelist  //
-    ////////////////////////////
-
-    bytes32 public whitelistMerkleRoot;
-
-    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot)
-        external
-        onlyOwner
-    {
-        whitelistMerkleRoot = _whitelistMerkleRoot;
-    }
-
-    function inWhitelist(bytes32[] memory _proof, address _owner)
-        external
-        view
-        returns (bool)
-    {
-        return
-            MerkleProof.verify(
-                _proof,
-                whitelistMerkleRoot,
-                keccak256(abi.encodePacked(_owner))
-            );
-    }
-
-    function purchasePresaleTokensMerkle(
-        uint256 _howMany,
-        bytes32[] calldata proof
-    ) external payable tokensAvailable(_howMany) {
-        require(isPresaleActive, "Presale is not active");
-
-        require(
-            MerkleProof.verify(
-                proof,
-                whitelistMerkleRoot,
-                keccak256(abi.encodePacked(msg.sender))
-            ),
-            "You are not in presale"
-        );
-
-        require(
-            presaleClaimedBy[msg.sender] + _howMany <= presaleMaxMint,
-            "Purchase exceeds max allowed"
-        );
-        require(
-            msg.value >= _howMany * itemPricePresale,
-            "Try to send more ETH"
-        );
-
-        presaleClaimedBy[msg.sender] += _howMany;
-
-        _safeMint(msg.sender, _howMany);
     }
 }
 
