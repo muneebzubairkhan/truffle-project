@@ -15,8 +15,7 @@ import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract UAC is ERC721A("Underground Ape Club", "UAC") {
-    string public baseURI =
-        "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
+    string public baseURI = "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
 
     uint256 public saleActiveTime = block.timestamp + 30 seconds;
     uint256 public itemPrice = 0.06 ether;
@@ -35,49 +34,21 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     mapping(address => uint256) public presaleClaimedBy;
     bytes32 public whitelistMerkleRoot;
 
-    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot)
-        external
-        onlyOwner
-    {
+    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
         whitelistMerkleRoot = _whitelistMerkleRoot;
     }
 
-    function inWhitelist(bytes32[] memory _proof, address _owner)
-        external
-        view
-        returns (bool)
-    {
-        return
-            MerkleProof.verify(
-                _proof,
-                whitelistMerkleRoot,
-                keccak256(abi.encodePacked(_owner))
-            );
+    function inWhitelist(bytes32[] memory _proof, address _owner) external view returns (bool) {
+        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
     }
 
-    function purchasePresaleTokensMerkle(
-        uint256 _howMany,
-        bytes32[] calldata proof
-    ) external payable tokensAvailable(_howMany) {
+    function purchasePresaleTokensMerkle(uint256 _howMany, bytes32[] calldata proof) external payable tokensAvailable(_howMany) {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
 
-        require(
-            MerkleProof.verify(
-                proof,
-                whitelistMerkleRoot,
-                keccak256(abi.encodePacked(msg.sender))
-            ),
-            "You are not in presale"
-        );
+        require(MerkleProof.verify(proof, whitelistMerkleRoot, keccak256(abi.encodePacked(msg.sender))), "You are not in presale");
 
-        require(
-            presaleClaimedBy[msg.sender] + _howMany <= presaleMaxMint,
-            "Purchase exceeds max allowed"
-        );
-        require(
-            msg.value >= _howMany * itemPricePresale,
-            "Try to send more ETH"
-        );
+        require(presaleClaimedBy[msg.sender] + _howMany <= presaleMaxMint, "Purchase exceeds max allowed");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
         presaleClaimedBy[msg.sender] += _howMany;
 
@@ -94,10 +65,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         itemPricePresale = _itemPricePresale;
     }
 
-    function setPresaleActiveTime(uint256 _presaleActiveTime)
-        external
-        onlyOwner
-    {
+    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
         presaleActiveTime = _presaleActiveTime;
     }
 
@@ -106,11 +74,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     ///////////////////////////////////
 
     // Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany)
-        external
-        payable
-        tokensAvailable(_howMany)
-    {
+    function purchaseTokens(uint256 _howMany) external payable tokensAvailable(_howMany) {
         require(block.timestamp > saleActiveTime, "Sale is not active");
         require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
@@ -148,21 +112,12 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     ///////////////////////////////////
 
     // Send NFTs to a list of addresses
-    function giftNftToList(address[] calldata _sendNftsTo, uint256 _howMany)
-        external
-        onlyOwner
-        tokensAvailable(_sendNftsTo.length)
-    {
-        for (uint256 i = 0; i < _sendNftsTo.length; i++)
-            _safeMint(_sendNftsTo[i], _howMany);
+    function giftNftToList(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_sendNftsTo.length) {
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
 
     // Send NFTs to a single address
-    function giftNftToAddress(address _sendNftsTo, uint256 _howMany)
-        external
-        onlyOwner
-        tokensAvailable(_howMany)
-    {
+    function giftNftToAddress(address _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_howMany) {
         _safeMint(_sendNftsTo, _howMany);
     }
 
@@ -184,15 +139,10 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         return baseURI;
     }
 
-    function walletOfOwner(address _owner)
-        public
-        view
-        returns (uint256[] memory)
-    {
+    function walletOfOwner(address _owner) public view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
-        for (uint256 i; i < ownerTokenCount; i++)
-            tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
+        for (uint256 i; i < ownerTokenCount; i++) tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
 
         return tokenIds;
     }
@@ -234,23 +184,18 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
 
     mapping(uint256 => bool) public staked;
 
-    function _beforeTokenTransfers(
-        address,
-        address,
+    function _beforeTokenTransfers( address,  address,
         uint256 startTokenId,
         uint256 quantity
     ) internal view override {
-        for (uint256 i = startTokenId; i < startTokenId + quantity; i++)
-            require(!staked[i], "Unstake tokenId it to transfer");
+        for (uint256 i = startTokenId; i < startTokenId + quantity; i++) require(!staked[i], "Unstake tokenId it to transfer");
     }
 
+
+
     // stake / unstake nfts
-    function stakeNfts(uint256[] calldata _tokenIds, bool _stake)
-        external
-        onlyWhitelisted
-    {
-        for (uint256 i = 0; i < _tokenIds.length; i++)
-            staked[_tokenIds[i]] = _stake;
+    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelisted {
+        for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 
     ///////////////////////////
@@ -261,23 +206,14 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     // Opensea Registerar Rinkeby 0xF57B2c51dED3A29e6891aba85459d600256Cf317
     address openSeaRegistrar = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
 
-    function isApprovedForAll(address _owner, address _operator)
-        public
-        view
-        override
-        returns (bool)
-    {
-        if (ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator)
-            return true;
+    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+        if (ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator) return true;
 
         return super.isApprovedForAll(_owner, _operator);
     }
 
     // infuture address changes for opensea registrar
-    function editOpenSeaRegisterar(address _openSeaRegistrar)
-        external
-        onlyOwner
-    {
+    function editOpenSeaRegisterar(address _openSeaRegistrar) external onlyOwner {
         openSeaRegistrar = _openSeaRegistrar;
     }
 

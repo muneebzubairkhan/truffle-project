@@ -15,11 +15,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
-contract LazyPandas_Simple is
-    ERC721("LazyPandas", "LPS"),
-    ERC721Enumerable,
-    ERC721Burnable
-{
+contract LazyPandas_Simple is ERC721("LazyPandas", "LPS"), ERC721Enumerable, ERC721Burnable {
     string public baseURI;
     bool public isSaleActive;
     uint256 public circulatingSupply;
@@ -39,16 +35,11 @@ contract LazyPandas_Simple is
     //   ALLOWLIST    //
     ////////////////////
     function addToAllowList(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onAllowList[addresses[i]] = true;
+        for (uint256 i = 0; i < addresses.length; i++) onAllowList[addresses[i]] = true;
     }
 
-    function removeFromAllowList(address[] calldata addresses)
-        external
-        onlyOwner
-    {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onAllowList[addresses[i]] = false;
+    function removeFromAllowList(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onAllowList[addresses[i]] = false;
     }
 
     ////////////////////
@@ -56,26 +47,15 @@ contract LazyPandas_Simple is
     ////////////////////
 
     // Purchase multiple NFTs at once
-    function purchasePresaleTokens(uint256 _howMany)
-        external
-        payable
-        tokensAvailable(_howMany)
-    {
+    function purchasePresaleTokens(uint256 _howMany) external payable tokensAvailable(_howMany) {
         require(isAllowListActive, "Allowlist is not active");
         require(onAllowList[msg.sender], "You are not in allowlist");
-        require(
-            allowListClaimedBy[msg.sender] + _howMany <= allowListMaxMint,
-            "Purchase exceeds max allowed"
-        );
-        require(
-            msg.value >= _howMany * itemPricePresale,
-            "Try to send more ETH"
-        );
+        require(allowListClaimedBy[msg.sender] + _howMany <= allowListMaxMint, "Purchase exceeds max allowed");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
         allowListClaimedBy[msg.sender] += _howMany;
 
-        for (uint256 i = 0; i < _howMany; i++)
-            _mint(msg.sender, ++circulatingSupply);
+        for (uint256 i = 0; i < _howMany; i++) _mint(msg.sender, ++circulatingSupply);
     }
 
     ////////////////////
@@ -83,17 +63,12 @@ contract LazyPandas_Simple is
     ////////////////////
 
     // Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany)
-        external
-        payable
-        tokensAvailable(_howMany)
-    {
+    function purchaseTokens(uint256 _howMany) external payable tokensAvailable(_howMany) {
         require(isSaleActive, "Sale is not active");
         require(_howMany > 0 && _howMany <= 10, "Mint min 1, max 10");
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
 
-        for (uint256 i = 0; i < _howMany; i++)
-            _mint(msg.sender, ++circulatingSupply);
+        for (uint256 i = 0; i < _howMany; i++) _mint(msg.sender, ++circulatingSupply);
     }
 
     //////////////////////////
@@ -132,23 +107,13 @@ contract LazyPandas_Simple is
     }
 
     // Send NFTs to a list of addresses
-    function giftNftToList(address[] calldata _sendNftsTo)
-        external
-        onlyOwner
-        tokensAvailable(_sendNftsTo.length)
-    {
-        for (uint256 i = 0; i < _sendNftsTo.length; i++)
-            _mint(_sendNftsTo[i], ++circulatingSupply);
+    function giftNftToList(address[] calldata _sendNftsTo) external onlyOwner tokensAvailable(_sendNftsTo.length) {
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _mint(_sendNftsTo[i], ++circulatingSupply);
     }
 
     // Send NFTs to a single address
-    function giftNftToAddress(address _sendNftsTo, uint256 _howMany)
-        external
-        onlyOwner
-        tokensAvailable(_howMany)
-    {
-        for (uint256 i = 0; i < _howMany; i++)
-            _mint(_sendNftsTo, ++circulatingSupply);
+    function giftNftToAddress(address _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_howMany) {
+        for (uint256 i = 0; i < _howMany; i++) _mint(_sendNftsTo, ++circulatingSupply);
     }
 
     function setIsAllowListActive(bool _isAllowListActive) external onlyOwner {
@@ -211,12 +176,7 @@ contract LazyPandas_Simple is
         super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, ERC721Enumerable)
-        returns (bool)
-    {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }

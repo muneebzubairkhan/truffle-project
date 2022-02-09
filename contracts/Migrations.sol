@@ -16,10 +16,7 @@ contract Migrations {
     uint256 public last_completed_migration;
 
     function setCompleted(uint256 completed) public {
-        require(
-            msg.sender == owner,
-            "This function is restricted to the contract's owner"
-        );
+        require(msg.sender == owner, "This function is restricted to the contract's owner");
         last_completed_migration = completed;
     }
 }
