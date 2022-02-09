@@ -15,8 +15,11 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
-
-contract LazyPandas_Simple is ERC721("LazyPandas", "LPS"), ERC721Enumerable, ERC721Burnable {
+contract LazyPandas_Simple is
+    ERC721("LazyPandas", "LPS"),
+    ERC721Enumerable,
+    ERC721Burnable
+{
     string public baseURI;
     bool public isSaleActive;
     uint256 public circulatingSupply;
@@ -85,10 +88,7 @@ contract LazyPandas_Simple is ERC721("LazyPandas", "LPS"), ERC721Enumerable, ERC
         payable
         tokensAvailable(_howMany)
     {
-        require(
-            isSaleActive,
-            "Sale is not active"
-        );
+        require(isSaleActive, "Sale is not active");
         require(_howMany > 0 && _howMany <= 10, "Mint min 1, max 10");
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
 
@@ -199,14 +199,15 @@ contract LazyPandas_Simple is ERC721("LazyPandas", "LPS"), ERC721Enumerable, ERC
     modifier onlyOwner() {
         require(owner == msg.sender, "Ownable: caller is not the owner");
         _;
-    }    
+    }
 
     // The following functions are overrides required by Solidity.
 
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
-        internal
-        override(ERC721, ERC721Enumerable)
-    {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) {
         super._beforeTokenTransfer(from, to, tokenId);
     }
 

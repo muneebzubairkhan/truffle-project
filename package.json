@@ -40,6 +40,8 @@
     "web3-utils": "^1.5.3"
   },
   "devDependencies": {
-    "eth-gas-reporter": "^0.2.24"
+    "eth-gas-reporter": "^0.2.24",
+    "prettier": "^2.5.1",
+    "prettier-plugin-solidity": "^1.0.0-beta.19"
   }
 }

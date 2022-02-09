@@ -20,6 +20,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
 
     uint256 public saleActiveTime = block.timestamp + 30 seconds;
     uint256 public itemPrice = 0.06 ether;
+
     uint256 public itemPricePresale = 0.03 ether;
 
     uint256 public constant maxSupply = 10000;
@@ -179,9 +180,13 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         return maxSupply - totalSupply() - reserveTokens;
     }
 
-    function _baseURI() internal view override returns (string memory) { return baseURI; }
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
+    }
 
-    function walletOfOwner(address _owner) public view
+    function walletOfOwner(address _owner)
+        public
+        view
         returns (uint256[] memory)
     {
         uint256 ownerTokenCount = balanceOf(_owner);
