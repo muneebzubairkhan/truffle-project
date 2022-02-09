@@ -190,7 +190,9 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
         address,
         uint256 startTokenId,
         uint256 quantity
-    ) internal view override {
+    ) internal view override whenNotPaused {
+        // can improve it, give reward on balanceOf()
+        // try gas by saparating contracts
         for (uint256 i = startTokenId; i < startTokenId + quantity; i++) require(!staked[i], "Unstake tokenId it to transfer");
     }
 
@@ -234,13 +236,6 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     function unpause() public onlyOwner {
         _unpause();
     }
-
-    function _beforeTokenTransfers(
-        address,
-        address,
-        uint256,
-        uint256
-    ) internal override whenNotPaused {}
 }
 
 interface ProxyRegisterar {
