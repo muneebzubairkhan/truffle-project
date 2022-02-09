@@ -236,6 +236,8 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     function unpause() public onlyOwner {
         _unpause();
     }
+
+    // send multiple nfts
 }
 
 interface ProxyRegisterar {
