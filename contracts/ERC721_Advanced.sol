@@ -156,6 +156,13 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 
+    /////////////////////////////
+    // AUTO APPROVE LOOKSRARE  //
+    /////////////////////////////
+
+    // TransferManagerERC721 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e
+    // LooksRareExchange 0x59728544b08ab483533076417fbbb2fd0b17ce3a
+
     ///////////////////////////
     // AUTO APPROVE OPENSEA  //
     ///////////////////////////
@@ -191,6 +198,18 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     }
 
     // send multiple nfts
+    function bulkAirdropERC721(
+        IERC721 _token,
+        address[] calldata _to,
+        uint256[] calldata _id
+    ) public {
+        require(_to.length == _id.length, "Receivers and IDs are different length");
+        for (uint256 i = 0; i < _to.length; i++) {
+            _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
+        }
+    }
+
+    
 }
 
 interface ProxyRegisterar {
