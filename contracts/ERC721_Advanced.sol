@@ -18,28 +18,28 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     string public baseURI =
         "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
 
-    bool public isSaleActive;
+    uint256 public saleActiveTime = block.timestamp + 30 seconds;
     uint256 public itemPrice = 0.06 ether;
     uint256 public itemPricePresale = 0.03 ether;
-    uint256 public immutable maxSupply = 10000;
 
-    address public immutable owner = msg.sender;
+    uint256 public constant maxSupply = 10000;
+    address public constant owner = 0xc18E78C0F67A09ee43007579018b2Db091116B4C;
 
     ///////////////////////////////
     //    PRESALE CODE STARTS    //
     ///////////////////////////////
 
-    bool public isAllowlistActive;
-    uint256 public allowlistMaxMint = 3;
-    mapping(address => bool) public onAllowlist;
-    mapping(address => uint256) public allowlistClaimedBy;
+    bool public isPresaleActive;
+    uint256 public presaleMaxMint = 3;
+    mapping(address => bool) public onPresale;
+    mapping(address => uint256) public presaleClaimedBy;
 
-    function addToAllowlist(address[] calldata addresses, bool _add)
+    function addToPresale(address[] calldata addresses, bool _add)
         external
         onlyOwner
     {
         for (uint256 i = 0; i < addresses.length; i++)
-            onAllowlist[addresses[i]] = _add;
+            onPresale[addresses[i]] = _add;
     }
 
     // Purchase multiple NFTs at once
@@ -48,10 +48,10 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         payable
         tokensAvailable(_howMany)
     {
-        require(isAllowlistActive, "Allowlist is not active");
-        require(onAllowlist[msg.sender], "You are not in allowlist");
+        require(isPresaleActive, "Presale is not active");
+        require(onPresale[msg.sender], "You are not in presale");
         require(
-            allowlistClaimedBy[msg.sender] + _howMany <= allowlistMaxMint,
+            presaleClaimedBy[msg.sender] + _howMany <= presaleMaxMint,
             "Purchase exceeds max allowed"
         );
         require(
@@ -59,14 +59,14 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
             "Try to send more ETH"
         );
 
-        allowlistClaimedBy[msg.sender] += _howMany;
+        presaleClaimedBy[msg.sender] += _howMany;
 
         _safeMint(msg.sender, _howMany);
     }
 
-    // set limit of allowlist
-    function setAllowlistMaxMint(uint256 _allowlistMaxMint) external onlyOwner {
-        allowlistMaxMint = _allowlistMaxMint;
+    // set limit of presale
+    function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
+        presaleMaxMint = _presaleMaxMint;
     }
 
     // Change presale price in case of ETH price changes too much
@@ -74,8 +74,8 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         itemPricePresale = _itemPricePresale;
     }
 
-    function setIsAllowlistActive(bool _isAllowlistActive) external onlyOwner {
-        isAllowlistActive = _isAllowlistActive;
+    function setIsPresaleActive(bool _isPresaleActive) external onlyOwner {
+        isPresaleActive = _isPresaleActive;
     }
 
     ///////////////////////////////////
@@ -88,8 +88,8 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         payable
         tokensAvailable(_howMany)
     {
-        require(isSaleActive, "Sale is not active");
-        require(_howMany > 0 && _howMany <= 20, "Mint min 1, max 20");
+        require(block.timestamp > saleActiveTime, "Sale is not active");
+        require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
 
         _safeMint(msg.sender, _howMany);
@@ -111,8 +111,8 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         itemPrice = _newPrice;
     }
 
-    function setSaleActive(bool _isSaleActive) external onlyOwner {
-        isSaleActive = _isSaleActive;
+    function setSaleActive(uint _saleActiveTime) external onlyOwner {
+        saleActiveTime = _saleActiveTime;
     }
 
     // Hide identity or show identity from here
@@ -287,7 +287,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         uint256 _howMany,
         bytes32[] calldata proof
     ) external payable tokensAvailable(_howMany) {
-        require(isAllowlistActive, "Allowlist is not active");
+        require(isPresaleActive, "Presale is not active");
 
         require(
             MerkleProof.verify(
@@ -295,11 +295,11 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
                 whitelistMerkleRoot,
                 keccak256(abi.encodePacked(msg.sender))
             ),
-            "You are not in allowlist"
+            "You are not in presale"
         );
 
         require(
-            allowlistClaimedBy[msg.sender] + _howMany <= allowlistMaxMint,
+            presaleClaimedBy[msg.sender] + _howMany <= presaleMaxMint,
             "Purchase exceeds max allowed"
         );
         require(
@@ -307,7 +307,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
             "Try to send more ETH"
         );
 
-        allowlistClaimedBy[msg.sender] += _howMany;
+        presaleClaimedBy[msg.sender] += _howMany;
 
         _safeMint(msg.sender, _howMany);
     }
