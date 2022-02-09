@@ -116,11 +116,11 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     //    PRESALE CODE STARTS    //
     ///////////////////////////////
 
-    uint256 public itemPricePresale = 0.03 ether;
     uint256 public presaleActiveTime;
     uint256 public presaleMaxMint = 3;
-    mapping(address => uint256) public presaleClaimedBy;
     bytes32 public whitelistMerkleRoot;
+    uint256 public itemPricePresale = 0.03 ether;
+    mapping(address => uint256) public presaleClaimedBy;
 
     function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
         whitelistMerkleRoot = _whitelistMerkleRoot;
