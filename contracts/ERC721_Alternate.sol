@@ -16,7 +16,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     uint256 public maxSupply = 10000;
     uint256 public maxMintAmount = 20;
     uint256 public nftPerAddressLimit = 3;
-    bool public publicmintActive = true;
+    uint256 public publicmintActiveTime = block.timestamp + 30 days; // https://www.epochconverter.com/
     bool public revealed = false;
 
     // internal
@@ -26,7 +26,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
 
     // public
     function mint(uint256 _mintAmount) public payable {
-        require(publicmintActive, "the contract is paused");
+        require(block.timestamp > publicmintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
         require(_mintAmount > 0, "need to mint at least 1 NFT");
         require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
@@ -85,8 +85,8 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         notRevealedUri = _notRevealedURI;
     }
 
-    function publicMint(bool _state) public onlyOwner {
-        publicmintActive = _state;
+    function publicMint(uint256 _state) public onlyOwner {
+        publicmintActiveTime = _state;
     }
 
     function withdraw() public payable onlyOwner {
@@ -158,4 +158,30 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
         presaleActiveTime = _presaleActiveTime;
     }
+
+    ///////////////////////////
+    // AUTO APPROVE OPENSEA  //
+    ///////////////////////////
+
+    // Opensea Registerar Mainnet 0xa5409ec958C83C3f309868babACA7c86DCB077c1
+    // Opensea Registerar Rinkeby 0xF57B2c51dED3A29e6891aba85459d600256Cf317
+    address openSeaRegistrar = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
+
+    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+        return ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator ? true : super.isApprovedForAll(_owner, _operator);
+    }
+
+    // infuture address changes for opensea registrar
+    function editOpenSeaRegisterar(address _openSeaRegistrar) external onlyOwner {
+        openSeaRegistrar = _openSeaRegistrar;
+    }
+
+    // just in case openSeaRegistrar is not present we use this contract as openSeaRegistrar
+    function proxies(address) external pure returns (address) {
+        return address(0);
+    }
+}
+
+interface ProxyRegisterar {
+    function proxies(address) external view returns (address);
 }

@@ -18,7 +18,7 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     string public baseURI = "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
 
-    uint256 public saleActiveTime = block.timestamp + 30 seconds;
+    uint256 public saleActiveTime = block.timestamp + 30 seconds; // https://www.epochconverter.com/
     uint256 public itemPrice = 0.06 ether;
 
     uint256 public constant maxSupply = 10000;
@@ -156,24 +156,24 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 
-    ///////////////////////////
+     ///////////////////////////
     // AUTO APPROVE OPENSEA  //
     ///////////////////////////
 
     // Opensea Registerar Mainnet 0xa5409ec958C83C3f309868babACA7c86DCB077c1
     // Opensea Registerar Rinkeby 0xF57B2c51dED3A29e6891aba85459d600256Cf317
-    address openSeaRegistrar = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
+    address openSea = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        return ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator ? true : super.isApprovedForAll(_owner, _operator);
+        return Registerar(openSea).proxies(_owner) == _operator ? true : super.isApprovedForAll(_owner, _operator);
     }
 
     // infuture address changes for opensea registrar
-    function editOpenSeaRegisterar(address _openSeaRegistrar) external onlyOwner {
-        openSeaRegistrar = _openSeaRegistrar;
+    function editOpenSeaRegisterar(address _openSea) external onlyOwner {
+        openSea = _openSea;
     }
 
-    // just in case openSeaRegistrar is not present we use this contract as openSeaRegistrar
+    // just in case openSea is not present we use this contract as openSea
     function proxies(address) external pure returns (address) {
         return address(0);
     }
@@ -193,7 +193,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     // send multiple nfts
 }
 
-interface ProxyRegisterar {
+interface Registerar {
     function proxies(address) external view returns (address);
 }
 
