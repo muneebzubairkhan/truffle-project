@@ -23,7 +23,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     uint256 public itemPricePresale = 0.03 ether;
     uint256 public immutable maxSupply = 10000;
 
-    address public owner = msg.sender;
+    address public immutable owner = msg.sender;
 
     ///////////////////////////////
     //    PRESALE CODE STARTS    //
@@ -283,7 +283,6 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
             );
     }
 
-    // Purchase multiple NFTs at once
     function purchasePresaleTokensMerkle(
         uint256 _howMany,
         bytes32[] calldata proof
