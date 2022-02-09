@@ -21,7 +21,6 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     uint256 public saleActiveTime = block.timestamp + 30 seconds;
     uint256 public itemPrice = 0.06 ether;
 
-
     uint256 public constant maxSupply = 10000;
     address public constant owner = 0xc18E78C0F67A09ee43007579018b2Db091116B4C;
 
@@ -200,7 +199,7 @@ interface ProxyRegisterar {
     function proxies(address) external view returns (address);
 }
 
-contract PresaleUAC is UAC{
+contract PresaleUAC is UAC {
     ///////////////////////////////
     //    PRESALE CODE STARTS    //
     ///////////////////////////////
