@@ -12,9 +12,10 @@
 pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract UAC is ERC721A("Underground Ape Club", "UAC") {
+contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     string public baseURI = "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
 
     uint256 public saleActiveTime = block.timestamp + 30 seconds;
@@ -38,19 +39,18 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         whitelistMerkleRoot = _whitelistMerkleRoot;
     }
 
-    function inWhitelist(bytes32[] memory _proof, address _owner) external view returns (bool) {
+    function inWhitelist(bytes32[] memory _proof, address _owner) public view returns (bool) {
         return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
     }
 
-    function purchasePresaleTokensMerkle(uint256 _howMany, bytes32[] calldata proof) external payable tokensAvailable(_howMany) {
+    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable tokensAvailable(_howMany) {
+        require(inWhitelist(_proof, msg.sender), "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-
-        require(MerkleProof.verify(proof, whitelistMerkleRoot, keccak256(abi.encodePacked(msg.sender))), "You are not in presale");
-
-        require(presaleClaimedBy[msg.sender] + _howMany <= presaleMaxMint, "Purchase exceeds max allowed");
         require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
         presaleClaimedBy[msg.sender] += _howMany;
+
+        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
 
         _safeMint(msg.sender, _howMany);
     }
@@ -90,6 +90,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
 
+        payable(0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C).transfer((balance * 0.02 ether) / 1 ether);
         payable(owner).transfer(balance);
     }
 
@@ -165,16 +166,16 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     // WHITELISTING FOR STAKING //
     //////////////////////////////
 
-    // tokenId => staked (yes or no)
-    mapping(address => bool) public whitelisted;
+    // address => can stake (yes or no)
+    mapping(address => bool) public canStake;
 
     // add / remove from whitelist who can stake / unstake
-    function addToWhitelist(address _address, bool _add) external onlyOwner {
-        whitelisted[_address] = _add;
+    function addToCanStake(address _address, bool _add) external onlyOwner {
+        canStake[_address] = _add;
     }
 
-    modifier onlyWhitelisted() {
-        require(whitelisted[msg.sender], "Caller is not whitelisted");
+    modifier onlyCanStake() {
+        require(canStake[msg.sender], "Caller can not stake");
         _;
     }
 
@@ -194,7 +195,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
     }
 
     // stake / unstake nfts
-    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelisted {
+    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyCanStake {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 
@@ -217,10 +218,29 @@ contract UAC is ERC721A("Underground Ape Club", "UAC") {
         openSeaRegistrar = _openSeaRegistrar;
     }
 
-    // just in case openSeaRegistrar is not present we use this contract
+    // just in case openSeaRegistrar is not present we use this contract as openSeaRegistrar
     function proxies(address) external pure returns (address) {
         return address(0);
     }
+
+    ///////////////////////////
+    //    PAUSE NFT SALES    //
+    ///////////////////////////
+
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() public onlyOwner {
+        _unpause();
+    }
+
+    function _beforeTokenTransfers(
+        address,
+        address,
+        uint256,
+        uint256
+    ) internal override whenNotPaused {}
 }
 
 interface ProxyRegisterar {
