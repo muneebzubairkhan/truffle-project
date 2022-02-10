@@ -22,8 +22,12 @@ import "erc721a/contracts/ERC721A.sol";
 contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     string public baseURI = "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
 
-    uint256 public saleActiveTime = block.timestamp + 30 seconds;
+    uint256 public saleActiveTime = block.timestamp + 5 seconds;
     uint256 public itemPrice = 0.02 ether;
+
+    uint256 public itemPriceErc20 = 200 ether;
+    // address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // IGLOO TOKEN (ERC20)
+    address public erc20 = 0xEf44f26371BF874b5D4c8b49914af169336bc957; // Rinkeby USDC TOKEN ERC20
 
     uint256 public maxSupply = 20_000;
 
@@ -32,9 +36,12 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     ///////////////////////////////////
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable tokensAvailable(_howMany) priceAvailable(_howMany) saleActive {
-        require(_howMany <= 20, "Mint min 1, max 20");
+    function purchaseTokens(uint256 _howMany) external payable tokensAvailable(_howMany) priceAvailable(_howMany) mintLimit(_howMany) saleActive {
+        _safeMint(msg.sender, _howMany);
+    }
 
+    /// @notice Purchase multiple NFTs at once
+    function purchaseTokensErc20(uint256 _howMany) external payable tokensAvailable(_howMany) priceAvailableERC20(_howMany) mintLimit(_howMany) saleActive {
         _safeMint(msg.sender, _howMany);
     }
 
@@ -49,6 +56,8 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         payable(0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C).transfer((balance * 0.02 ether) / 1 ether);
         payable(0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C).transfer(balance);
     }
+
+    // todo and see gas savings we can combine all of below in 1 function
 
     /// @notice Change price in case of ETH price changes too much
     function setPrice(uint256 _newPrice) external onlyOwner {
@@ -68,6 +77,16 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     /// @notice set max supply of nft
     function setMaxSupply(uint256 _maxSupply) external onlyOwner {
         maxSupply = _maxSupply;
+    }
+
+    /// @notice set itemPrice in Erc20
+    function setErc20(address _erc20) external onlyOwner {
+        erc20 = _erc20;
+    }
+
+    /// @notice set itemPrice in Erc20
+    function setItemPriceErc20(uint256 _itemPriceErc20) external onlyOwner {
+        itemPriceErc20 = _itemPriceErc20;
     }
 
     ///////////////////////////////////
@@ -111,6 +130,11 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         _;
     }
 
+    modifier mintLimit(uint256 _howMany) {
+        require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
+        _;
+    }
+
     modifier tokensAvailable(uint256 _howMany) {
         require(_howMany <= maxSupply - totalSupply(), "Try minting less tokens");
         _;
@@ -118,6 +142,11 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
 
     modifier priceAvailable(uint256 _howMany) {
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
+        _;
+    }
+
+    modifier priceAvailableERC20(uint256 _howMany) {
+        require(IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20), "Try to send more ERC20");
         _;
     }
 
@@ -130,13 +159,23 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     // AUTO APPROVE OPENSEA & LOOKSRARE //
     //////////////////////////////////////
 
-    // Opensea Registerar Mainnet 0xa5409ec958C83C3f309868babACA7c86DCB077c1
-    // Opensea Registerar Rinkeby 0xF57B2c51dED3A29e6891aba85459d600256Cf317
-
+    // Rinkeby
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        address openSeaRegistrar = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
-        return ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator ? true : super.isApprovedForAll(_owner, _operator);
+        /// @dev todo check gas on local vs global variable
+
+        if (_operator == 0x1AA777972073Ff66DCFDeD85749bDD555C0665dA) return true;
+        // LOOKSRARE
+        else if (_operator == OpenSea(0xF57B2c51dED3A29e6891aba85459d600256Cf317).proxies(_owner)) return true; // OPENSEA
+        return super.isApprovedForAll(_owner, _operator);
     }
+
+    // function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+    //     /// @dev todo check gas on local vs global variable
+
+    //     if (_operator == 0x59728544B08AB483533076417FbBB2fD0B17CE3a) return true; // LOOKSRARE
+    //     else if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true; // OPENSEA
+    //     return super.isApprovedForAll(_owner, _operator);
+    // }
 
     // send multiple nfts
     function bulkERC721Nfts(
@@ -150,6 +189,14 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     }
 }
 
-interface ProxyRegisterar {
+interface OpenSea {
     function proxies(address) external view returns (address);
+}
+
+interface IERC20 {
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 }
