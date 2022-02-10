@@ -20,28 +20,44 @@ pragma solidity ^0.8.0;
 import "erc721a/contracts/ERC721A.sol";
 
 contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
-    string public baseURI = "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
-
-    uint256 public saleActiveTime = block.timestamp + 5 seconds;
+    //
+    uint256 public maxSupply = 20_000;
     uint256 public itemPrice = 0.02 ether;
-
     uint256 public itemPriceErc20 = 200 ether;
+    uint256 public itemPriceHolder = 0.01 ether;
+    uint256 public saleActiveTime = block.timestamp + 5 seconds;
+    uint256 public saleActiveTimeErc20 = block.timestamp + 5 seconds;
+    string public baseURI = "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
     // address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // IGLOO TOKEN (ERC20)
     address public erc20 = 0xEf44f26371BF874b5D4c8b49914af169336bc957; // Rinkeby USDC TOKEN ERC20
-
-    uint256 public maxSupply = 20_000;
+    // address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // Bastard Penguins Mainnet
+    address public erc721 = 0x4BD39d433bb884e28AA49402ED33479d0Cf720A1; // Testnet Rinkeby Bastard Penguins
 
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
     ///////////////////////////////////
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable tokensAvailable(_howMany) priceAvailable(_howMany) mintLimit(_howMany) saleActive {
+    function purchaseTokens(uint256 _howMany)
+        external
+        payable
+        saleActive
+        mintLimit(_howMany)
+        priceAvailable(_howMany)
+        tokensAvailable(_howMany)
+    {
         _safeMint(msg.sender, _howMany);
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokensErc20(uint256 _howMany) external payable tokensAvailable(_howMany) priceAvailableERC20(_howMany) mintLimit(_howMany) saleActive {
+    function purchaseTokensErc20(uint256 _howMany)
+        external
+        payable
+        saleActiveErc20
+        mintLimit(_howMany)
+        tokensAvailable(_howMany)
+        priceAvailableERC20(_howMany)
+    {
         _safeMint(msg.sender, _howMany);
     }
 
@@ -51,22 +67,21 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
 
     /// @notice Owner can withdraw from here
     function withdraw() external onlyOwner {
-        uint256 balance = address(this).balance;
-
-        payable(0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C).transfer((balance * 0.02 ether) / 1 ether);
-        payable(0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C).transfer(balance);
+        payable(0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C).transfer(address(this).balance);
     }
 
     // todo and see gas savings we can combine all of below in 1 function
 
     /// @notice Change price in case of ETH price changes too much
-    function setPrice(uint256 _newPrice) external onlyOwner {
+    function setPrice(uint256 _newPrice, uint256 _newPriceHolder) external onlyOwner {
         itemPrice = _newPrice;
+        itemPriceHolder = _newPriceHolder;
     }
 
     /// @notice set sale active time
-    function setSaleActive(uint256 _saleActiveTime) external onlyOwner {
+    function setSaleActiveTime(uint256 _saleActiveTime, uint256 _saleActiveTimeErc20) external onlyOwner {
         saleActiveTime = _saleActiveTime;
+        saleActiveTimeErc20 = _saleActiveTimeErc20;
     }
 
     /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
@@ -130,6 +145,11 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         _;
     }
 
+    modifier saleActiveErc20() {
+        require(block.timestamp > saleActiveTimeErc20, "Sale is not active");
+        _;
+    }
+
     modifier mintLimit(uint256 _howMany) {
         require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
         _;
@@ -141,7 +161,8 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     }
 
     modifier priceAvailable(uint256 _howMany) {
-        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
+        if (IERC721(erc721).balanceOf(msg.sender) > 0) require(msg.value >= _howMany * itemPriceHolder, "Try to send more ETH");
+        else require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
         _;
     }
 
@@ -200,3 +221,6 @@ interface IERC20 {
         uint256 amount
     ) external returns (bool);
 }
+
+// 2403727 * 0.000000050 = 0.12018635
+// rename vars to special variables like erc721 to penguins
