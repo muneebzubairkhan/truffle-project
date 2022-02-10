@@ -177,7 +177,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     //////////////////////////////////////
 
     // Rinkeby
-    function isApprovedForAll(address _owner, address _operator) external view override returns (bool) {
+    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         /// @dev todo check gas on local vs global variable
 
         if (_operator == 0x1AA777972073Ff66DCFDeD85749bDD555C0665dA) return true;
