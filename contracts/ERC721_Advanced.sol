@@ -25,13 +25,14 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     uint256 public itemPrice = 0.02 ether;
     uint256 public itemPriceErc20 = 200 ether;
     uint256 public itemPriceHolder = 0.01 ether;
-    uint256 public saleActiveTime = block.timestamp + 5 seconds;
-    uint256 public saleActiveTimeErc20 = block.timestamp + 5 seconds;
+    uint256 public saleActiveTime = block.timestamp + 1 days;
+    uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
     string public baseURI = "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
     // address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // IGLOO TOKEN (ERC20)
-    address public erc20 = 0xEf44f26371BF874b5D4c8b49914af169336bc957; // Rinkeby USDC TOKEN ERC20
+    // address public erc20 = 0xEf44f26371BF874b5D4c8b49914af169336bc957; // Rinkeby USDC TOKEN ERC20
+    address public erc20 = 0xd9145CCE52D386f254917e481eB44e9943F39138; // Remix USDC TOKEN ERC20
     // address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // Bastard Penguins Mainnet
-    address public erc721 = 0x5FD6eB55D12E759a21C09eF703fe0CBa1DC9d88D; // Testnet Rinkeby Bastard Penguins
+    address public erc721 = 0xd8b934580fcE35a11B58C6D73aDeE468a2833fa8; // Testnet Rinkeby Bastard Penguins
 
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
