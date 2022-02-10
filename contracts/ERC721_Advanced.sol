@@ -31,7 +31,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     // address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // IGLOO TOKEN (ERC20)
     address public erc20 = 0xEf44f26371BF874b5D4c8b49914af169336bc957; // Rinkeby USDC TOKEN ERC20
     // address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // Bastard Penguins Mainnet
-    address public erc721 = 0x4BD39d433bb884e28AA49402ED33479d0Cf720A1; // Testnet Rinkeby Bastard Penguins
+    address public erc721 = 0xaE036c65C649172b43ef7156b009c6221B596B8b; // Testnet Rinkeby Bastard Penguins
 
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
@@ -65,9 +65,16 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     // ONLY OWNER METHODS   //
     //////////////////////////
 
+    modifier onlyOwner() {
+        // require(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender, "Caller is not the owner"); // Mainnet
+        // require(0xc18E78C0F67A09ee43007579018b2Db091116B4C == msg.sender, "Caller is not the owner"); // Testnet Rinkeby
+        require(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4 == msg.sender, "Caller is not the owner");
+        _;
+    }
+
     /// @notice Owner can withdraw from here
     function withdraw() external onlyOwner {
-        payable(0xc66C9f79AAa0c8E6F3d12C4eFc7D7FE7c1f8B89C).transfer(address(this).balance);
+        payable(0xe2c135274428FF8183946c3e46560Fa00353753A).transfer(address(this).balance);
     }
 
     // todo and see gas savings we can combine all of below in 1 function
@@ -122,7 +129,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     }
 
     /// @notice get all nfts of a person
-    /// @dev  try multicall on ui to remove this function
+    /// @dev  try multicall on ui to remove this function, also muticall on send tx.
     function walletOfOwner(address _owner) public view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
@@ -163,11 +170,6 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
 
     modifier priceAvailableERC20(uint256 _howMany) {
         require(IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20), "Try to send more ERC20");
-        _;
-    }
-
-    modifier onlyOwner() {
-        require(0xc18E78C0F67A09ee43007579018b2Db091116B4C == msg.sender, "Caller is not the owner");
         _;
     }
 
