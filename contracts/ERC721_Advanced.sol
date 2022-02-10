@@ -109,13 +109,8 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     ///////////////////////////////////
 
     /// @notice Send NFTs to a list of addresses
-    function giftNftToList(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_sendNftsTo.length) {
+    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_sendNftsTo.length * _howMany) {
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
-    }
-
-    /// @notice Send NFTs to a single address
-    function giftNftToAddress(address _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_howMany) {
-        _safeMint(_sendNftsTo, _howMany);
     }
 
     ///////////////////
