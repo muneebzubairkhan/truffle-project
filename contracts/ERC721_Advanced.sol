@@ -29,8 +29,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
     string public baseURI = "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
     // address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // IGLOO TOKEN (ERC20)
-    // address public erc20 = 0xEf44f26371BF874b5D4c8b49914af169336bc957; // Rinkeby USDC TOKEN ERC20
-    address public erc20 = 0xd9145CCE52D386f254917e481eB44e9943F39138; // Remix USDC TOKEN ERC20
+    address public erc20 = 0x2eC91e6941A1C0da8cB27B86168b1935dB0f1dCE; // Rinkeby IGLOO TOKEN (ERC20)
     // address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // Bastard Penguins Mainnet
     address public erc721 = 0x4BD39d433bb884e28AA49402ED33479d0Cf720A1; // Testnet Rinkeby Bastard Penguins
 
