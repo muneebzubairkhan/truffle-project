@@ -31,7 +31,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     // address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // IGLOO TOKEN (ERC20)
     address public erc20 = 0xEf44f26371BF874b5D4c8b49914af169336bc957; // Rinkeby USDC TOKEN ERC20
     // address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // Bastard Penguins Mainnet
-    address public erc721 = 0xaE036c65C649172b43ef7156b009c6221B596B8b; // Testnet Rinkeby Bastard Penguins
+    address public erc721 = 0x5FD6eB55D12E759a21C09eF703fe0CBa1DC9d88D; // Testnet Rinkeby Bastard Penguins
 
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
@@ -52,7 +52,6 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     /// @notice Purchase multiple NFTs at once
     function purchaseTokensErc20(uint256 _howMany)
         external
-        payable
         saleActiveErc20
         mintLimit(_howMany)
         tokensAvailable(_howMany)
@@ -130,7 +129,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
 
     /// @notice get all nfts of a person
     /// @dev  try multicall on ui to remove this function, also muticall on send tx.
-    function walletOfOwner(address _owner) public view returns (uint256[] memory) {
+    function walletOfOwner(address _owner) external view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
         for (uint256 i; i < ownerTokenCount; i++) tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
@@ -178,7 +177,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     //////////////////////////////////////
 
     // Rinkeby
-    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+    function isApprovedForAll(address _owner, address _operator) external view override returns (bool) {
         /// @dev todo check gas on local vs global variable
 
         if (_operator == 0x1AA777972073Ff66DCFDeD85749bDD555C0665dA) return true;
@@ -200,7 +199,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         IERC721 _token,
         address[] calldata _to,
         uint256[] calldata _id
-    ) public {
+    ) external {
         require(_to.length == _id.length, "Receivers and IDs are different length");
 
         for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
