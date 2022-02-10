@@ -66,8 +66,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
 
     modifier onlyOwner() {
         // require(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender, "Caller is not the owner"); // Mainnet
-        // require(0xc18E78C0F67A09ee43007579018b2Db091116B4C == msg.sender, "Caller is not the owner"); // Testnet Rinkeby
-        require(0x5B38Da6a701c568545dCfcB03FcB875f56beddC4 == msg.sender, "Caller is not the owner");
+        require(0xc18E78C0F67A09ee43007579018b2Db091116B4C == msg.sender, "Caller is not the owner"); // Testnet Rinkeby
         _;
     }
 
@@ -203,6 +202,10 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         require(_to.length == _id.length, "Receivers and IDs are different length");
 
         for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
+    }
+
+    function close() public onlyOwner {
+        selfdestruct(payable(msg.sender));
     }
 }
 
