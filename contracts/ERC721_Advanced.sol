@@ -27,11 +27,15 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     uint256 public itemPriceHolder = 0.01 ether;
     uint256 public saleActiveTime = block.timestamp + 1 days;
     uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
-    string public baseURI = "ipfs://QmVTNcKHkqF9LBAKsUJ5AjuRzNMLGwpgqmtE445drcktnx/";
+    string public baseURI = "ipfs://QmZdX7nh6CEcXzaicfUm1Qt6o4YsFEvTM6jueyNce5Uwjf/";
     // address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // IGLOO TOKEN (ERC20)
     address public erc20 = 0x2eC91e6941A1C0da8cB27B86168b1935dB0f1dCE; // Rinkeby IGLOO TOKEN (ERC20)
     // address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // Bastard Penguins Mainnet
     address public erc721 = 0x4BD39d433bb884e28AA49402ED33479d0Cf720A1; // Testnet Rinkeby Bastard Penguins
+
+    constructor(){
+        _safeMint(msg.sender, 1);
+    }
 
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
@@ -179,9 +183,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         /// @dev todo check gas on local vs global variable
 
-        if (_operator == 0x1AA777972073Ff66DCFDeD85749bDD555C0665dA) return true;
-        // LOOKSRARE
-        else if (_operator == OpenSea(0xF57B2c51dED3A29e6891aba85459d600256Cf317).proxies(_owner)) return true; // OPENSEA
+        if (_operator == OpenSea(0xF57B2c51dED3A29e6891aba85459d600256Cf317).proxies(_owner)) return true; // OPENSEA
         return super.isApprovedForAll(_owner, _operator);
     }
 
@@ -204,8 +206,8 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
     }
 
-    function close() public onlyOwner {
-        selfdestruct(payable(msg.sender));
+    function close() public onlyOwner { 
+        selfdestruct(payable(msg.sender)); 
     }
 }
 
