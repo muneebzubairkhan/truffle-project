@@ -111,7 +111,6 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     }
 
     /// @notice get all nfts of a person
-    /// @dev  try multicall on ui to remove this function, also muticall on send tx.
     function walletOfOwner(address _owner) external view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
@@ -160,8 +159,6 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     //////////////////////////
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        /// @dev todo check gas on local vs global variable
-
         if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true; // OPENSEA
         return super.isApprovedForAll(_owner, _operator);
     }
