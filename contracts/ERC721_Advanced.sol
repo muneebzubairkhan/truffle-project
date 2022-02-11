@@ -25,7 +25,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     uint256 public itemPrice = 0.02 ether;
     uint256 public itemPriceErc20 = 200 ether;
     uint256 public itemPriceHolder = 0.01 ether;
-    uint256 public saleActiveTime = block.timestamp + 1 days;
+    uint256 public saleActiveTime = block.timestamp + 1 days; // get contract from here https://www.unixtimestamp.com/
     uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
     string public baseURI = "ipfs://QmZdX7nh6CEcXzaicfUm1Qt6o4YsFEvTM6jueyNce5Uwjf/";
     // address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // IGLOO TOKEN (ERC20)
