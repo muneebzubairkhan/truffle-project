@@ -1,19 +1,8 @@
-// UNDERGROUND APE CLUB
+// Bastard Penguins Comics
 
-// Website:  https://undergroundape.club/
-// Twitter:  https://twitter.com/undergroundapes
-// Medium:   https://medium.com/@undegroundapeclub
-// Discord:  https://discord.com/invite/undergroundapes
-// Opensea:  https://opensea.io/assets/0xb94b38fcb227350989f95f54f54f43b5fcc3ccff/0
-// Contract: https://etherscan.io/address/0xb94b38fcb227350989f95f54f54f43b5fcc3ccff#code
+// Website:  http://bastardpenguins.club/
 
 // SPDX-License-Identifier: MIT
-
-// 2274943 * 0.000000050 = 0.11374714999999999
-// 2268444 * 0.000000040 = 0.09073776 to 0.1134222
-// 2217969
-// 2206963 * 0.000000050 = 0.11034814999999999 = 0.08827852
-// 2157041 * 0.000000050 = 0.10785204999999999
 
 pragma solidity ^0.8.0;
 
@@ -25,17 +14,11 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     uint256 public itemPrice = 0.02 ether;
     uint256 public itemPriceErc20 = 200 ether;
     uint256 public itemPriceHolder = 0.01 ether;
-    uint256 public saleActiveTime = block.timestamp + 1 days; // get contract from here https://www.unixtimestamp.com/
+    uint256 public saleActiveTime = block.timestamp + 1 days;
     uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
     string public baseURI = "ipfs://QmZdX7nh6CEcXzaicfUm1Qt6o4YsFEvTM6jueyNce5Uwjf/";
-    // address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // IGLOO TOKEN (ERC20)
-    address public erc20 = 0x2eC91e6941A1C0da8cB27B86168b1935dB0f1dCE; // Rinkeby IGLOO TOKEN (ERC20)
-    // address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // Bastard Penguins Mainnet
-    address public erc721 = 0x4BD39d433bb884e28AA49402ED33479d0Cf720A1; // Testnet Rinkeby Bastard Penguins
-
-    constructor(){
-        _safeMint(msg.sender, 1);
-    }
+    address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // Igloo Token
+    address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // Bastard Penguins
 
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
@@ -69,8 +52,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     //////////////////////////
 
     modifier onlyOwner() {
-        // require(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender, "Caller is not the owner"); // Mainnet
-        require(0xc18E78C0F67A09ee43007579018b2Db091116B4C == msg.sender, "Caller is not the owner"); // Testnet Rinkeby
+        require(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender, "Caller is not the owner");
         _;
     }
 
@@ -78,8 +60,6 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     function withdraw() external onlyOwner {
         payable(0xe2c135274428FF8183946c3e46560Fa00353753A).transfer(address(this).balance);
     }
-
-    // todo and see gas savings we can combine all of below in 1 function
 
     /// @notice Change price in case of ETH price changes too much
     function setPrice(uint256 _newPrice, uint256 _newPriceHolder) external onlyOwner {
@@ -175,25 +155,16 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         _;
     }
 
-    //////////////////////////////////////
-    // AUTO APPROVE OPENSEA & LOOKSRARE //
-    //////////////////////////////////////
+    //////////////////////////
+    // AUTO APPROVE OPENSEA //
+    //////////////////////////
 
-    // Rinkeby
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         /// @dev todo check gas on local vs global variable
 
-        if (_operator == OpenSea(0xF57B2c51dED3A29e6891aba85459d600256Cf317).proxies(_owner)) return true; // OPENSEA
+        if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true; // OPENSEA
         return super.isApprovedForAll(_owner, _operator);
     }
-
-    // function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-    //     /// @dev todo check gas on local vs global variable
-
-    //     if (_operator == 0x59728544B08AB483533076417FbBB2fD0B17CE3a) return true; // LOOKSRARE
-    //     else if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true; // OPENSEA
-    //     return super.isApprovedForAll(_owner, _operator);
-    // }
 
     // send multiple nfts
     function bulkERC721Nfts(
@@ -204,10 +175,6 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         require(_to.length == _id.length, "Receivers and IDs are different length");
 
         for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
-    }
-
-    function close() public onlyOwner { 
-        selfdestruct(payable(msg.sender)); 
     }
 }
 
@@ -222,6 +189,3 @@ interface IERC20 {
         uint256 amount
     ) external returns (bool);
 }
-
-// 2403727 * 0.000000050 = 0.12018635
-// rename vars to special variables like erc721 to penguins

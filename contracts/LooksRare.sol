@@ -27,6 +27,7 @@ interface ICurrencyManager {
 
     function viewCountWhitelistedCurrencies() external view returns (uint256);
 }
+
 interface IExecutionManager {
     function addStrategy(address strategy) external;
 
@@ -129,16 +130,13 @@ interface IRoyaltyFeeManager {
 }
 
 interface ILooksRareExchange {
-    function matchAskWithTakerBidUsingETHAndWETH(
-        OrderTypes.TakerOrder calldata takerBid,
-        OrderTypes.MakerOrder calldata makerAsk
-    ) external payable;
+    function matchAskWithTakerBidUsingETHAndWETH(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk)
+        external
+        payable;
 
-    function matchAskWithTakerBid(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk)
-        external;
+    function matchAskWithTakerBid(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk) external;
 
-    function matchBidWithTakerAsk(OrderTypes.TakerOrder calldata takerAsk, OrderTypes.MakerOrder calldata makerBid)
-        external;
+    function matchBidWithTakerAsk(OrderTypes.TakerOrder calldata takerAsk, OrderTypes.MakerOrder calldata makerBid) external;
 }
 
 interface ITransferManagerNFT {
@@ -162,6 +160,7 @@ interface IWETH {
 
     function withdraw(uint256) external;
 }
+
 // LooksRare libraries
 library SignatureChecker {
     /**
@@ -179,10 +178,7 @@ library SignatureChecker {
     ) internal pure returns (address) {
         // https://ethereum.stackexchange.com/questions/83174/is-it-best-practice-to-check-signature-malleability-in-ecrecover
         // https://crypto.iacr.org/2019/affevents/wac/medias/Heninger-BiasedNonceSense.pdf
-        require(
-            uint256(s) <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0,
-            "Signature: Invalid s parameter"
-        );
+        require(uint256(s) <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0, "Signature: Invalid s parameter");
 
         require(v == 27 || v == 28, "Signature: Invalid v parameter");
 
@@ -222,6 +218,7 @@ library SignatureChecker {
         }
     }
 }
+
 /**
  * @title LooksRareExchange
  * @notice It is the core contract of the LooksRare exchange.
@@ -385,10 +382,12 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
      * @param takerBid taker bid order
      * @param makerAsk maker ask order
      */
-    function matchAskWithTakerBidUsingETHAndWETH(
-        OrderTypes.TakerOrder calldata takerBid,
-        OrderTypes.MakerOrder calldata makerAsk
-    ) external payable override nonReentrant {
+    function matchAskWithTakerBidUsingETHAndWETH(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk)
+        external
+        payable
+        override
+        nonReentrant
+    {
         require((makerAsk.isOrderAsk) && (!takerBid.isOrderAsk), "Order: Wrong sides");
         require(makerAsk.currency == WETH, "Order: Currency must be WETH");
         require(msg.sender == takerBid.taker, "Order: Taker must be the sender");
@@ -408,8 +407,10 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
         _validateOrder(makerAsk, askHash);
 
         // Retrieve execution parameters
-        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerAsk.strategy)
-            .canExecuteTakerBid(takerBid, makerAsk);
+        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerAsk.strategy).canExecuteTakerBid(
+            takerBid,
+            makerAsk
+        );
 
         require(isExecutionValid, "Strategy: Execution invalid");
 
@@ -460,8 +461,10 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
         bytes32 askHash = makerAsk.hash();
         _validateOrder(makerAsk, askHash);
 
-        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerAsk.strategy)
-            .canExecuteTakerBid(takerBid, makerAsk);
+        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerAsk.strategy).canExecuteTakerBid(
+            takerBid,
+            makerAsk
+        );
 
         require(isExecutionValid, "Strategy: Execution invalid");
 
@@ -514,8 +517,10 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
         bytes32 bidHash = makerBid.hash();
         _validateOrder(makerBid, bidHash);
 
-        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerBid.strategy)
-            .canExecuteTakerAsk(takerAsk, makerBid);
+        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerBid.strategy).canExecuteTakerAsk(
+            takerAsk,
+            makerBid
+        );
 
         require(isExecutionValid, "Strategy: Execution invalid");
 
@@ -647,8 +652,11 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
 
         // 2. Royalty fee
         {
-            (address royaltyFeeRecipient, uint256 royaltyFeeAmount) = royaltyFeeManager
-                .calculateRoyaltyFeeAndGetRecipient(collection, tokenId, amount);
+            (address royaltyFeeRecipient, uint256 royaltyFeeAmount) = royaltyFeeManager.calculateRoyaltyFeeAndGetRecipient(
+                collection,
+                tokenId,
+                amount
+            );
 
             // Check if there is a royalty fee and that it is different to 0
             if ((royaltyFeeRecipient != address(0)) && (royaltyFeeAmount != 0)) {
@@ -700,8 +708,11 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
 
         // 2. Royalty fee
         {
-            (address royaltyFeeRecipient, uint256 royaltyFeeAmount) = royaltyFeeManager
-                .calculateRoyaltyFeeAndGetRecipient(collection, tokenId, amount);
+            (address royaltyFeeRecipient, uint256 royaltyFeeAmount) = royaltyFeeManager.calculateRoyaltyFeeAndGetRecipient(
+                collection,
+                tokenId,
+                amount
+            );
 
             // Check if there is a royalty fee and that it is different to 0
             if ((royaltyFeeRecipient != address(0)) && (royaltyFeeAmount != 0)) {
@@ -777,14 +788,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
 
         // Verify the validity of the signature
         require(
-            SignatureChecker.verify(
-                orderHash,
-                makerOrder.signer,
-                makerOrder.v,
-                makerOrder.r,
-                makerOrder.s,
-                DOMAIN_SEPARATOR
-            ),
+            SignatureChecker.verify(orderHash, makerOrder.signer, makerOrder.v, makerOrder.r, makerOrder.s, DOMAIN_SEPARATOR),
             "Signature: Invalid"
         );
 
