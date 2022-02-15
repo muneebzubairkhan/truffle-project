@@ -29,7 +29,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     ///////////////////////////////////
 
     // Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable tokensAvailable(_howMany) {
+    function purchaseTokens(uint256 _howMany) external payable callerIsUser tokensAvailable(_howMany) {
         require(block.timestamp > saleActiveTime, "Sale is not active");
         require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
@@ -116,6 +116,11 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
         require(owner == msg.sender, "Caller is not the owner");
         _;
     }
+    
+    modifier callerIsUser() {
+        require(tx.origin == msg.sender, "The caller is another contract");
+        _;
+    }
 
     //////////////////////////////
     // WHITELISTING FOR STAKING //
@@ -175,16 +180,6 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
         return ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator ? true : super.isApprovedForAll(_owner, _operator);
     }
 
-    // infuture address changes for opensea registrar
-    function editOpenSeaRegisterar(address _openSeaRegistrar) external onlyOwner {
-        openSeaRegistrar = _openSeaRegistrar;
-    }
-
-    // just in case openSeaRegistrar is not present we use this contract as openSeaRegistrar
-    function proxies(address) external pure returns (address) {
-        return address(0);
-    }
-
     ///////////////////////////
     //    PAUSE NFT SALES    //
     ///////////////////////////
@@ -208,8 +203,6 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
             _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
         }
     }
-
-    
 }
 
 interface ProxyRegisterar {
@@ -235,7 +228,7 @@ contract PresaleUAC is UAC {
         return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
     }
 
-    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable tokensAvailable(_howMany) {
+    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable callerIsUser tokensAvailable(_howMany)  {
         require(inWhitelist(_proof, msg.sender), "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
