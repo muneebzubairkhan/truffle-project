@@ -174,10 +174,9 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
 
     // Opensea Registerar Mainnet 0xa5409ec958C83C3f309868babACA7c86DCB077c1
     // Opensea Registerar Rinkeby 0xF57B2c51dED3A29e6891aba85459d600256Cf317
-    address openSeaRegistrar = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        return ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator ? true : super.isApprovedForAll(_owner, _operator);
+        return OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner) == _operator ? true : super.isApprovedForAll(_owner, _operator);
     }
 
     ///////////////////////////
@@ -205,7 +204,7 @@ contract UAC is ERC721A("Underground Ape Club", "UAC"), Pausable {
     }
 }
 
-interface ProxyRegisterar {
+interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
