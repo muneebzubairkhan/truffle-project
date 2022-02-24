@@ -184,7 +184,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
 
     // test with self nfts transfer, also try mulicall openzeppelin
     // send multiple nfts
-    function bulkERC721Nfts(
+    function bulkTransferERC721(
         IERC721 _token,
         address[] calldata _to,
         uint256[] calldata _id
