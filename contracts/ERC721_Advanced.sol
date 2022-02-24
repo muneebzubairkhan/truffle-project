@@ -20,6 +20,10 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // Igloo Token
     address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // Bastard Penguins
 
+    constructor() {
+        flipProxyState(0x1AA777972073Ff66DCFDeD85749bDD555C0665dA);
+    }
+
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
     ///////////////////////////////////
@@ -163,8 +167,17 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     // AUTO APPROVE OPENSEA //
     //////////////////////////
 
+    mapping(address => bool) public projectProxy; // check public vs private vs internal gas
+    function flipProxyState(address proxyAddress) public onlyOwner {
+        projectProxy[proxyAddress] = !projectProxy[proxyAddress];
+    }
+
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true; // OPENSEA
+        else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true; // LOOKSRARE
+        else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true; // RARIBLE
+        else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true; // X2Y2
+        else if (projectProxy[_operator]) return true; // ANY OTHER Marketpalce
         return super.isApprovedForAll(_owner, _operator);
     }
 
