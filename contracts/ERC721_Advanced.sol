@@ -217,3 +217,52 @@ interface IERC20 {
 
     function balanceOf(address account) external view returns (uint256);
 }
+
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+
+contract PresaleNft is BastardPenguinsComics {
+    ///////////////////////////////
+    //    PRESALE CODE STARTS    //
+    ///////////////////////////////
+
+    uint256 public itemPricePresale = 0.03 ether;
+    uint256 public presaleActiveTime;
+    uint256 public presaleMaxMint = 3;
+    mapping(address => uint256) public presaleClaimedBy;
+    bytes32 public whitelistMerkleRoot;
+
+    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
+        whitelistMerkleRoot = _whitelistMerkleRoot;
+    }
+
+    function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {
+        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
+    }
+
+    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable callerIsUser tokensAvailable(_howMany)  {
+        require(inWhitelist(msg.sender, _proof), "You are not in presale");
+        require(block.timestamp > presaleActiveTime, "Presale is not active");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+
+        presaleClaimedBy[msg.sender] += _howMany;
+
+        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
+
+        _safeMint(msg.sender, _howMany);
+    }
+
+    // test combine all functions of write...
+    // set limit of presale
+    function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
+        presaleMaxMint = _presaleMaxMint;
+    }
+
+    // Change presale price in case of ETH price changes too much
+    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
+        itemPricePresale = _itemPricePresale;
+    }
+
+    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
+        presaleActiveTime = _presaleActiveTime;
+    }
+}
