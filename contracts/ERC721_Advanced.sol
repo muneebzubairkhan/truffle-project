@@ -1,6 +1,7 @@
 // Bastard Penguins Comics
 
 // Website:  http://bastardpenguins.club/
+// OpenSea:  http://opensea.club/abc/
 
 // SPDX-License-Identifier: MIT
 
@@ -34,6 +35,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         external
         payable
         saleActive
+        callerIsUser
         mintLimit(_howMany)
         priceAvailable(_howMany)
         tokensAvailable(_howMany)
@@ -44,6 +46,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     /// @notice Purchase multiple NFTs at once
     function purchaseTokensErc20(uint256 _howMany)
         external
+        callerIsUser
         saleActiveErc20
         mintLimit(_howMany)
         tokensAvailable(_howMany)
@@ -120,6 +123,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         return baseURI;
     }
 
+    // test multicall
     /// @notice get all nfts of a person
     function walletOfOwner(address _owner) external view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);
@@ -132,6 +136,11 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     ///////////////////
     //  HELPER CODE  //
     ///////////////////
+
+    modifier callerIsUser() {
+        require(tx.origin == msg.sender, "The caller is a contract");
+        _;
+    }
 
     modifier saleActive() {
         require(block.timestamp > saleActiveTime, "Sale is not active");
