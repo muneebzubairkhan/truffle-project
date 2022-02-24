@@ -7,6 +7,7 @@
 pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
+// turn on Optimization, 200
 
 contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     //
