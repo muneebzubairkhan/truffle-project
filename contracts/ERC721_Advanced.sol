@@ -61,6 +61,11 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         payable(0xe2c135274428FF8183946c3e46560Fa00353753A).transfer(address(this).balance);
     }
 
+    /// @notice Owner can withdraw from here
+    function withdrawERC20(address _erc20) external onlyOwner {
+        IERC20(_erc20).transferFrom(address(this), msg.sender, IERC20(_erc20).balanceOf(address(this)));
+    }
+
     /// @notice Change price in case of ETH price changes too much
     function setPrice(uint256 _newPrice, uint256 _newPriceHolder) external onlyOwner {
         itemPrice = _newPrice;
@@ -163,6 +168,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         return super.isApprovedForAll(_owner, _operator);
     }
 
+    // test with self nfts transfer, also try mulicall openzeppelin
     // send multiple nfts
     function bulkERC721Nfts(
         IERC721 _token,
@@ -185,4 +191,6 @@ interface IERC20 {
         address recipient,
         uint256 amount
     ) external returns (bool);
+
+    function balanceOf(address account) external view returns (uint256);
 }
