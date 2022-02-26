@@ -64,6 +64,11 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     // ONLY OWNER METHODS   //
     //////////////////////////
 
+    // function withdraw() public payable onlyOwner {
+    //     (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+    //     require(success);
+    // }
+
     /// @notice Owner can withdraw from here
     function withdraw() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
@@ -193,15 +198,15 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
 
     // test with self nfts transfer, also try mulicall openzeppelin
     // send multiple nfts
-    function bulkTransferERC721(
-        IERC721 _token,
-        address[] calldata _to,
-        uint256[] calldata _id
-    ) external {
-        require(_to.length == _id.length, "Receivers and IDs are different length");
+    // function bulkTransferERC721(
+    //     IERC721 _token,
+    //     address[] calldata _to,
+    //     uint256[] calldata _id
+    // ) external {
+    //     require(_to.length == _id.length, "Receivers and IDs are different length");
 
-        for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
-    }
+    //     for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
+    // }
 }
 
 interface OpenSea {
