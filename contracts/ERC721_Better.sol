@@ -160,31 +160,31 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     }
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        // OPENSEA
         if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
-        // LOOKSRARE
+        // OPENSEA
         else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
-        // RARIBLE
+        // LOOKSRARE
         else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
-        // X2Y2
+        // RARIBLE
         else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
+        // X2Y2
         else if (projectProxy[_operator]) return true; // ANY OTHER Marketpalce
         return super.isApprovedForAll(_owner, _operator);
     }
 
-    // test gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropEtherToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
+    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
+    function airDropEtherToList(address[] calldata _to, uint _toSend) external onlyOwner {
         for (uint256 i = 0; i < _to.length; i++) {
             (bool success, ) = payable(_to[i]).call{value: _toSend}("");
             require(success);
         }
     }
 
-    // test gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropEtherToHolders(uint256 _toSend) external onlyOwner {
-        for (uint256 i = 0; i < totalSupply(); i++) {
+    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
+    function airDropEtherToHolders(uint _toSend, uint _fromTokenId, uint _toTokenId) external onlyOwner {
+        for (uint256 i = _fromTokenId; i < _toTokenId; i++) {
             (bool success, ) = payable(ownerOf(i)).call{value: _toSend}("");
-            require(success);
+            require(success);   
         }
     }
 
@@ -236,5 +236,3 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
 interface OpenSea {
     function proxies(address) external view returns (address);
 }
-
-// 2870871 * 0.000000035 = 0.1005 ETH to deploy at gas 35
