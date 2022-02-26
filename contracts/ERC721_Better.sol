@@ -98,7 +98,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     //       AIRDROP CODE STARTS     //
     ///////////////////////////////////
 
-   function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
+    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
 
@@ -154,15 +154,20 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     ///////////////////////////
 
     mapping(address => bool) public projectProxy; // check public vs private vs internal gas
+
     function flipProxyState(address proxyAddress) public onlyOwner {
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true; // OPENSEA
-        else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true; // LOOKSRARE
-        else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true; // RARIBLE
-        else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true; // X2Y2
+        if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
+        // OPENSEA
+        else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
+        // LOOKSRARE
+        else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
+        // RARIBLE
+        else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
+        // X2Y2
         else if (projectProxy[_operator]) return true; // ANY OTHER Marketpalce
         return super.isApprovedForAll(_owner, _operator);
     }
@@ -176,11 +181,11 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         }
     }
 
-    function burn(uint _tokenId) external {
+    function burn(uint256 _tokenId) external {
         transferFrom(msg.sender, 0x000000000000000000000000000000000000dEaD, _tokenId);
     }
 
-    function ownerStartTimestamp(uint256 tokenId) public view returns (uint) {
+    function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
         return ownershipOf(tokenId).startTimestamp;
     }
 
@@ -190,9 +195,11 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
 
     // tokenId => staked (yes or no)
     mapping(address => bool) public whitelistedForStaking;
+
     function addToWhitelistForStaking(address _address, bool _add) external onlyOwner {
         whitelistedForStaking[_address] = _add;
     }
+
     modifier onlyWhitelistedForStaking() {
         require(whitelistedForStaking[msg.sender], "Caller is not whitelisted for staking");
         _;
@@ -203,6 +210,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     /////////////////////
 
     mapping(uint256 => bool) public staked;
+
     function _beforeTokenTransfers(
         address,
         address,
@@ -211,13 +219,10 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     ) internal view override {
         require(!staked[startTokenId], "Unstake tokenId it to transfer");
     }
+
     // stake / unstake nfts
-    function stakeNfts(uint256[] calldata _tokenIds, bool _stake)
-        external
-        onlyWhitelistedForStaking
-    {
-        for (uint256 i = 0; i < _tokenIds.length; i++)
-            staked[_tokenIds[i]] = _stake;
+    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
+        for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 }
 
