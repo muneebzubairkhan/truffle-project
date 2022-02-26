@@ -16,7 +16,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     uint256 public maxSupply = 9750;
     uint256 public maxMintAmount = 20;
     uint256 public nftPerAddressLimit = 3;
-    uint256 public publicmintActiveTime = block.timestamp + 30 days; // https://www.epochconverter.com/
+    uint256 public publicmintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
     bool public revealed = false;
 
     // internal
@@ -85,8 +85,8 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         notRevealedUri = _notRevealedURI;
     }
 
-    function setPublicMintActiveTime(uint256 _state) public onlyOwner {
-        publicmintActiveTime = _state;
+    function setPublicMintActiveTime(uint256 _publicmintActiveTime) public onlyOwner {
+        publicmintActiveTime = _publicmintActiveTime;
     }
 
     function withdraw() public payable onlyOwner {
@@ -172,20 +172,20 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         return super.isApprovedForAll(_owner, _operator);
     }
 
-    // Air Drop Ether
-    // test gas on avax for 1000 addresses
-    function airDropEther(address[] calldata _to, uint _toSend) external onlyOwner {
+    // test gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
+    function airDropEtherToList(address[] calldata _to, uint _toSend) external onlyOwner {
         for (uint256 i = 0; i < _to.length; i++) {
             (bool success, ) = payable(_to[i]).call{value: _toSend}("");
             require(success);
         }
     }
 
-    // Air Drop Ether
-    // test gas on avax for 1000 addresses
-    function airDropEther2(address[] calldata _to, uint _toSend) external onlyOwner {
-        for (uint256 i = 0; i < _to.length; i++) 
-            payable(_to[i]).transfer(_toSend);
+    // test gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
+    function airDropEtherToHolders(uint _toSend) external onlyOwner {
+        for (uint256 i = 0; i < totalSupply(); i++) {
+            (bool success, ) = payable(ownerOf(i)).call{value: _toSend}("");
+            require(success);
+        }
     }
 
     function burn(uint256 _tokenId) external {
