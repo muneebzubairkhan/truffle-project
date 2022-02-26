@@ -13,7 +13,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     string public baseExtension = ".json";
     string public notRevealedUri;
     uint256 public cost = 0.075 ether;
-    uint256 public maxSupply = 10000;
+    uint256 public maxSupply = 9750;
     uint256 public maxMintAmount = 20;
     uint256 public nftPerAddressLimit = 3;
     uint256 public publicmintActiveTime = block.timestamp + 30 days; // https://www.epochconverter.com/
