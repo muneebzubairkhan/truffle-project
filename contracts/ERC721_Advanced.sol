@@ -16,14 +16,19 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     uint256 public itemPrice = 0.02 ether;
     uint256 public itemPriceErc20 = 200 ether;
     uint256 public itemPriceHolder = 0.01 ether;
-    uint256 public saleActiveTime = block.timestamp + 1 days;
+    uint256 public saleActiveTime = block.timestamp + 365 days; // test with calculated vs a+b gas diff;
     uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
-    string public baseURI = "ipfs://QmZdX7nh6CEcXzaicfUm1Qt6o4YsFEvTM6jueyNce5Uwjf/";
-    address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // Igloo Token
-    address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // Bastard Penguins
+    string public baseURI = "ipfs://QmZdX7nh6CEcXzaicfUm1Qt6o4YsFEvTM6jueyNce5Uwjf/"; // confirm it
+    address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // To Buy In Token, Igloo Token
+    address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // To Hold Token, Bastard Penguins
 
     constructor() {
-        flipProxyState(0x1AA777972073Ff66DCFDeD85749bDD555C0665dA);
+        // flipProxyState(0x1AA777972073Ff66DCFDeD85749bDD555C0665dA);
+    }
+
+    modifier onlyOwner() {
+        require(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender, "Caller is not the owner");
+        _;
     }
 
     ///////////////////////////////////
@@ -59,14 +64,9 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     // ONLY OWNER METHODS   //
     //////////////////////////
 
-    modifier onlyOwner() {
-        require(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender, "Caller is not the owner");
-        _;
-    }
-
     /// @notice Owner can withdraw from here
     function withdraw() external onlyOwner {
-        payable(0xe2c135274428FF8183946c3e46560Fa00353753A).transfer(address(this).balance);
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     /// @notice Owner can withdraw from here
@@ -208,6 +208,7 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
+// check gas diff in import vs write
 interface IERC20 {
     function transferFrom(
         address sender,
@@ -225,28 +226,25 @@ contract PresaleNft is BastardPenguinsComics {
     //    PRESALE CODE STARTS    //
     ///////////////////////////////
 
-    uint256 public itemPricePresale = 0.03 ether;
-    uint256 public presaleActiveTime;
+    uint256 public presaleActiveTime = block.timestamp + 365 days;
     uint256 public presaleMaxMint = 3;
-    mapping(address => uint256) public presaleClaimedBy;
-    bytes32 public whitelistMerkleRoot;
 
-    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
-        whitelistMerkleRoot = _whitelistMerkleRoot;
+    mapping(uint => uint256) public itemPricePresales;
+    mapping (uint => bytes32) public whitelistMerkleRoots;
+
+    function setWhitelistMerkleRoot(uint _rootNumber, bytes32 _whitelistMerkleRoot) external onlyOwner {
+        whitelistMerkleRoots[_rootNumber] = _whitelistMerkleRoot;
     }
 
-    function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {
-        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
+    function inWhitelist(address _owner, bytes32[] memory _proof, uint _rootNumber) public view returns (bool) {
+        return MerkleProof.verify(_proof, whitelistMerkleRoots[_rootNumber], keccak256(abi.encodePacked(_owner)));
     }
 
-    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable callerIsUser tokensAvailable(_howMany)  {
-        require(inWhitelist(msg.sender, _proof), "You are not in presale");
+    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof, uint _rootNumber) external payable callerIsUser tokensAvailable(_howMany)  {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
-
-        presaleClaimedBy[msg.sender] += _howMany;
-
-        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
+        require(inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
+        require(_numberMinted(msg.sender) <= presaleMaxMint, "Purchase exceeds max allowed");
+        require(msg.value >= _howMany * itemPricePresales[_rootNumber], "Try to send more ETH");
 
         _safeMint(msg.sender, _howMany);
     }
@@ -258,8 +256,8 @@ contract PresaleNft is BastardPenguinsComics {
     }
 
     // Change presale price in case of ETH price changes too much
-    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
-        itemPricePresale = _itemPricePresale;
+    function setPricePresale(uint256 _itemPricePresale, uint _rootNumber) external onlyOwner {
+        itemPricePresales[_rootNumber] = _itemPricePresale;
     }
 
     function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {

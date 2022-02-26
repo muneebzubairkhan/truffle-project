@@ -14,7 +14,7 @@
     "____": "_____",
     "testRegular": "nodemon --exec \"truffle test\" --ext \".test.js .sol\"",
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" --ext .sol",
-    "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate\" --ext .sol",
+    "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate --reset\" --ext .sol",
     "runLocalBlockchain": "ganache-cli",
     "_____": "_____",
     "verify": "truffle run verify NftStaking --network %npm_package_selectedNetwork%",
