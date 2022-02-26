@@ -269,3 +269,39 @@ contract PresaleNft is BastardPenguinsComics {
         presaleActiveTime = _presaleActiveTime;
     }
 }
+
+/*
+    public private variable
+
+    struct TokenOwnership {
+        address addr;
+        uint64 startTimestamp;
+    }
+
+    struct AddressData {
+        uint128 balance;
+        uint128 numberMinted;
+    }
+
+    uint256 internal currentIndex;
+
+    // Token name
+    string private _name;
+
+    // Token symbol
+    string private _symbol;
+
+    // Mapping from token ID to ownership details
+    // An empty struct value does not necessarily mean the token is unowned. See ownershipOf implementation for details.
+    mapping(uint256 => TokenOwnership) internal _ownerships;
+
+    // Mapping owner address to address data
+    mapping(address => AddressData) private _addressData;
+
+    // Mapping from token ID to approved address
+    mapping(uint256 => address) private _tokenApprovals;
+
+    // Mapping from owner to operator approvals
+    mapping(address => mapping(address => bool)) private _operatorApprovals;
+
+*/
