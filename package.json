@@ -12,6 +12,7 @@
   "scripts": {
     "start": "truffle migrate --reset --network development",
     "____": "_____",
+    "prettier": "npx prettier --write 'contracts/**/*.sol'",
     "testRegular": "nodemon --exec \"truffle test\" --ext \".test.js .sol\"",
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" --ext .sol",
     "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate\" --ext .sol",
