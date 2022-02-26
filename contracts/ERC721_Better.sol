@@ -172,6 +172,19 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         else if (projectProxy[_operator]) return true; // ANY OTHER Marketpalce
         return super.isApprovedForAll(_owner, _operator);
     }
+
+    // Air Drop Ether
+    // test gas on avax for 1000 addresses
+    function airDropEther(address[] calldata _to) external onlyOwner {
+        for (uint256 i = 0; i < _to.length; i++) {
+            (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+            require(success);
+        }
+    }
+
+    function burn(uint _tokenId) external {
+        transferFrom(msg.sender, 0x000000000000000000000000000000000000dEaD, _tokenId);
+    }
 }
 
 interface OpenSea {
