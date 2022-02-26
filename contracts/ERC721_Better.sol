@@ -100,15 +100,11 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
 
     // Send NFTs to a list of addresses
     function giftNftToList(address[] calldata _sendNftsTo) external onlyOwner {
-        require(totalSupply() + _sendNftsTo.length <= maxSupply, "max NFT limit exceeded");
-
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], 1);
     }
 
     // Send NFTs to a single address
     function giftNftToAddress(address _sendNftsTo, uint256 _howMany) external onlyOwner {
-        require(totalSupply() + _howMany <= maxSupply, "max NFT limit exceeded");
-
         _safeMint(_sendNftsTo, _howMany);
     }
 
