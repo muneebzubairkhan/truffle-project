@@ -159,26 +159,22 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     // AUTO APPROVE OPENSEA  //
     ///////////////////////////
 
-    // Opensea Registerar Mainnet 0xa5409ec958C83C3f309868babACA7c86DCB077c1
-    // Opensea Registerar Rinkeby 0xF57B2c51dED3A29e6891aba85459d600256Cf317
-    address openSeaRegistrar = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
+    mapping(address => bool) public projectProxy; // check public vs private vs internal gas
+    function flipProxyState(address proxyAddress) public onlyOwner {
+        projectProxy[proxyAddress] = !projectProxy[proxyAddress];
+    }
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        return ProxyRegisterar(openSeaRegistrar).proxies(_owner) == _operator ? true : super.isApprovedForAll(_owner, _operator);
-    }
-
-    // infuture address changes for opensea registrar
-    function editOpenSeaRegisterar(address _openSeaRegistrar) external onlyOwner {
-        openSeaRegistrar = _openSeaRegistrar;
-    }
-
-    // just in case openSeaRegistrar is not present we use this contract as openSeaRegistrar
-    function proxies(address) external pure returns (address) {
-        return address(0);
+        if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true; // OPENSEA
+        else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true; // LOOKSRARE
+        else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true; // RARIBLE
+        else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true; // X2Y2
+        else if (projectProxy[_operator]) return true; // ANY OTHER Marketpalce
+        return super.isApprovedForAll(_owner, _operator);
     }
 }
 
-interface ProxyRegisterar {
+interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
