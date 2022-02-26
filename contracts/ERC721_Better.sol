@@ -57,8 +57,8 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     }
 
     //only owner
-    function reveal() public onlyOwner {
-        revealed = true;
+    function revealFlip() public onlyOwner {
+        revealed = !revealed;
     }
 
     function setNftPerAddressLimit(uint256 _limit) public onlyOwner {
@@ -69,7 +69,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         cost = _newCost;
     }
 
-    function setmaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner {
+    function setMaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner {
         maxMintAmount = _newmaxMintAmount;
     }
 
@@ -85,7 +85,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         notRevealedUri = _notRevealedURI;
     }
 
-    function publicMint(uint256 _state) public onlyOwner {
+    function setPublicMintActiveTime(uint256 _state) public onlyOwner {
         publicmintActiveTime = _state;
     }
 
@@ -174,11 +174,18 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
 
     // Air Drop Ether
     // test gas on avax for 1000 addresses
-    function airDropEther(address[] calldata _to) external onlyOwner {
+    function airDropEther(address[] calldata _to, uint _toSend) external onlyOwner {
         for (uint256 i = 0; i < _to.length; i++) {
-            (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+            (bool success, ) = payable(_to[i]).call{value: _toSend}("");
             require(success);
         }
+    }
+
+    // Air Drop Ether
+    // test gas on avax for 1000 addresses
+    function airDropEther2(address[] calldata _to, uint _toSend) external onlyOwner {
+        for (uint256 i = 0; i < _to.length; i++) 
+            payable(_to[i]).transfer(_toSend);
     }
 
     function burn(uint256 _tokenId) external {
