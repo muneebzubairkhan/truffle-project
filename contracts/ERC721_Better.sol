@@ -257,7 +257,3 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 }
-
-interface OpenSea {
-    function proxies(address) external view returns (address);
-}
