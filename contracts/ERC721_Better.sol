@@ -62,8 +62,6 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
         uint256 tokenIdsIdx;
         address currOwnershipAddr;
 
-        // Counter overflow is impossible as the loop breaks when
-        // uint256 i is equal to another uint256 numMintedSoFar.
         unchecked {
             for (uint256 i; i < numMintedSoFar; i++) {
                 TokenOwnership memory ownership = _ownerships[i];
@@ -89,7 +87,6 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
         return bytes(currentBaseURI).length > 0 ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension)) : "";
     }
 
-    //only owner
     function revealFlip() public onlyOwner {
         revealed = !revealed;
     }
@@ -196,16 +193,6 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
 
     // set auto approve for trusted marketplaces here
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        // for ETH mainnet
-        // if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
-        // // OPENSEA
-        // else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
-        // // LOOKSRARE
-        // else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
-        // // RARIBLE
-        // else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
-        // // X2Y2
-        // else
         if (projectProxy[_operator]) return true; // ANY OTHER Marketplace
         return super.isApprovedForAll(_owner, _operator);
     }
