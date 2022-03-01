@@ -4,20 +4,31 @@ pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
+contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable {
     using Strings for uint256;
 
     string public baseURI;
     string public baseExtension = ".json";
     string public notRevealedUri;
     uint256 public cost = 0.075 ether;
-    uint256 public maxSupply = 9750;
+    uint256 public maxSupply = 10_000;
+    uint256 public reservedSupply = 250;
     uint256 public maxMintAmount = 20;
     uint256 public nftPerAddressLimit = 3;
     uint256 public publicmintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
     bool public revealed = false;
+
+    constructor() {
+        whitelistedForStaking[msg.sender] = true;
+    }
+
+    // internal
+    function _startTokenId() internal pure override returns (uint256) {
+        return 1;
+    }
 
     // internal
     function _baseURI() internal view virtual override returns (string memory) {
@@ -30,7 +41,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         uint256 supply = totalSupply();
         require(_mintAmount > 0, "need to mint at least 1 NFT");
         require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
-        require(supply + _mintAmount <= maxSupply, "max NFT limit exceeded");
+        require(supply + _mintAmount + reservedSupply <= maxSupply, "max NFT limit exceeded");
         require(msg.value >= cost * _mintAmount, "insufficient funds");
 
         _safeMint(msg.sender, _mintAmount);
@@ -43,6 +54,36 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
             tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
         }
         return tokenIds;
+    }
+
+    function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
+        if (index >= balanceOf(owner)) revert OwnerIndexOutOfBounds();
+        uint256 numMintedSoFar = _currentIndex;
+        uint256 tokenIdsIdx;
+        address currOwnershipAddr;
+
+        // Counter overflow is impossible as the loop breaks when
+        // uint256 i is equal to another uint256 numMintedSoFar.
+        unchecked {
+            for (uint256 i; i < numMintedSoFar; i++) {
+                TokenOwnership memory ownership = _ownerships[i];
+                if (ownership.burned) {
+                    continue;
+                }
+                if (ownership.addr != address(0)) {
+                    currOwnershipAddr = ownership.addr;
+                }
+                if (currOwnershipAddr == owner) {
+                    if (tokenIdsIdx == index) {
+                        return i;
+                    }
+                    tokenIdsIdx++;
+                }
+            }
+        }
+
+        // Execution should never reach this point.
+        revert();
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
@@ -63,10 +104,6 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
 
     function setNftPerAddressLimit(uint256 _limit) public onlyOwner {
         nftPerAddressLimit = _limit;
-    }
-
-    function setMaxSupply(uint256 _maxSupply) public onlyOwner {
-        maxSupply = _maxSupply;
     }
 
     function setCost(uint256 _newCost) public onlyOwner {
@@ -103,6 +140,8 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     ///////////////////////////////////
 
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
+        reservedSupply -= _sendNftsTo.length * _howMany;
+
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
 
@@ -126,7 +165,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
 
     function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable {
         uint256 supply = totalSupply();
-        require(supply + _howMany <= maxSupply, "max NFT limit exceeded");
+        require(supply + _howMany + reservedSupply <= maxSupply, "max NFT limit exceeded");
 
         require(inWhitelist(_proof, msg.sender), "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
@@ -163,21 +202,24 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
 
+    // set auto approve for trusted marketplaces here
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
-        // OPENSEA
-        else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
-        // LOOKSRARE
-        else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
-        // RARIBLE
-        else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
-        // X2Y2
-        else if (projectProxy[_operator]) return true; // ANY OTHER Marketpalce
+        // for ETH mainnet
+        // if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
+        // // OPENSEA
+        // else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
+        // // LOOKSRARE
+        // else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
+        // // RARIBLE
+        // else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
+        // // X2Y2
+        // else
+        if (projectProxy[_operator]) return true; // ANY OTHER Marketplace
         return super.isApprovedForAll(_owner, _operator);
     }
 
     // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropEtherToList(address[] calldata _to, uint _toSend) external onlyOwner {
+    function airDropEtherToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
         for (uint256 i = 0; i < _to.length; i++) {
             (bool success, ) = payable(_to[i]).call{value: _toSend}("");
             require(success);
@@ -185,15 +227,15 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable {
     }
 
     // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropEtherToHolders(uint _toSend, uint _fromTokenId, uint _toTokenId) external onlyOwner {
+    function airDropEtherToHolders(
+        uint256 _toSend,
+        uint256 _fromTokenId,
+        uint256 _toTokenId
+    ) external onlyOwner {
         for (uint256 i = _fromTokenId; i < _toTokenId; i++) {
             (bool success, ) = payable(ownerOf(i)).call{value: _toSend}("");
-            require(success);   
+            require(success);
         }
-    }
-
-    function burn(uint256 _tokenId) external {
-        transferFrom(msg.sender, 0x000000000000000000000000000000000000dEaD, _tokenId);
     }
 
     function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {

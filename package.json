@@ -13,6 +13,7 @@
     "start": "truffle migrate --reset --network development",
     "____": "_____",
     "prettier": "npx prettier --write 'contracts/**/*.sol'",
+    "prettierRegular": "nodemon --watch contracts --exec \"npx prettier --write 'contracts/**/*.sol'\" --ext .sol",
     "testRegular": "nodemon --exec \"truffle test\" --ext \".test.js .sol\"",
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" --ext .sol",
     "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate\" --ext .sol",
@@ -35,7 +36,7 @@
     "@openzeppelin/contracts": "^4.4.1",
     "@truffle/hdwallet-provider": "^2.0.0",
     "dotenv": "^10.0.0",
-    "erc721a": "latest",
+    "erc721a": "^3.0.0",
     "nodemon": "^2.0.13",
     "truffle-plugin-verify": "^0.5.20",
     "web3-utils": "^1.5.3"
