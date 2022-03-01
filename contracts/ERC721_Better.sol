@@ -13,7 +13,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
     string public baseURI;
     string public baseExtension = ".json";
     string public notRevealedUri;
-    uint256 public cost = 0.075 ether;
+    uint256 public cost = 0.075 * 1e18;
     uint256 public maxSupply = 10_000;
     uint256 public reservedSupply = 250;
     uint256 public maxMintAmount = 20;
@@ -144,7 +144,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
     uint256 public presaleActiveTime;
     uint256 public presaleMaxMint = 3;
     bytes32 public whitelistMerkleRoot;
-    uint256 public itemPricePresale = 0.03 ether;
+    uint256 public itemPricePresale = 0.03 * 1e18;
     mapping(address => uint256) public presaleClaimedBy;
 
     function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
@@ -211,7 +211,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
     }
 
     // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropEtherToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
+    function airDropAvaxToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
         for (uint256 i = 0; i < _to.length; i++) {
             (bool success, ) = payable(_to[i]).call{value: _toSend}("");
             require(success);
@@ -219,7 +219,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
     }
 
     // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropEtherToHolders(
+    function airDropAvaxToHolders(
         uint256 _toSend,
         uint256 _fromTokenId,
         uint256 _toTokenId
