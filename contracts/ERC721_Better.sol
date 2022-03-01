@@ -138,7 +138,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
     //    PRESALE CODE STARTS    //
     ///////////////////////////////
 
-    uint256 public presaleActiveTime;
+    uint256 public presaleActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
     uint256 public presaleMaxMint = 3;
     bytes32 public whitelistMerkleRoot;
     uint256 public itemPricePresale = 0.03 * 1e18;
@@ -198,7 +198,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
     }
 
     // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropAvaxToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
+    function airDropTokenToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
         for (uint256 i = 0; i < _to.length; i++) {
             (bool success, ) = payable(_to[i]).call{value: _toSend}("");
             require(success);
@@ -206,7 +206,7 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
     }
 
     // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropAvaxToHolders(
+    function airDropTokenToHolders(
         uint256 _toSend,
         uint256 _fromTokenId,
         uint256 _toTokenId
