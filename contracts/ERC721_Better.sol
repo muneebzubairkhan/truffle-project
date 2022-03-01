@@ -67,31 +67,23 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
         unchecked {
             for (uint256 i; i < numMintedSoFar; i++) {
                 TokenOwnership memory ownership = _ownerships[i];
-                if (ownership.burned) {
-                    continue;
-                }
-                if (ownership.addr != address(0)) {
-                    currOwnershipAddr = ownership.addr;
-                }
+                if (ownership.burned) continue;
+
+                if (ownership.addr != address(0)) currOwnershipAddr = ownership.addr;
+
                 if (currOwnershipAddr == owner) {
-                    if (tokenIdsIdx == index) {
-                        return i;
-                    }
+                    if (tokenIdsIdx == index) return i;
                     tokenIdsIdx++;
                 }
             }
         }
-
-        // Execution should never reach this point.
         revert();
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
-        if (revealed == false) {
-            return notRevealedUri;
-        }
+        if (revealed == false) return notRevealedUri;
 
         string memory currentBaseURI = _baseURI();
         return bytes(currentBaseURI).length > 0 ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension)) : "";
