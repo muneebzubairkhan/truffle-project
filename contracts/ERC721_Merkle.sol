@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable {
+contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable {
     using Strings for uint256;
 
     string public baseURI;
@@ -21,11 +21,8 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
     uint256 public publicmintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
     bool public revealed = false;
 
-    constructor() {
-        whitelistedForStaking[msg.sender] = true;
-    }
+    constructor() {}
 
-    // internal
     function _startTokenId() internal pure override returns (uint256) {
         return 1;
     }
@@ -195,65 +192,5 @@ contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC7
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         if (projectProxy[_operator]) return true; // ANY OTHER Marketplace
         return super.isApprovedForAll(_owner, _operator);
-    }
-
-    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropTokenToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
-        for (uint256 i = 0; i < _to.length; i++) {
-            (bool success, ) = payable(_to[i]).call{value: _toSend}("");
-            require(success);
-        }
-    }
-
-    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropTokenToHolders(
-        uint256 _toSend,
-        uint256 _fromTokenId,
-        uint256 _toTokenId
-    ) external onlyOwner {
-        for (uint256 i = _fromTokenId; i < _toTokenId; i++) {
-            (bool success, ) = payable(ownerOf(i)).call{value: _toSend}("");
-            require(success);
-        }
-    }
-
-    function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
-        return ownershipOf(tokenId).startTimestamp;
-    }
-
-    //////////////////////////////
-    // WHITELISTING FOR STAKING //
-    //////////////////////////////
-
-    // tokenId => staked (yes or no)
-    mapping(address => bool) public whitelistedForStaking;
-
-    function addToWhitelistForStaking(address _address, bool _add) external onlyOwner {
-        whitelistedForStaking[_address] = _add;
-    }
-
-    modifier onlyWhitelistedForStaking() {
-        require(whitelistedForStaking[msg.sender], "Caller is not whitelisted for staking");
-        _;
-    }
-
-    /////////////////////
-    // STAKING METHOD  //
-    /////////////////////
-
-    mapping(uint256 => bool) public staked;
-
-    function _beforeTokenTransfers(
-        address,
-        address,
-        uint256 startTokenId,
-        uint256
-    ) internal view override {
-        require(!staked[startTokenId], "Unstake tokenId it to transfer");
-    }
-
-    // stake / unstake nfts
-    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
-        for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 }
