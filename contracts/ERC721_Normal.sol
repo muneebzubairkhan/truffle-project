@@ -5,7 +5,6 @@ pragma solidity ^0.8.0;
 import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract DysfunctionalDogs is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable {
     using Strings for uint256;
