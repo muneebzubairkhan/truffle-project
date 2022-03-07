@@ -196,9 +196,9 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         presaleActiveTime = _presaleActiveTime;
     }
 
-    ///////////////////////////
-    // AUTO APPROVE OPENSEA  //
-    ///////////////////////////
+    ////////////////////////////////
+    // AUTO APPROVE MARKETPLACES  //
+    ////////////////////////////////
 
     mapping(address => bool) public projectProxy; // check public vs private vs internal gas
 
