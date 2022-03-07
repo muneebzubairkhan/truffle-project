@@ -4,10 +4,20 @@ pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable {
+contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable, ERC2981 {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function burn(uint256 tokenId) public override {
+        super._burn(tokenId);
+        _resetTokenRoyalty(tokenId);
+    }
+
     using Strings for uint256;
 
     string public baseURI;
@@ -23,6 +33,11 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
     constructor() {
         whitelistedForStaking[msg.sender] = true;
+        _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
+    }
+
+    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
+        _setDefaultRoyalty(_receiver, _feeNumerator);
     }
 
     // internal
