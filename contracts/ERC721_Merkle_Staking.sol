@@ -30,6 +30,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     uint256 public nftPerAddressLimit = 3;
     uint256 public publicmintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
     bool public revealed = false;
+    uint constant presaleSupply = 400;
 
     constructor() {
         whitelistedForStaking[msg.sender] = true;
@@ -168,7 +169,9 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     }
 
     function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable {
+
         uint256 supply = totalSupply();
+        require(supply <= presaleSupply, "presale limit reached");
         require(supply + _howMany + reservedSupply <= maxSupply, "max NFT limit exceeded");
 
         require(inWhitelist(_proof, msg.sender), "You are not in presale");
