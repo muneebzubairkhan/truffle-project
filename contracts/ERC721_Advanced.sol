@@ -138,6 +138,28 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
         return tokenIds;
     }
 
+    function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
+        if (index >= balanceOf(owner)) revert();
+        uint256 numMintedSoFar = _currentIndex;
+        uint256 tokenIdsIdx;
+        address currOwnershipAddr;
+
+        unchecked {
+            for (uint256 i; i < numMintedSoFar; i++) {
+                TokenOwnership memory ownership = _ownerships[i];
+                if (ownership.burned) continue;
+
+                if (ownership.addr != address(0)) currOwnershipAddr = ownership.addr;
+
+                if (currOwnershipAddr == owner) {
+                    if (tokenIdsIdx == index) return i;
+                    tokenIdsIdx++;
+                }
+            }
+        }
+        revert();
+    }
+
     ///////////////////
     //  HELPER CODE  //
     ///////////////////
