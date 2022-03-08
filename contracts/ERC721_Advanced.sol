@@ -19,7 +19,7 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract NftComics is ERC721A("Nft Comics", "BPC"), ERC721ABurnable, ERC2981 {
+contract NftComics is ERC721A("Nft Comics", "NFTC"), ERC721ABurnable, ERC2981 {
     //
     uint256 public maxSupply = 20_000;
     uint256 public itemPrice = 0.02 ether;
