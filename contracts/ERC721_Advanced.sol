@@ -29,7 +29,8 @@ contract NftComics is ERC721A("Nft Comics", "NFTC"), ERC721ABurnable, ERC2981 {
     uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
     address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // To Buy In Token, USDT Token
     address public erc721ToHold = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // To Hold Token, Nft
-    string public baseURI = "ipfs://QmZdX7nh6CEcXzaicfUm1Qt6o4YsFEvTM6jueyNce5Uwjf/"; // confirm it
+    address private constant owner = 0xe2c135274428FF8183946c3e46560Fa00353753A;
+    string public baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/"; // confirm it
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
@@ -38,7 +39,7 @@ contract NftComics is ERC721A("Nft Comics", "NFTC"), ERC721ABurnable, ERC2981 {
     }
 
     modifier onlyOwner() {
-        require(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender, "Caller is not the owner");
+        require(owner == msg.sender, "Caller is not the owner");
         _;
     }
 
@@ -129,8 +130,8 @@ contract NftComics is ERC721A("Nft Comics", "NFTC"), ERC721ABurnable, ERC2981 {
         return tokenIds;
     }
 
-    function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
-        if (index >= balanceOf(owner)) revert();
+    function tokenOfOwnerByIndex(address _owner, uint256 index) public view returns (uint256) {
+        if (index >= balanceOf(_owner)) revert();
         uint256 numMintedSoFar = _currentIndex;
         uint256 tokenIdsIdx;
         address currOwnershipAddr;
@@ -142,7 +143,7 @@ contract NftComics is ERC721A("Nft Comics", "NFTC"), ERC721ABurnable, ERC2981 {
 
                 if (ownership.addr != address(0)) currOwnershipAddr = ownership.addr;
 
-                if (currOwnershipAddr == owner) {
+                if (currOwnershipAddr == _owner) {
                     if (tokenIdsIdx == index) return i;
                     tokenIdsIdx++;
                 }
