@@ -2,7 +2,6 @@
 
 // Website:  http://bastardpenguins.club/
 // OpenSea:  http://opensea.club/abc/
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
