@@ -3,7 +3,7 @@
 //  | \ | |  ____|__   __|
 //  |  \| | |__     | |___
 //  | . ` |  __|    | / __|
-//  | |\  | |       | \__ \
+//  | |\  | |                       | \__ \
 //  |_| \_|_|       |_|___/
 
 // Website:  http://Nft.club/
@@ -18,7 +18,7 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract NftComics is ERC721A("Nft Comics", "NFTC"), ERC721ABurnable, ERC2981 {
+contract FoxDao is ERC721A("Nft Comics", "NFTC"), ERC721ABurnable, ERC2981 {
     //
     uint256 public maxSupply = 20_000;
     uint256 public itemPrice = 0.02 ether;
@@ -240,7 +240,7 @@ interface OpenSea {
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract PresaleNft is NftComics {
+contract PresaleNft is FoxDao {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -273,10 +273,11 @@ contract PresaleNft is NftComics {
     ) external payable callerIsUser tokensAvailable(_howMany) {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(_inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
-        require(_numberMinted(msg.sender) <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
         require(msg.value >= _howMany * itemPricePresales[_rootNumber], "Try to send more ETH");
 
         _safeMint(msg.sender, _howMany);
+
+        require(_numberMinted(msg.sender) <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
     }
 
     function setPresale(
