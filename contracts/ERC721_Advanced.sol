@@ -3,20 +3,20 @@
 // Website:  http://bastardpenguins.club/
 // OpenSea:  http://opensea.club/abc/
 // SPDX-License-Identifier: MIT
+// turn on Optimization, 200
 
 pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-// turn on Optimization, 200
 
+error LowBalanceERC20();
 error SaleNotStarted();
 error CallerNotOwner();
-error CallerNotUser();
 error MintLessTokens();
+error CallerNotUser();
 error LowBalance();
-error LowBalanceERC20();
 
 contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC721ABurnable, ERC2981 {
     //
@@ -258,25 +258,29 @@ interface IERC20 {
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract PresaleNft is BastardPenguinsComics {
-    ///////////////////////////////
-    //    PRESALE CODE STARTS    //
-    ///////////////////////////////
-
-    uint256 public presaleActiveTime = block.timestamp + 365 days;
     uint256 public presaleMaxMint = 3;
-
     mapping(uint256 => uint256) public itemPricePresales;
     mapping(uint256 => bytes32) public whitelistMerkleRoots;
+    uint256 public presaleActiveTime = block.timestamp + 365 days;
 
     function setWhitelistMerkleRoot(uint256 _rootNumber, bytes32 _whitelistMerkleRoot) external onlyOwner {
         whitelistMerkleRoots[_rootNumber] = _whitelistMerkleRoot;
+    }
+
+    // multicall inWhitelist
+    function inWhitelist(
+        address _owner,
+        bytes32[] memory _proof,
+        uint _from, uint _to
+    ) external view returns (uint) {
+        for (uint i = _from; i < _to; i++) if(inWhitelist(_owner, _proof, i)) return i; return type(uint256).max;
     }
 
     function inWhitelist(
         address _owner,
         bytes32[] memory _proof,
         uint256 _rootNumber
-    ) public view returns (bool) {
+    ) private view returns (bool) {
         return MerkleProof.verify(_proof, whitelistMerkleRoots[_rootNumber], keccak256(abi.encodePacked(_owner)));
     }
 
@@ -293,13 +297,11 @@ contract PresaleNft is BastardPenguinsComics {
         _safeMint(msg.sender, _howMany);
     }
 
-    // test combine all functions of write...
     // set limit of presale
     function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
         presaleMaxMint = _presaleMaxMint;
     }
 
-    // Change presale price in case of ETH price changes too much
     function setPricePresale(uint256 _itemPricePresale, uint256 _rootNumber) external onlyOwner {
         itemPricePresales[_rootNumber] = _itemPricePresale;
     }
