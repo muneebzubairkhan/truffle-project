@@ -37,7 +37,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC
     }
 
     modifier onlyOwner() {
-        if(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender) revert CallerNotOwner();
+        if (0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender) revert CallerNotOwner();
         _;
     }
 
@@ -155,38 +155,39 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC
     ///////////////////
 
     modifier callerIsUser() {
-        if(tx.origin == msg.sender) revert CallerNotUser();
+        if (tx.origin == msg.sender) revert CallerNotUser();
         _;
     }
 
     modifier saleActive() {
-        if(block.timestamp > saleActiveTime) revert SaleNotStarted();
+        if (block.timestamp > saleActiveTime) revert SaleNotStarted();
         _;
     }
 
     modifier saleActiveErc20() {
-        if(block.timestamp > saleActiveTimeErc20) revert SaleNotStarted();
+        if (block.timestamp > saleActiveTimeErc20) revert SaleNotStarted();
         _;
     }
 
     modifier mintLimit(uint256 _howMany) {
-        if(_howMany >= 1 && _howMany <= 20) revert MintLessTokens();
+        if (_howMany >= 1 && _howMany <= 20) revert MintLessTokens();
         _;
     }
 
     modifier tokensAvailable(uint256 _howMany) {
-        if(_howMany <= maxSupply - totalSupply()) revert MintLessTokens();
+        if (_howMany <= maxSupply - totalSupply()) revert MintLessTokens();
         _;
     }
 
     modifier priceAvailable(uint256 _howMany) {
-        if (IERC721(erc721).balanceOf(msg.sender) > 0) if(msg.value >= _howMany * itemPriceHolder) revert LowBalance();
-        else if(msg.value >= _howMany * itemPrice) revert LowBalance();
+        if (IERC721(erc721).balanceOf(msg.sender) > 0)
+            if (msg.value >= _howMany * itemPriceHolder) revert LowBalance();
+            else if (msg.value >= _howMany * itemPrice) revert LowBalance();
         _;
     }
 
     modifier priceAvailableERC20(uint256 _howMany) {
-        if(IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20)) revert LowBalanceERC20();
+        if (IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20)) revert LowBalanceERC20();
         _;
     }
 
@@ -201,11 +202,16 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC
     }
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true; // OPENSEA
-        else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true; // LOOKSRARE
-        else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true; // RARIBLE
-        else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true; // X2Y2
-        else if (projectProxy[_operator]) return true; // ANY OTHER Marketpalce
+        // OPENSEA
+        if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
+        // LOOKSRARE
+        else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
+        // RARIBLE
+        else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
+        // X2Y2
+        else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
+        // ANY OTHER Marketpalce
+        else if (projectProxy[_operator]) return true;
         return super.isApprovedForAll(_owner, _operator);
     }
 
@@ -216,7 +222,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC
         address[] calldata _to,
         uint256[] calldata _id
     ) external {
-        if(_to.length == _id.length) revert();
+        if (_to.length == _id.length) revert();
 
         for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
     }
@@ -258,25 +264,24 @@ interface IERC20 {
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract PresaleNft is BastardPenguinsComics {
-    uint256 public presaleMaxMint = 3;
+    // multiple presale configs
+    mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
     mapping(uint256 => bytes32) public whitelistMerkleRoots;
     uint256 public presaleActiveTime = block.timestamp + 365 days;
-
-    function setWhitelistMerkleRoot(uint256 _rootNumber, bytes32 _whitelistMerkleRoot) external onlyOwner {
-        whitelistMerkleRoots[_rootNumber] = _whitelistMerkleRoot;
-    }
 
     // multicall inWhitelist
     function inWhitelist(
         address _owner,
         bytes32[] memory _proof,
-        uint _from, uint _to
-    ) external view returns (uint) {
-        for (uint i = _from; i < _to; i++) if(inWhitelist(_owner, _proof, i)) return i; return type(uint256).max;
+        uint256 _from,
+        uint256 _to
+    ) external view returns (uint256) {
+        for (uint256 i = _from; i < _to; i++) if (_inWhitelist(_owner, _proof, i)) return i;
+        return type(uint256).max;
     }
 
-    function inWhitelist(
+    function _inWhitelist(
         address _owner,
         bytes32[] memory _proof,
         uint256 _rootNumber
@@ -290,20 +295,22 @@ contract PresaleNft is BastardPenguinsComics {
         uint256 _rootNumber
     ) external payable callerIsUser tokensAvailable(_howMany) {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
-        require(_numberMinted(msg.sender) <= presaleMaxMint, "Purchase exceeds max allowed");
+        require(_inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
+        require(_numberMinted(msg.sender) <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
         require(msg.value >= _howMany * itemPricePresales[_rootNumber], "Try to send more ETH");
 
         _safeMint(msg.sender, _howMany);
     }
 
-    // set limit of presale
-    function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
-        presaleMaxMint = _presaleMaxMint;
-    }
-
-    function setPricePresale(uint256 _itemPricePresale, uint256 _rootNumber) external onlyOwner {
+    function setPresale(
+        uint256 _rootNumber,
+        bytes32 _whitelistMerkleRoot,
+        uint256 _maxMintPresales,
+        uint256 _itemPricePresale
+    ) external onlyOwner {
+        maxMintPresales[_rootNumber] = _maxMintPresales;
         itemPricePresales[_rootNumber] = _itemPricePresale;
+        whitelistMerkleRoots[_rootNumber] = _whitelistMerkleRoot;
     }
 
     function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
