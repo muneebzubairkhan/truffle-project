@@ -230,6 +230,10 @@ contract FoxNationDAOPresale is FoxNationDAO {
         require(_numberMinted(msg.sender) <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
     }
 
+    function numberMinted(address _owner) external view returns (uint256) {
+        return _numberMinted(_owner);
+    }
+
     function setPresale(
         uint256 _rootNumber,
         bytes32 _whitelistMerkleRoot,
