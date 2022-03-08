@@ -130,9 +130,7 @@ interface IRoyaltyFeeManager {
 }
 
 interface ILooksRareExchange {
-    function matchAskWithTakerBidUsingETHAndWETH(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk)
-        external
-        payable;
+    function matchAskWithTakerBidUsingETHAndWETH(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk) external payable;
 
     function matchAskWithTakerBid(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk) external;
 
@@ -283,13 +281,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
     event NewRoyaltyFeeManager(address indexed royaltyFeeManager);
     event NewTransferSelectorNFT(address indexed transferSelectorNFT);
 
-    event RoyaltyPayment(
-        address indexed collection,
-        uint256 indexed tokenId,
-        address indexed royaltyRecipient,
-        address currency,
-        uint256 amount
-    );
+    event RoyaltyPayment(address indexed collection, uint256 indexed tokenId, address indexed royaltyRecipient, address currency, uint256 amount);
 
     event TakerAsk(
         bytes32 orderHash, // bid hash of the maker order
@@ -382,12 +374,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
      * @param takerBid taker bid order
      * @param makerAsk maker ask order
      */
-    function matchAskWithTakerBidUsingETHAndWETH(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk)
-        external
-        payable
-        override
-        nonReentrant
-    {
+    function matchAskWithTakerBidUsingETHAndWETH(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk) external payable override nonReentrant {
         require((makerAsk.isOrderAsk) && (!takerBid.isOrderAsk), "Order: Wrong sides");
         require(makerAsk.currency == WETH, "Order: Currency must be WETH");
         require(msg.sender == takerBid.taker, "Order: Taker must be the sender");
@@ -407,10 +394,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
         _validateOrder(makerAsk, askHash);
 
         // Retrieve execution parameters
-        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerAsk.strategy).canExecuteTakerBid(
-            takerBid,
-            makerAsk
-        );
+        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerAsk.strategy).canExecuteTakerBid(takerBid, makerAsk);
 
         require(isExecutionValid, "Strategy: Execution invalid");
 
@@ -418,30 +402,12 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
         _isUserOrderNonceExecutedOrCancelled[makerAsk.signer][makerAsk.nonce] = true;
 
         // Execution part 1/2
-        _transferFeesAndFundsWithWETH(
-            makerAsk.strategy,
-            makerAsk.collection,
-            tokenId,
-            makerAsk.signer,
-            takerBid.price,
-            makerAsk.minPercentageToAsk
-        );
+        _transferFeesAndFundsWithWETH(makerAsk.strategy, makerAsk.collection, tokenId, makerAsk.signer, takerBid.price, makerAsk.minPercentageToAsk);
 
         // Execution part 2/2
         _transferNonFungibleToken(makerAsk.collection, makerAsk.signer, takerBid.taker, tokenId, amount);
 
-        emit TakerBid(
-            askHash,
-            makerAsk.nonce,
-            takerBid.taker,
-            makerAsk.signer,
-            makerAsk.strategy,
-            makerAsk.currency,
-            makerAsk.collection,
-            tokenId,
-            amount,
-            takerBid.price
-        );
+        emit TakerBid(askHash, makerAsk.nonce, takerBid.taker, makerAsk.signer, makerAsk.strategy, makerAsk.currency, makerAsk.collection, tokenId, amount, takerBid.price);
     }
 
     /**
@@ -449,11 +415,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
      * @param takerBid taker bid order
      * @param makerAsk maker ask order
      */
-    function matchAskWithTakerBid(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk)
-        external
-        override
-        nonReentrant
-    {
+    function matchAskWithTakerBid(OrderTypes.TakerOrder calldata takerBid, OrderTypes.MakerOrder calldata makerAsk) external override nonReentrant {
         require((makerAsk.isOrderAsk) && (!takerBid.isOrderAsk), "Order: Wrong sides");
         require(msg.sender == takerBid.taker, "Order: Taker must be the sender");
 
@@ -461,10 +423,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
         bytes32 askHash = makerAsk.hash();
         _validateOrder(makerAsk, askHash);
 
-        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerAsk.strategy).canExecuteTakerBid(
-            takerBid,
-            makerAsk
-        );
+        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerAsk.strategy).canExecuteTakerBid(takerBid, makerAsk);
 
         require(isExecutionValid, "Strategy: Execution invalid");
 
@@ -472,32 +431,12 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
         _isUserOrderNonceExecutedOrCancelled[makerAsk.signer][makerAsk.nonce] = true;
 
         // Execution part 1/2
-        _transferFeesAndFunds(
-            makerAsk.strategy,
-            makerAsk.collection,
-            tokenId,
-            makerAsk.currency,
-            msg.sender,
-            makerAsk.signer,
-            takerBid.price,
-            makerAsk.minPercentageToAsk
-        );
+        _transferFeesAndFunds(makerAsk.strategy, makerAsk.collection, tokenId, makerAsk.currency, msg.sender, makerAsk.signer, takerBid.price, makerAsk.minPercentageToAsk);
 
         // Execution part 2/2
         _transferNonFungibleToken(makerAsk.collection, makerAsk.signer, takerBid.taker, tokenId, amount);
 
-        emit TakerBid(
-            askHash,
-            makerAsk.nonce,
-            takerBid.taker,
-            makerAsk.signer,
-            makerAsk.strategy,
-            makerAsk.currency,
-            makerAsk.collection,
-            tokenId,
-            amount,
-            takerBid.price
-        );
+        emit TakerBid(askHash, makerAsk.nonce, takerBid.taker, makerAsk.signer, makerAsk.strategy, makerAsk.currency, makerAsk.collection, tokenId, amount, takerBid.price);
     }
 
     /**
@@ -505,11 +444,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
      * @param takerAsk taker ask order
      * @param makerBid maker bid order
      */
-    function matchBidWithTakerAsk(OrderTypes.TakerOrder calldata takerAsk, OrderTypes.MakerOrder calldata makerBid)
-        external
-        override
-        nonReentrant
-    {
+    function matchBidWithTakerAsk(OrderTypes.TakerOrder calldata takerAsk, OrderTypes.MakerOrder calldata makerBid) external override nonReentrant {
         require((!makerBid.isOrderAsk) && (takerAsk.isOrderAsk), "Order: Wrong sides");
         require(msg.sender == takerAsk.taker, "Order: Taker must be the sender");
 
@@ -517,10 +452,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
         bytes32 bidHash = makerBid.hash();
         _validateOrder(makerBid, bidHash);
 
-        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerBid.strategy).canExecuteTakerAsk(
-            takerAsk,
-            makerBid
-        );
+        (bool isExecutionValid, uint256 tokenId, uint256 amount) = IExecutionStrategy(makerBid.strategy).canExecuteTakerAsk(takerAsk, makerBid);
 
         require(isExecutionValid, "Strategy: Execution invalid");
 
@@ -531,29 +463,9 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
         _transferNonFungibleToken(makerBid.collection, msg.sender, makerBid.signer, tokenId, amount);
 
         // Execution part 2/2
-        _transferFeesAndFunds(
-            makerBid.strategy,
-            makerBid.collection,
-            tokenId,
-            makerBid.currency,
-            makerBid.signer,
-            takerAsk.taker,
-            takerAsk.price,
-            takerAsk.minPercentageToAsk
-        );
+        _transferFeesAndFunds(makerBid.strategy, makerBid.collection, tokenId, makerBid.currency, makerBid.signer, takerAsk.taker, takerAsk.price, takerAsk.minPercentageToAsk);
 
-        emit TakerAsk(
-            bidHash,
-            makerBid.nonce,
-            takerAsk.taker,
-            makerBid.signer,
-            makerBid.strategy,
-            makerBid.currency,
-            makerBid.collection,
-            tokenId,
-            amount,
-            takerAsk.price
-        );
+        emit TakerAsk(bidHash, makerBid.nonce, takerAsk.taker, makerBid.signer, makerBid.strategy, makerBid.currency, makerBid.collection, tokenId, amount, takerAsk.price);
     }
 
     /**
@@ -652,11 +564,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
 
         // 2. Royalty fee
         {
-            (address royaltyFeeRecipient, uint256 royaltyFeeAmount) = royaltyFeeManager.calculateRoyaltyFeeAndGetRecipient(
-                collection,
-                tokenId,
-                amount
-            );
+            (address royaltyFeeRecipient, uint256 royaltyFeeAmount) = royaltyFeeManager.calculateRoyaltyFeeAndGetRecipient(collection, tokenId, amount);
 
             // Check if there is a royalty fee and that it is different to 0
             if ((royaltyFeeRecipient != address(0)) && (royaltyFeeAmount != 0)) {
@@ -708,11 +616,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
 
         // 2. Royalty fee
         {
-            (address royaltyFeeRecipient, uint256 royaltyFeeAmount) = royaltyFeeManager.calculateRoyaltyFeeAndGetRecipient(
-                collection,
-                tokenId,
-                amount
-            );
+            (address royaltyFeeRecipient, uint256 royaltyFeeAmount) = royaltyFeeManager.calculateRoyaltyFeeAndGetRecipient(collection, tokenId, amount);
 
             // Check if there is a royalty fee and that it is different to 0
             if ((royaltyFeeRecipient != address(0)) && (royaltyFeeAmount != 0)) {
@@ -774,11 +678,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
      */
     function _validateOrder(OrderTypes.MakerOrder calldata makerOrder, bytes32 orderHash) internal view {
         // Verify whether order nonce has expired
-        require(
-            (!_isUserOrderNonceExecutedOrCancelled[makerOrder.signer][makerOrder.nonce]) &&
-                (makerOrder.nonce >= userMinOrderNonce[makerOrder.signer]),
-            "Order: Matching order expired"
-        );
+        require((!_isUserOrderNonceExecutedOrCancelled[makerOrder.signer][makerOrder.nonce]) && (makerOrder.nonce >= userMinOrderNonce[makerOrder.signer]), "Order: Matching order expired");
 
         // Verify the signer is not address(0)
         require(makerOrder.signer != address(0), "Order: Invalid signer");
@@ -787,10 +687,7 @@ contract LooksRareExchange is ILooksRareExchange, ReentrancyGuard, Ownable {
         require(makerOrder.amount > 0, "Order: Amount cannot be 0");
 
         // Verify the validity of the signature
-        require(
-            SignatureChecker.verify(orderHash, makerOrder.signer, makerOrder.v, makerOrder.r, makerOrder.s, DOMAIN_SEPARATOR),
-            "Signature: Invalid"
-        );
+        require(SignatureChecker.verify(orderHash, makerOrder.signer, makerOrder.v, makerOrder.r, makerOrder.s, DOMAIN_SEPARATOR), "Signature: Invalid");
 
         // Verify whether the currency is whitelisted
         require(currencyManager.isCurrencyWhitelisted(makerOrder.currency), "Currency: Not whitelisted");

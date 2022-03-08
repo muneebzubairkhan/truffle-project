@@ -8,9 +8,13 @@
 pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
+import "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import "@openzeppelin/contracts/token/common/ERC2981.sol";
 // turn on Optimization, 200
 
-contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
+error SaleNotStarted();
+
+contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC721ABurnable, ERC2981 {
     //
     uint256 public maxSupply = 20_000;
     uint256 public itemPrice = 0.02 ether;
@@ -23,7 +27,9 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // To Hold Token, Bastard Penguins
 
     constructor() {
+        _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
         // flipProxyState(0x1AA777972073Ff66DCFDeD85749bDD555C0665dA);
+        _safeMint(msg.sender, 2);
     }
 
     modifier onlyOwner() {
@@ -36,38 +42,18 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     ///////////////////////////////////
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany)
-        external
-        payable
-        saleActive
-        callerIsUser
-        mintLimit(_howMany)
-        priceAvailable(_howMany)
-        tokensAvailable(_howMany)
-    {
+    function purchaseTokens(uint256 _howMany) external payable saleActive callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
         _safeMint(msg.sender, _howMany);
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokensErc20(uint256 _howMany)
-        external
-        callerIsUser
-        saleActiveErc20
-        mintLimit(_howMany)
-        tokensAvailable(_howMany)
-        priceAvailableERC20(_howMany)
-    {
+    function purchaseTokensErc20(uint256 _howMany) external callerIsUser saleActiveErc20 mintLimit(_howMany) tokensAvailable(_howMany) priceAvailableERC20(_howMany) {
         _safeMint(msg.sender, _howMany);
     }
 
     //////////////////////////
     // ONLY OWNER METHODS   //
     //////////////////////////
-
-    // function withdraw() public payable onlyOwner {
-    //     (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
-    //     require(success);
-    // }
 
     /// @notice Owner can withdraw from here
     function withdraw() external onlyOwner {
@@ -205,6 +191,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
     //////////////////////////
 
     mapping(address => bool) public projectProxy; // check public vs private vs internal gas
+
     function flipProxyState(address proxyAddress) public onlyOwner {
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
@@ -220,15 +207,33 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC") {
 
     // test with self nfts transfer, also try mulicall openzeppelin
     // send multiple nfts
-    // function bulkTransferERC721(
-    //     IERC721 _token,
-    //     address[] calldata _to,
-    //     uint256[] calldata _id
-    // ) external {
-    //     require(_to.length == _id.length, "Receivers and IDs are different length");
+    function bulkTransferERC721(
+        IERC721 _token,
+        address[] calldata _to,
+        uint256[] calldata _id
+    ) external {
+        require(_to.length == _id.length, "Receivers and IDs are different length");
 
-    //     for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
-    // }
+        for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
+    }
+
+    // _startTokenId from 1 not 0
+    function _startTokenId() internal pure override returns (uint256) {
+        return 1;
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function burn(uint256 tokenId) public override {
+        super._burn(tokenId);
+        _resetTokenRoyalty(tokenId);
+    }
+
+    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
+        _setDefaultRoyalty(_receiver, _feeNumerator);
+    }
 }
 
 interface OpenSea {
@@ -256,18 +261,26 @@ contract PresaleNft is BastardPenguinsComics {
     uint256 public presaleActiveTime = block.timestamp + 365 days;
     uint256 public presaleMaxMint = 3;
 
-    mapping(uint => uint256) public itemPricePresales;
-    mapping (uint => bytes32) public whitelistMerkleRoots;
+    mapping(uint256 => uint256) public itemPricePresales;
+    mapping(uint256 => bytes32) public whitelistMerkleRoots;
 
-    function setWhitelistMerkleRoot(uint _rootNumber, bytes32 _whitelistMerkleRoot) external onlyOwner {
+    function setWhitelistMerkleRoot(uint256 _rootNumber, bytes32 _whitelistMerkleRoot) external onlyOwner {
         whitelistMerkleRoots[_rootNumber] = _whitelistMerkleRoot;
     }
 
-    function inWhitelist(address _owner, bytes32[] memory _proof, uint _rootNumber) public view returns (bool) {
+    function inWhitelist(
+        address _owner,
+        bytes32[] memory _proof,
+        uint256 _rootNumber
+    ) public view returns (bool) {
         return MerkleProof.verify(_proof, whitelistMerkleRoots[_rootNumber], keccak256(abi.encodePacked(_owner)));
     }
 
-    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof, uint _rootNumber) external payable callerIsUser tokensAvailable(_howMany)  {
+    function purchasePresaleTokens(
+        uint256 _howMany,
+        bytes32[] calldata _proof,
+        uint256 _rootNumber
+    ) external payable callerIsUser tokensAvailable(_howMany) {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
         require(_numberMinted(msg.sender) <= presaleMaxMint, "Purchase exceeds max allowed");
@@ -283,7 +296,7 @@ contract PresaleNft is BastardPenguinsComics {
     }
 
     // Change presale price in case of ETH price changes too much
-    function setPricePresale(uint256 _itemPricePresale, uint _rootNumber) external onlyOwner {
+    function setPricePresale(uint256 _itemPricePresale, uint256 _rootNumber) external onlyOwner {
         itemPricePresales[_rootNumber] = _itemPricePresale;
     }
 
@@ -305,7 +318,7 @@ contract PresaleNft is BastardPenguinsComics {
         uint128 numberMinted;
     }
 
-    uint256 internal currentIndex;
+    uint internal currentIndex;
 
     // Token name
     string private _name;
@@ -315,13 +328,13 @@ contract PresaleNft is BastardPenguinsComics {
 
     // Mapping from token ID to ownership details
     // An empty struct value does not necessarily mean the token is unowned. See ownershipOf implementation for details.
-    mapping(uint256 => TokenOwnership) internal _ownerships;
+    mapping(uint => TokenOwnership) internal _ownerships;
 
     // Mapping owner address to address data
     mapping(address => AddressData) private _addressData;
 
     // Mapping from token ID to approved address
-    mapping(uint256 => address) private _tokenApprovals;
+    mapping(uint => address) private _tokenApprovals;
 
     // Mapping from owner to operator approvals
     mapping(address => mapping(address => bool)) private _operatorApprovals;
