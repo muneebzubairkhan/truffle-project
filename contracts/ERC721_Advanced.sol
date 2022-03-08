@@ -24,15 +24,14 @@ interface OpenSea {
 }
 
 contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ERC2981 {
-    //
-    uint256 public maxSupply = 20_000;
+    uint256 public maxSupply = 10_000;
     uint256 public itemPrice = 0.02 ether;
     uint256 public saleActiveTime = block.timestamp + 365 days; //  confirm it
     address private constant owner = 0xe2c135274428FF8183946c3e46560Fa00353753A;
     string public baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/"; // confirm it
 
     constructor() {
-        _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
+        _setDefaultRoyalty(msg.sender, 2_50); // 2.50 %
     }
 
     modifier onlyOwner() {
@@ -96,7 +95,6 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
         uint256 ownerTokenCount = balanceOf(_owner);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
         for (uint256 i; i < ownerTokenCount; i++) tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
-
         return tokenIds;
     }
 
@@ -105,14 +103,11 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
         uint256 numMintedSoFar = _currentIndex;
         uint256 tokenIdsIdx;
         address currOwnershipAddr;
-
         unchecked {
             for (uint256 i; i < numMintedSoFar; i++) {
                 TokenOwnership memory ownership = _ownerships[i];
                 if (ownership.burned) continue;
-
                 if (ownership.addr != address(0)) currOwnershipAddr = ownership.addr;
-
                 if (currOwnershipAddr == _owner) {
                     if (tokenIdsIdx == index) return i;
                     tokenIdsIdx++;
@@ -179,7 +174,7 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
         return super.isApprovedForAll(_owner, _operator);
     }
 
-    // _startTokenId from 1 not 0
+    /// @notice _startTokenId from 1 not 0
     function _startTokenId() internal pure override returns (uint256) {
         return 1;
     }
