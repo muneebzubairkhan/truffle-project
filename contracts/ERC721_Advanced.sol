@@ -1,13 +1,14 @@
 //  Nft Comics
-//   _   _ ______ _______
-//  | \ | |  ____|__   __|
-//  |  \| | |__     | |___
-//  | . ` |  __|    | / __|
-//  | |\  | |       | \__ \
-//  |_| \_|_|       |_|___/
+// ########  #######  ##     ##      ##    ##    ###    ######## ####  #######  ##    ##      ########     ###     #######
+// ##       ##     ##  ##   ##       ###   ##   ## ##      ##     ##  ##     ## ###   ##      ##     ##   ## ##   ##     ##
+// ##       ##     ##   ## ##        ####  ##  ##   ##     ##     ##  ##     ## ####  ##      ##     ##  ##   ##  ##     ##
+// ######   ##     ##    ###         ## ## ## ##     ##    ##     ##  ##     ## ## ## ##      ##     ## ##     ## ##     ##
+// ##       ##     ##   ## ##        ##  #### #########    ##     ##  ##     ## ##  ####      ##     ## ######### ##     ##
+// ##       ##     ##  ##   ##       ##   ### ##     ##    ##     ##  ##     ## ##   ###      ##     ## ##     ## ##     ##
+// ##        #######  ##     ##      ##    ## ##     ##    ##    ####  #######  ##    ##      ########  ##     ##  #######
 
-// Website:  http://Nft.club/
-// OpenSea:  http://opensea.club/abc/
+// Website:  https://foxnationdao.com/
+// OpenSea:  https://opensea.io/collection/foxnationdao
 
 // SPDX-License-Identifier: MIT
 
@@ -18,7 +19,7 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract FoxDao is ERC721A("Nft Comics", "NFTC"), ERC721ABurnable, ERC2981 {
+contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ERC2981 {
     //
     uint256 public maxSupply = 20_000;
     uint256 public itemPrice = 0.02 ether;
@@ -240,7 +241,7 @@ interface OpenSea {
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract PresaleNft is FoxDao {
+contract PresaleNft is FoxNationDAO {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
