@@ -28,9 +28,9 @@ contract NftComics is ERC721A("Nft Comics", "BPC"), ERC721ABurnable, ERC2981 {
     uint256 public itemPriceHolder = 0.01 ether;
     uint256 public saleActiveTime = block.timestamp + 365 days; // test with calculated vs a+b gas diff;
     uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
-    string public baseURI = "ipfs://QmZdX7nh6CEcXzaicfUm1Qt6o4YsFEvTM6jueyNce5Uwjf/"; // confirm it
     address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // To Buy In Token, USDT Token
-    address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // To Hold Token, Nft
+    address public erc721ToHold = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // To Hold Token, Nft
+    string public baseURI = "ipfs://QmZdX7nh6CEcXzaicfUm1Qt6o4YsFEvTM6jueyNce5Uwjf/"; // confirm it
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
@@ -182,7 +182,7 @@ contract NftComics is ERC721A("Nft Comics", "BPC"), ERC721ABurnable, ERC2981 {
     }
 
     modifier priceAvailable(uint256 _howMany) {
-        if (IERC721(erc721).balanceOf(msg.sender) > 0)
+        if (IERC721(erc721ToHold).balanceOf(msg.sender) > 0)
             if (msg.value >= _howMany * itemPriceHolder) revert LowBalance();
             else if (msg.value >= _howMany * itemPrice) revert LowBalance();
         _;
