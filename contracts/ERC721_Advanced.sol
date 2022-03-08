@@ -10,6 +10,7 @@ pragma solidity ^0.8.0;
 import "erc721a/contracts/ERC721A.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 error LowBalanceERC20();
 error SaleNotStarted();
@@ -250,17 +251,6 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-// check gas diff in import vs write
-interface IERC20 {
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
-
-    function balanceOf(address account) external view returns (uint256);
-}
-
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract PresaleNft is BastardPenguinsComics {
@@ -319,19 +309,38 @@ contract PresaleNft is BastardPenguinsComics {
 }
 
 /*
-    public private variable
+    using Address for address;
+    using Strings for uint256;
 
+    // Compiler will pack this into a single 256bit word.
     struct TokenOwnership {
+        // The address of the owner.
         address addr;
+        // Keeps track of the start time of ownership with minimal overhead for tokenomics.
         uint64 startTimestamp;
+        // Whether the token has been burned.
+        bool burned;
     }
 
+    // Compiler will pack this into a single 256bit word.
     struct AddressData {
-        uint128 balance;
-        uint128 numberMinted;
+        // Realistically, 2**64-1 is more than enough.
+        uint64 balance;
+        // Keeps track of mint count with minimal overhead for tokenomics.
+        uint64 numberMinted;
+        // Keeps track of burn count with minimal overhead for tokenomics.
+        uint64 numberBurned;
+        // For miscellaneous variable(s) pertaining to the address
+        // (e.g. number of whitelist mint slots used).
+        // If there are multiple variables, please pack them into a uint64.
+        uint64 aux;
     }
 
-    uint internal currentIndex;
+    // The tokenId of the next token to be minted.
+    uint256 internal _currentIndex;
+
+    // The number of tokens burned.
+    uint256 internal _burnCounter;
 
     // Token name
     string private _name;
@@ -341,13 +350,13 @@ contract PresaleNft is BastardPenguinsComics {
 
     // Mapping from token ID to ownership details
     // An empty struct value does not necessarily mean the token is unowned. See ownershipOf implementation for details.
-    mapping(uint => TokenOwnership) internal _ownerships;
+    mapping(uint256 => TokenOwnership) internal _ownerships;
 
     // Mapping owner address to address data
     mapping(address => AddressData) private _addressData;
 
     // Mapping from token ID to approved address
-    mapping(uint => address) private _tokenApprovals;
+    mapping(uint256 => address) private _tokenApprovals;
 
     // Mapping from owner to operator approvals
     mapping(address => mapping(address => bool)) private _operatorApprovals;
