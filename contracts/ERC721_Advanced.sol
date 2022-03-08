@@ -19,7 +19,7 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ERC2981 {
+contract Nft is ERC721A("Name", "Symbol"), ERC721ABurnable, ERC2981 {
     //
     uint256 public maxSupply = 20_000;
     uint256 public itemPrice = 0.02 ether;
