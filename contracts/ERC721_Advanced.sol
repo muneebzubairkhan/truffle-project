@@ -1,6 +1,6 @@
-// Bastard Penguins Comics
+// Nft Comics
 
-// Website:  http://bastardpenguins.club/
+// Website:  http://Nft.club/
 // OpenSea:  http://opensea.club/abc/
 // SPDX-License-Identifier: MIT
 // turn on Optimization, 200
@@ -19,7 +19,7 @@ error MintLessTokens();
 error CallerNotUser();
 error LowBalance();
 
-contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC721ABurnable, ERC2981 {
+contract NftComics is ERC721A("Nft Comics", "BPC"), ERC721ABurnable, ERC2981 {
     //
     uint256 public maxSupply = 20_000;
     uint256 public itemPrice = 0.02 ether;
@@ -28,8 +28,8 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC
     uint256 public saleActiveTime = block.timestamp + 365 days; // test with calculated vs a+b gas diff;
     uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
     string public baseURI = "ipfs://QmZdX7nh6CEcXzaicfUm1Qt6o4YsFEvTM6jueyNce5Uwjf/"; // confirm it
-    address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // To Buy In Token, Igloo Token
-    address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // To Hold Token, Bastard Penguins
+    address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // To Buy In Token, USDT Token
+    address public erc721 = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // To Hold Token, Nft
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
@@ -192,9 +192,9 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC
         _;
     }
 
-    //////////////////////////
-    // AUTO APPROVE OPENSEA //
-    //////////////////////////
+    ///////////////////////////////
+    // AUTO APPROVE MARKETPLACES //
+    ///////////////////////////////
 
     mapping(address => bool) public projectProxy; // check public vs private vs internal gas
 
@@ -225,7 +225,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC
     ) external {
         if (_to.length == _id.length) revert();
 
-        for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
+        for (uint256 i = 0; i < _to.length; i++) _token.transferFrom(msg.sender, _to[i], _id[i]);
     }
 
     // _startTokenId from 1 not 0
@@ -253,7 +253,7 @@ interface OpenSea {
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract PresaleNft is BastardPenguinsComics {
+contract PresaleNft is NftComics {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
