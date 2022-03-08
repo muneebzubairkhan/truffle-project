@@ -12,6 +12,11 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 // turn on Optimization, 200
 
 error SaleNotStarted();
+error CallerNotOwner();
+error CallerNotUser();
+error MintLessTokens();
+error LowBalance();
+error LowBalanceERC20();
 
 contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC721ABurnable, ERC2981 {
     //
@@ -32,7 +37,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC
     }
 
     modifier onlyOwner() {
-        require(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender, "Caller is not the owner");
+        if(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender) revert CallerNotOwner();
         _;
     }
 
@@ -150,38 +155,38 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC
     ///////////////////
 
     modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller is a contract");
+        if(tx.origin == msg.sender) revert CallerNotUser();
         _;
     }
 
     modifier saleActive() {
-        require(block.timestamp > saleActiveTime, "Sale is not active");
+        if(block.timestamp > saleActiveTime) revert SaleNotStarted();
         _;
     }
 
     modifier saleActiveErc20() {
-        require(block.timestamp > saleActiveTimeErc20, "Sale is not active");
+        if(block.timestamp > saleActiveTimeErc20) revert SaleNotStarted();
         _;
     }
 
     modifier mintLimit(uint256 _howMany) {
-        require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
+        if(_howMany >= 1 && _howMany <= 20) revert MintLessTokens();
         _;
     }
 
     modifier tokensAvailable(uint256 _howMany) {
-        require(_howMany <= maxSupply - totalSupply(), "Try minting less tokens");
+        if(_howMany <= maxSupply - totalSupply()) revert MintLessTokens();
         _;
     }
 
     modifier priceAvailable(uint256 _howMany) {
-        if (IERC721(erc721).balanceOf(msg.sender) > 0) require(msg.value >= _howMany * itemPriceHolder, "Try to send more ETH");
-        else require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
+        if (IERC721(erc721).balanceOf(msg.sender) > 0) if(msg.value >= _howMany * itemPriceHolder) revert LowBalance();
+        else if(msg.value >= _howMany * itemPrice) revert LowBalance();
         _;
     }
 
     modifier priceAvailableERC20(uint256 _howMany) {
-        require(IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20), "Try to send more ERC20");
+        if(IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20)) revert LowBalanceERC20();
         _;
     }
 
@@ -211,7 +216,7 @@ contract BastardPenguinsComics is ERC721A("Bastard Penguins Comics", "BPC"), ERC
         address[] calldata _to,
         uint256[] calldata _id
     ) external {
-        require(_to.length == _id.length, "Receivers and IDs are different length");
+        if(_to.length == _id.length) revert();
 
         for (uint256 i = 0; i < _to.length; i++) _token.safeTransferFrom(msg.sender, _to[i], _id[i]);
     }
