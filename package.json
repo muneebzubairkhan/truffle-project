@@ -13,6 +13,7 @@
     "start": "truffle migrate --reset --network development",
     "____": "_____",
     "testRegular": "nodemon --exec \"truffle test\" --ext \".test.js .sol\"",
+    "prettierRegular": "nodemon --watch contracts --exec \"npx prettier --write 'contracts/**/*.sol'\" --ext .sol",
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" --ext .sol",
     "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate --reset\" --ext .sol",
     "runLocalBlockchain": "ganache-cli",
