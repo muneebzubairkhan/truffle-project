@@ -19,23 +19,20 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+interface OpenSea {
+    function proxies(address) external view returns (address);
+}
+
 contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ERC2981 {
     //
     uint256 public maxSupply = 20_000;
     uint256 public itemPrice = 0.02 ether;
-    uint256 public itemPriceErc20 = 200 ether;
-    uint256 public itemPriceHolder = 0.01 ether;
     uint256 public saleActiveTime = block.timestamp + 365 days; //  confirm it
-    uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
-    address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // To Buy In Token, USDT Token
-    address public erc721ToHold = 0x350b4CdD07CC5836e30086b993D27983465Ec014; // To Hold Token, Nft
     address private constant owner = 0xe2c135274428FF8183946c3e46560Fa00353753A;
     string public baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/"; // confirm it
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
-        // flipProxyState(0x1AA777972073Ff66DCFDeD85749bDD555C0665dA);
-        _safeMint(msg.sender, 2);
     }
 
     modifier onlyOwner() {
@@ -52,11 +49,6 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
         _safeMint(msg.sender, _howMany);
     }
 
-    /// @notice Purchase multiple NFTs at once
-    function purchaseTokensErc20(uint256 _howMany) external callerIsUser saleActiveErc20 mintLimit(_howMany) tokensAvailable(_howMany) priceAvailableERC20(_howMany) {
-        _safeMint(msg.sender, _howMany);
-    }
-
     //////////////////////////
     // ONLY OWNER METHODS   //
     //////////////////////////
@@ -66,21 +58,14 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    /// @notice Owner can withdraw from here
-    function withdrawERC20(address _erc20) external onlyOwner {
-        IERC20(_erc20).transferFrom(address(this), msg.sender, IERC20(_erc20).balanceOf(address(this)));
-    }
-
     /// @notice Change price in case of ETH price changes too much
-    function setPrice(uint256 _newPrice, uint256 _newPriceHolder) external onlyOwner {
+    function setPrice(uint256 _newPrice) external onlyOwner {
         itemPrice = _newPrice;
-        itemPriceHolder = _newPriceHolder;
     }
 
     /// @notice set sale active time
-    function setSaleActiveTime(uint256 _saleActiveTime, uint256 _saleActiveTimeErc20) external onlyOwner {
+    function setSaleActiveTime(uint256 _saleActiveTime) external onlyOwner {
         saleActiveTime = _saleActiveTime;
-        saleActiveTimeErc20 = _saleActiveTimeErc20;
     }
 
     /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
@@ -93,16 +78,6 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
         maxSupply = _maxSupply;
     }
 
-    /// @notice set itemPrice in Erc20
-    function setErc20(address _erc20) external onlyOwner {
-        erc20 = _erc20;
-    }
-
-    /// @notice set itemPrice in Erc20
-    function setItemPriceErc20(uint256 _itemPriceErc20) external onlyOwner {
-        itemPriceErc20 = _itemPriceErc20;
-    }
-
     ///////////////////////////////////
     //       AIRDROP CODE STARTS     //
     ///////////////////////////////////
@@ -112,15 +87,10 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
 
-    ///////////////////
-    // QUERY METHOD  //
-    ///////////////////
+    ////////////////////
+    // HELPER METHOD  //
+    ////////////////////
 
-    function _baseURI() internal view override returns (string memory) {
-        return baseURI;
-    }
-
-    // test multicall
     /// @notice get all nfts of a person
     function walletOfOwner(address _owner) external view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);
@@ -156,6 +126,10 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
     //  HELPER CODE  //
     ///////////////////
 
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
+    }
+
     modifier callerIsUser() {
         require(tx.origin == msg.sender, "The caller is a contract");
         _;
@@ -163,11 +137,6 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
 
     modifier saleActive() {
         require(block.timestamp > saleActiveTime, "Sale is not active");
-        _;
-    }
-
-    modifier saleActiveErc20() {
-        require(block.timestamp > saleActiveTimeErc20, "Sale is not active");
         _;
     }
 
@@ -182,13 +151,7 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
     }
 
     modifier priceAvailable(uint256 _howMany) {
-        if (IERC721(erc721ToHold).balanceOf(msg.sender) > 0) require(msg.value >= _howMany * itemPriceHolder, "Try to send more ETH");
-        else require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
-        _;
-    }
-
-    modifier priceAvailableERC20(uint256 _howMany) {
-        require(IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20), "Try to send more ERC20");
+        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
         _;
     }
 
@@ -235,13 +198,9 @@ contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ER
     }
 }
 
-interface OpenSea {
-    function proxies(address) external view returns (address);
-}
-
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract PresaleNft is FoxNationDAO {
+contract FoxNationDAOPresale is FoxNationDAO {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -294,5 +253,46 @@ contract PresaleNft is FoxNationDAO {
 
     function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
         presaleActiveTime = _presaleActiveTime;
+    }
+}
+
+contract FoxNationDAOERC20 is FoxNationDAOPresale {
+    /// @notice set itemPrice in Erc20
+    uint256 public itemPriceErc20 = 200 ether;
+    uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
+    address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // To Buy In Token, USDT Token
+
+    /// @notice Purchase multiple NFTs at once
+    function purchaseTokensErc20(uint256 _howMany) external callerIsUser saleActiveErc20 mintLimit(_howMany) tokensAvailable(_howMany) priceAvailableERC20(_howMany) {
+        _safeMint(msg.sender, _howMany);
+    }
+
+    /// @notice Owner can withdraw from here
+    function withdrawERC20(address _erc20) external onlyOwner {
+        IERC20(_erc20).transferFrom(address(this), msg.sender, IERC20(_erc20).balanceOf(address(this)));
+    }
+
+    function setErc20(address _erc20) external onlyOwner {
+        erc20 = _erc20;
+    }
+
+    /// @notice set itemPrice in Erc20
+    function setItemPriceErc20(uint256 _itemPriceErc20) external onlyOwner {
+        itemPriceErc20 = _itemPriceErc20;
+    }
+
+    /// @notice set sale active time
+    function setSaleActiveTimeERC20(uint256 _saleActiveTimeErc20) external onlyOwner {
+        saleActiveTimeErc20 = _saleActiveTimeErc20;
+    }
+
+    modifier saleActiveErc20() {
+        require(block.timestamp > saleActiveTimeErc20, "Sale is not active");
+        _;
+    }
+
+    modifier priceAvailableERC20(uint256 _howMany) {
+        require(IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20), "Try to send more ERC20");
+        _;
     }
 }

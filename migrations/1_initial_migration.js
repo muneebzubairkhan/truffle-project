@@ -1,5 +1,5 @@
 const Migrations = artifacts.require("Migrations");
-const Nft = artifacts.require("PresaleNft");
+const Nft = artifacts.require("FoxNationDAOERC20");
 // const _Contract_1_ = artifacts.require("_Contract_1_");
 
 module.exports = async (deployer, network, accounts) => {
