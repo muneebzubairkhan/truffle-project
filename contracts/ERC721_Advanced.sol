@@ -19,13 +19,6 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-error LowBalanceERC20();
-error SaleNotStarted();
-error CallerNotOwner();
-error MintLessTokens();
-error CallerNotUser();
-error LowBalance();
-
 contract NftComics is ERC721A("Nft Comics", "BPC"), ERC721ABurnable, ERC2981 {
     //
     uint256 public maxSupply = 20_000;
@@ -45,7 +38,7 @@ contract NftComics is ERC721A("Nft Comics", "BPC"), ERC721ABurnable, ERC2981 {
     }
 
     modifier onlyOwner() {
-        if (0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender) revert CallerNotOwner();
+        require(0xe2c135274428FF8183946c3e46560Fa00353753A == msg.sender, "Caller is not the owner");
         _;
     }
 
@@ -163,39 +156,38 @@ contract NftComics is ERC721A("Nft Comics", "BPC"), ERC721ABurnable, ERC2981 {
     ///////////////////
 
     modifier callerIsUser() {
-        if (tx.origin == msg.sender) revert CallerNotUser();
+        require(tx.origin == msg.sender, "The caller is a contract");
         _;
     }
 
     modifier saleActive() {
-        if (block.timestamp > saleActiveTime) revert SaleNotStarted();
+        require(block.timestamp > saleActiveTime, "Sale is not active");
         _;
     }
 
     modifier saleActiveErc20() {
-        if (block.timestamp > saleActiveTimeErc20) revert SaleNotStarted();
+        require(block.timestamp > saleActiveTimeErc20, "Sale is not active");
         _;
     }
 
     modifier mintLimit(uint256 _howMany) {
-        if (_howMany >= 1 && _howMany <= 20) revert MintLessTokens();
+        require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
         _;
     }
 
     modifier tokensAvailable(uint256 _howMany) {
-        if (_howMany <= maxSupply - totalSupply()) revert MintLessTokens();
+        require(_howMany <= maxSupply - totalSupply(), "Try minting less tokens");
         _;
     }
 
     modifier priceAvailable(uint256 _howMany) {
-        if (IERC721(erc721ToHold).balanceOf(msg.sender) > 0)
-            if (msg.value >= _howMany * itemPriceHolder) revert LowBalance();
-            else if (msg.value >= _howMany * itemPrice) revert LowBalance();
+        if (IERC721(erc721ToHold).balanceOf(msg.sender) > 0) require(msg.value >= _howMany * itemPriceHolder, "Try to send more ETH");
+        else require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
         _;
     }
 
     modifier priceAvailableERC20(uint256 _howMany) {
-        if (IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20)) revert LowBalanceERC20();
+        require(IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20), "Try to send more ERC20");
         _;
     }
 
