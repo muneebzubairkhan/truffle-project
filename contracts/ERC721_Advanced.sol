@@ -1,4 +1,10 @@
-// Nft Comics
+//  Nft Comics
+//   _   _ ______ _______
+//  | \ | |  ____|__   __|
+//  |  \| | |__     | |___
+//  | . ` |  __|    | / __|
+//  | |\  | |       | \__ \
+//  |_| \_|_|       |_|___/
 
 // Website:  http://Nft.club/
 // OpenSea:  http://opensea.club/abc/
