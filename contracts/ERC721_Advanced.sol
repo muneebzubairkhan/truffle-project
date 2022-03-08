@@ -15,28 +15,23 @@
 pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
-import "erc721a/contracts/extensions/ERC721ABurnable.sol";
-import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 
 interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract FoxNationDAO is ERC721A("Fox Nation DAO", "FNDAO"), ERC721ABurnable, ERC2981 {
+contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), ERC721ABurnable, ERC2981, Ownable {
     uint256 public maxSupply = 10_000;
-    uint256 public itemPrice = 0.02 ether;
-    uint256 public saleActiveTime = block.timestamp + 365 days; //  confirm it
-    address private constant owner = 0xe2c135274428FF8183946c3e46560Fa00353753A;
-    string public baseURI = "ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/"; // confirm it
+    uint256 public itemPrice = 0.07 ether;
+    uint256 public saleActiveTime = block.timestamp + 365 days;
+    string public baseURI;
 
     constructor() {
-        _setDefaultRoyalty(msg.sender, 2_50); // 2.50 %
-    }
-
-    modifier onlyOwner() {
-        require(owner == msg.sender, "Caller is not the owner");
-        _;
+        _setDefaultRoyalty(msg.sender, 7_50); // 7.50 %
     }
 
     ///////////////////////////////////
