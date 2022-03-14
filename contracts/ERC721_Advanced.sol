@@ -1,14 +1,16 @@
-//  Nft Comics
-// ########  #######  ##     ##      ##    ##    ###    ######## ####  #######  ##    ##      ########     ###     #######
-// ##       ##     ##  ##   ##       ###   ##   ## ##      ##     ##  ##     ## ###   ##      ##     ##   ## ##   ##     ##
-// ##       ##     ##   ## ##        ####  ##  ##   ##     ##     ##  ##     ## ####  ##      ##     ##  ##   ##  ##     ##
-// ######   ##     ##    ###         ## ## ## ##     ##    ##     ##  ##     ## ## ## ##      ##     ## ##     ## ##     ##
-// ##       ##     ##   ## ##        ##  #### #########    ##     ##  ##     ## ##  ####      ##     ## ######### ##     ##
-// ##       ##     ##  ##   ##       ##   ### ##     ##    ##     ##  ##     ## ##   ###      ##     ## ##     ## ##     ##
-// ##        #######  ##     ##      ##    ## ##     ##    ##    ####  #######  ##    ##      ########  ##     ##  #######
+// ########  ######## ######## ########  ######  ##     ## ##    ##       ########     ###    ##    ## ########     ###     ######  
+// ##     ## ##       ##          ##    ##    ## ##     ##  ##  ##        ##     ##   ## ##   ###   ## ##     ##   ## ##   ##    ## 
+// ##     ## ##       ##          ##    ##       ##     ##   ####         ##     ##  ##   ##  ####  ## ##     ##  ##   ##  ##       
+// ########  ######   ######      ##    ##       #########    ##          ########  ##     ## ## ## ## ##     ## ##     ##  ######  
+// ##     ## ##       ##          ##    ##       ##     ##    ##          ##        ######### ##  #### ##     ## #########       ## 
+// ##     ## ##       ##          ##    ##    ## ##     ##    ##          ##        ##     ## ##   ### ##     ## ##     ## ##    ## 
+// ########  ######## ########    ##     ######  ##     ##    ##          ##        ##     ## ##    ## ########  ##     ##  ######                                                                                            
 
-// Website:  https://foxnationdao.com/
-// OpenSea:  https://opensea.io/collection/foxnationdao
+// Website:    https://www.beetchypandas.club/
+// OpenSea:    https://opensea.io/collection/beetchypandas
+// Twitter:    https://twitter.com/BeetchyPandas
+// Instagram:  https://www.instagram.com/beetchypandas/
+// Discord:    https://discord.com/invite/7rqy7PxmD9
 
 // SPDX-License-Identifier: MIT
 
@@ -24,15 +26,11 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), ERC721ABurnable, ERC2981, Ownable {
-    uint256 public maxSupply = 10_000;
-    uint256 public itemPrice = 0.07 ether;
-    uint256 public saleActiveTime = block.timestamp + 365 days;
+contract BeetchyPandas is ERC721A("Beetchy Pandas", "BPS"), ERC721ABurnable, ERC2981, Ownable {
     string public baseURI;
-
-    constructor() {
-        _setDefaultRoyalty(msg.sender, 7_50); // 7.50 %
-    }
+    uint256 public maxSupply = 10_000;
+    uint256 public itemPrice = 0.03 ether;
+    uint256 public saleActiveTime = block.timestamp + 365 days;
 
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
@@ -190,7 +188,7 @@ contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), ERC721ABurnable, ERC2
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract FoxNationDAOPresale is FoxNationDAO {
+contract BeetchyPandasPresale is BeetchyPandas {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -250,11 +248,11 @@ contract FoxNationDAOPresale is FoxNationDAO {
     }
 }
 
-contract FoxNationDAOERC20 is FoxNationDAOPresale {
+contract BeetchyPandasERC20Sale is BeetchyPandasPresale {
     /// @notice set itemPrice in Erc20
-    uint256 public itemPriceErc20 = 200 ether;
+    uint256 public itemPriceErc20 = 100 ether;
     uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
-    address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // To Buy In Token, USDT Token
+    address public erc20 = 0x6B175474E89094C44Da98b954EedeAC495271d0F; // To Buy In DAI Stable Coin, Coin can be changed depending on community
 
     /// @notice Purchase multiple NFTs at once
     function purchaseTokensErc20(uint256 _howMany) external callerIsUser saleActiveErc20 mintLimit(_howMany) tokensAvailable(_howMany) priceAvailableERC20(_howMany) {
@@ -276,8 +274,9 @@ contract FoxNationDAOERC20 is FoxNationDAOPresale {
     }
 
     /// @notice set sale active time
-    function setSaleActiveTimeERC20(uint256 _saleActiveTimeErc20) external onlyOwner {
+    function setSaleActiveTimeERC20(uint256 _saleActiveTimeErc20, uint256 _saleActiveTime) external onlyOwner {
         saleActiveTimeErc20 = _saleActiveTimeErc20;
+        saleActiveTime = _saleActiveTime;
     }
 
     modifier saleActiveErc20() {
