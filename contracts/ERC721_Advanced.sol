@@ -27,23 +27,15 @@ interface OpenSea {
 }
 
 contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnable, ERC2981, Ownable {
-    string baseURI; // pending
-    uint256 itemPrice = 0.2 ether;
-    uint256 constant maxSupply = 5304;
     uint256 saleActiveTime = 1647691200; // Saturday, March 19, 2022 11:00:00 PM French Timezone GMT + 1
-
-    ///////////////////////////////////
-    //    PUBLIC SALE CODE STARTS    //
-    ///////////////////////////////////
+    uint256 constant maxSupply = 5304;
+    uint256 itemPrice = 0.2 ether;
+    string baseURI; // pending
 
     /// @notice Purchase multiple NFTs at once
     function purchaseTokens(uint256 _howMany) external payable saleActive mintLimits(_howMany) priceAvailable(_howMany) {
         _safeMint(msg.sender, _howMany);
     }
-
-    //////////////////////////
-    // ONLY OWNER METHODS   //
-    //////////////////////////
 
     /// @notice Owner can withdraw from here
     function withdraw() external onlyOwner {
@@ -64,10 +56,6 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     function setBaseURI(string memory __baseURI) external onlyOwner {
         baseURI = __baseURI;
     }
-
-    ///////////////////////////////////
-    //       AIRDROP CODE STARTS     //
-    ///////////////////////////////////
 
     /// @notice Send NFTs to a list of addresses
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
@@ -106,10 +94,6 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
         revert();
     }
 
-    ///////////////////
-    //  HELPER CODE  //
-    ///////////////////
-
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
@@ -129,6 +113,27 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
         require(_howMany >= 1 && _howMany <= 10, "Mint min 1, max 10");
         require(_howMany + totalSupply() <= maxSupply, "Try minting less tokens");
         _;
+    }
+
+    function _startTokenId() internal pure override returns (uint256) {
+        return 1;
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721A, ERC2981) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function burn(uint256 tokenId) public override {
+        super._burn(tokenId);
+        _resetTokenRoyalty(tokenId);
+    }
+
+    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) external onlyOwner {
+        _setDefaultRoyalty(_receiver, _feeNumerator);
+    }
+
+    function numberMinted(address _owner) external view returns (uint256) {
+        return _numberMinted(_owner);
     }
 
     ///////////////////////////////
@@ -152,27 +157,6 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
                 ? true
                 : super.isApprovedForAll(_owner, _operator);
     }
-
-    function _startTokenId() internal pure override returns (uint256) {
-        return 1;
-    }
-
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721A, ERC2981) returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
-
-    function burn(uint256 tokenId) public override {
-        super._burn(tokenId);
-        _resetTokenRoyalty(tokenId);
-    }
-
-    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) external onlyOwner {
-        _setDefaultRoyalty(_receiver, _feeNumerator);
-    }
-
-    function numberMinted(address _owner) external view returns (uint256) {
-        return _numberMinted(_owner);
-    }
 }
 
 contract DSOPPresale is DSOP {
@@ -181,9 +165,9 @@ contract DSOPPresale is DSOP {
     bytes32 whitelistMerkleRoot;
 
     function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable mintLimits(_howMany) {
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
         _safeMint(msg.sender, _howMany);
     }
