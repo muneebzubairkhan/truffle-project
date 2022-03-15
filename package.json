@@ -36,8 +36,10 @@
     "@truffle/hdwallet-provider": "^2.0.0",
     "dotenv": "^10.0.0",
     "erc721a": "latest",
+    "keccak256": "^1.0.6",
+    "merkletreejs": "^0.2.31",
     "truffle-plugin-verify": "^0.5.20",
-    "web3-utils": "^1.5.3"
+    "web3-utils": "^1.7.1"
   },
   "devDependencies": {
     "eth-gas-reporter": "^0.2.24",
