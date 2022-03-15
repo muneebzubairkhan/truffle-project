@@ -15,7 +15,8 @@ contract("Nft", async ([owner, client, parentCompany]) => {
   });
 });
 
-
+// Error: 
+// Error: truffle-plugin.json not found in the eth-gas-reporter plugin package!
 
 
 
