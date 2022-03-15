@@ -32,6 +32,10 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     uint256 itemPrice = 0.2 ether;
     string baseURI; // pending
 
+    constructor () {
+        _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
+    }
+
     /// @notice Purchase multiple NFTs at once
     function purchaseTokens(uint256 _howMany) external payable saleActive mintLimits(_howMany) priceAvailable(_howMany) {
         _safeMint(msg.sender, _howMany);
