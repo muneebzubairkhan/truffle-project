@@ -155,39 +155,18 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     ///////////////////////////////
 
     uint256 public presaleActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
-    uint256 public presaleMaxMint = 3;
-    bytes32 public whitelistMerkleRoot;
     uint256 public itemPricePresale = 0.03 * 1e18;
-    mapping(address => uint256) public presaleClaimedBy;
 
-    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
-        whitelistMerkleRoot = _whitelistMerkleRoot;
-    }
-
-    function inWhitelist(bytes32[] memory _proof, address _owner) public view returns (bool) {
-        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
-    }
-
-    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable {
+    function purchasePresaleTokens(uint256 _howMany) external payable {
 
         uint256 supply = totalSupply();
         require(supply <= presaleSupply, "presale limit reached");
         require(supply + _howMany + reservedSupply <= maxSupply, "max NFT limit exceeded");
 
-        require(inWhitelist(_proof, msg.sender), "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
-        presaleClaimedBy[msg.sender] += _howMany;
-
-        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
-
         _safeMint(msg.sender, _howMany);
-    }
-
-    // set limit of presale
-    function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
-        presaleMaxMint = _presaleMaxMint;
     }
 
     // Change presale price in case of ETH price changes too much
@@ -213,26 +192,6 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         if (projectProxy[_operator]) return true; // ANY OTHER Marketplace
         return super.isApprovedForAll(_owner, _operator);
-    }
-
-    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropTokenToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
-        for (uint256 i = 0; i < _to.length; i++) {
-            (bool success, ) = payable(_to[i]).call{value: _toSend}("");
-            require(success);
-        }
-    }
-
-    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropTokenToHolders(
-        uint256 _toSend,
-        uint256 _fromTokenId,
-        uint256 _toTokenId
-    ) external onlyOwner {
-        for (uint256 i = _fromTokenId; i < _toTokenId; i++) {
-            (bool success, ) = payable(ownerOf(i)).call{value: _toSend}("");
-            require(success);
-        }
     }
 
     function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
