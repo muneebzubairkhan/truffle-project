@@ -68,6 +68,8 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(MNEMONIC, "https://rinkeby.infura.io/v3/" + token),
       network_id: "4",
+      gas: "3000000",
+      gasPrice: toWei("1.5", "gwei"),
       skipDryRun: true,
       explorerUrl: "https://rinkeby.etherscan.io/address/",
       web3Provider: "https://rinkeby.infura.io/v3/" + token,
@@ -91,16 +93,16 @@ module.exports = {
     //   },
     //   network_id: '1'
     // },
-    // ropsten: {
-    //   provider: () => {
-    //     return new HDWalletProvider(
-    //       MNEMONIC,
-    //       'https://ropsten.infura.io/v3/' + token
-    //     );
-    //   },
-    //   network_id: '3',
-    //   skipDryRun: true
-    // },
+    ropsten: {
+      provider: () => {
+        return new HDWalletProvider(
+          MNEMONIC,
+          'https://ropsten.infura.io/v3/' + token
+        );
+      },
+      network_id: '3',
+      skipDryRun: true
+    },
 
     // kovan: {
     //   provider: () => {

@@ -22,6 +22,7 @@
     "startBscTestnet": "sudo truffle migrate --network bscTestnet --all --reset && truffle run verify DSOPPresale --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify DSOPPresale --network bscMainnet",
     "startRinkeby": "sudo truffle migrate --network rinkeby --reset && truffle run verify DSOPPresale --network rinkeby",
+    "startRopsten": "sudo truffle migrate --network ropsten --reset && truffle run verify DSOPPresale --network ropsten",
     "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify DSOPPresale --network mainnet",
     "startInnovate": "truffle migrate --network %(grep DEPLOY_NETWORK .env)% --reset && truffle run verify DSOPPresale --network $(grep DEPLOY_NETWORK .env)",
     "___": "_____",
