@@ -111,7 +111,6 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     modifier mintLimits(uint256 _howMany) {
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 10, "Mint min 1, max 10");
-        require(_howMany + totalSupply() <= maxSupply, "Try minting less tokens");
         _;
     }
 
@@ -170,6 +169,8 @@ contract DSOPPresale is DSOP {
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
 
         _safeMint(msg.sender, _howMany);
+
+        require(totalSupply() <= maxSupply, "Try minting less");
     }
 
     function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {

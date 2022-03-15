@@ -38,10 +38,10 @@
     "erc721a": "latest",
     "nodemon": "^2.0.13",
     "truffle-plugin-verify": "^0.5.20",
-    "web3-utils": "^1.5.3"
+    "web3-utils": "^1.5.3",
+    "eth-gas-reporter": "^0.2.24"
   },
   "devDependencies": {
-    "eth-gas-reporter": "^0.2.24",
     "prettier": "^2.5.1",
     "prettier-plugin-solidity": "^1.0.0-beta.19"
   }
