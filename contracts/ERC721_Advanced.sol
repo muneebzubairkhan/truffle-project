@@ -20,6 +20,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 interface OpenSea {
     function proxies(address) external view returns (address);
@@ -29,7 +30,7 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     string baseURI; // pending
     uint256 itemPrice = 0.2 ether;
     uint256 constant maxSupply = 5304;
-    uint256 saleActiveTime = block.timestamp + 365 days;
+    uint256 saleActiveTime = 1647691200; // Saturday, March 19, 2022 11:00:00 PM French Timezone GMT + 1
 
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
@@ -168,49 +169,35 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) external onlyOwner {
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
+
+    function numberMinted(address _owner) external view returns (uint256) {
+        return _numberMinted(_owner);
+    }
 }
 
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-
 contract DSOPPresale is DSOP {
-    uint256 maxMintPresale;
-    uint256 itemPricePresale;
+    uint256 presaleActiveTime = 1648036800; // Saturday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
+    uint256 itemPricePresale = 0.01 ether;
     bytes32 whitelistMerkleRoot;
-    uint256 presaleActiveTime = block.timestamp + 365 days;
-
-    // multicall inWhitelist
-    function inWhitelist(address _owner, bytes32[] memory _proof) external view returns (bool) {
-        if (_inWhitelist(_owner, _proof)) return true;
-        return false;
-    }
-
-    function _inWhitelist(address _owner, bytes32[] memory _proof) private view returns (bool) {
-        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
-    }
 
     function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable mintLimits(_howMany) {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(_inWhitelist(msg.sender, _proof), "You are not in presale");
+        require(inWhitelist(msg.sender, _proof), "You are not in presale");
         require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
         _safeMint(msg.sender, _howMany);
     }
 
-    function numberMinted(address _owner) external view returns (uint256) {
-        return _numberMinted(_owner);
+    function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {
+        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
     }
 
-    function setPresale(
-        bytes32 _whitelistMerkleRoot,
-        uint256 _maxMintPresales,
-        uint256 _itemPricePresale
-    ) external onlyOwner {
-        maxMintPresale = _maxMintPresales;
+    function setPresale(uint256 _itemPricePresale, uint256 _presaleActiveTime) external onlyOwner {
         itemPricePresale = _itemPricePresale;
-        whitelistMerkleRoot = _whitelistMerkleRoot;
+        presaleActiveTime = _presaleActiveTime;
     }
 
-    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
-        presaleActiveTime = _presaleActiveTime;
+    function setWhitelist(bytes32 _whitelistMerkleRoot) external onlyOwner {
+        whitelistMerkleRoot = _whitelistMerkleRoot;
     }
 }
