@@ -1,14 +1,15 @@
+const { toWei } = require("web3-utils");
 const { makeUiCode } = require("../migrations/helper.js");
 
-const Nft = artifacts.require("Nft");
+const Nft = artifacts.require("BeetchyPandasERC20Sale");
 
 contract("Nft", async ([owner, client, parentCompany]) => {
   it("deploy smart contract", async () => {
     //
     let nft = await Nft.new({ from: owner });
-    console.log(await nft.owner());
-    console.log(owner);
-    await nft.addToAllowlist([owner], { from: owner });
+    console.log(owner === await nft.owner());
+    await nft.setSaleActiveTime(0);
+    await nft.purchaseTokens(1, {value: toWei("0.03")});
     //
     makeUiCode("development", { nft });
   });

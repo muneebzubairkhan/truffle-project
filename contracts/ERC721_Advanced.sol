@@ -55,6 +55,7 @@ contract BeetchyPandas is ERC721A("Beetchy Pandas", "BPS"), ERC721ABurnable, ERC
         itemPrice = _newPrice;
     }
 
+
     /// @notice set sale active time
     function setSaleActiveTime(uint256 _saleActiveTime) external onlyOwner {
         saleActiveTime = _saleActiveTime;
@@ -289,3 +290,5 @@ contract BeetchyPandasERC20Sale is BeetchyPandasPresale {
         _;
     }
 }
+
+
