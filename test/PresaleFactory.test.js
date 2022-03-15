@@ -31,7 +31,7 @@ contract("Nft", async ([owner, client, parentCompany]) => {
       sortPairs: true,
     });
 
-    await nft.setPresale(0, 0);
+    await nft.setPresaleActiveTime(0);
     await nft.setWhitelist(tree.getHexRoot(), { from: owner });
     await nft.purchasePresaleTokens(1, tree.getHexProof(keccak256(client)), {
       value: toWei("1"),

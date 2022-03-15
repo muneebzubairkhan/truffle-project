@@ -181,9 +181,12 @@ contract DSOPPresale is DSOP {
         return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
     }
 
-    function setPresale(uint256 _itemPricePresale, uint256 _presaleActiveTime) external onlyOwner {
-        itemPricePresale = _itemPricePresale;
+    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
         presaleActiveTime = _presaleActiveTime;
+    }
+
+    function setPresaleItemPrice(uint256 _itemPricePresale) external onlyOwner {
+        itemPricePresale = _itemPricePresale;
     }
 
     function setWhitelist(bytes32 _whitelistMerkleRoot) external onlyOwner {
