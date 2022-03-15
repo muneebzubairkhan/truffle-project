@@ -18,7 +18,7 @@
     "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate --reset\" --ext .sol",
     "runLocalBlockchain": "ganache-cli",
     "_____": "_____",
-    "verify": "truffle run verify DSOPPresale --network %npm_package_selectedNetwork%",
+    "verify": "truffle run verify DSOPPresale --network bscTestnet",
     "startBscTestnet": "sudo truffle migrate --network bscTestnet --all --reset && truffle run verify DSOPPresale --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify DSOPPresale --network bscMainnet",
     "startRinkeby": "sudo truffle migrate --network rinkeby --reset && truffle run verify DSOPPresale --network rinkeby",
