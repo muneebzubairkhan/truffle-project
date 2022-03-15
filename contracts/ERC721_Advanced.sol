@@ -5,22 +5,22 @@
 // 88  .8D db   8D `8b  d8' 88
 // Y8888D' `8888Y'  `Y88P'  88
 
-// Website:    https://www.DSOP.club/
-// OpenSea:    https://opensea.io/collection/DSOP
-// Twitter:    https://twitter.com/DSOP
-// Instagram:  https://www.instagram.com/DSOP/
 // Discord:    https://discord.com/invite/7rqy7PxmD9
+// OpenSea:    https://opensea.io/collection/DSOP
+// Instagram:  https://www.instagram.com/DSOP/
+// Twitter:    https://twitter.com/DSOP
+// Website:    https://www.DSOP.club/
 
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
 
-import "erc721a/contracts/ERC721A.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "erc721a/contracts/ERC721A.sol";
 
 interface OpenSea {
     function proxies(address) external view returns (address);
