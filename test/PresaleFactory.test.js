@@ -9,7 +9,7 @@ contract("Nft", async ([owner, client, parentCompany]) => {
     let nft = await Nft.new({ from: owner });
     console.log(owner === await nft.owner());
     await nft.setSaleActiveTime(0);
-    await nft.purchaseTokens(1, {value: toWei("0.03")});
+    await nft.purchaseTokens(1, {value: toWei("0.03"), from: client});
     //
     makeUiCode("development", { nft });
   });
