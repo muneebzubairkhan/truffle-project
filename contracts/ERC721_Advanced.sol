@@ -1,15 +1,15 @@
-// ########  ######## ######## ########  ######  ##     ## ##    ##       ########     ###    ##    ## ########     ###     ######  
-// ##     ## ##       ##          ##    ##    ## ##     ##  ##  ##        ##     ##   ## ##   ###   ## ##     ##   ## ##   ##    ## 
-// ##     ## ##       ##          ##    ##       ##     ##   ####         ##     ##  ##   ##  ####  ## ##     ##  ##   ##  ##       
-// ########  ######   ######      ##    ##       #########    ##          ########  ##     ## ## ## ## ##     ## ##     ##  ######  
-// ##     ## ##       ##          ##    ##       ##     ##    ##          ##        ######### ##  #### ##     ## #########       ## 
-// ##     ## ##       ##          ##    ##    ## ##     ##    ##          ##        ##     ## ##   ### ##     ## ##     ## ##    ## 
-// ########  ######## ########    ##     ######  ##     ##    ##          ##        ##     ## ##    ## ########  ##     ##  ######                                                                                            
+// ########  ######## ######## ########  ######  ##     ## ##    ##       ########     ###    ##    ## ########     ###     ######
+// ##     ## ##       ##          ##    ##    ## ##     ##  ##  ##        ##     ##   ## ##   ###   ## ##     ##   ## ##   ##    ##
+// ##     ## ##       ##          ##    ##       ##     ##   ####         ##     ##  ##   ##  ####  ## ##     ##  ##   ##  ##
+// ########  ######   ######      ##    ##       #########    ##          ########  ##     ## ## ## ## ##     ## ##     ##  ######
+// ##     ## ##       ##          ##    ##       ##     ##    ##          ##        ######### ##  #### ##     ## #########       ##
+// ##     ## ##       ##          ##    ##    ## ##     ##    ##          ##        ##     ## ##   ### ##     ## ##     ## ##    ##
+// ########  ######## ########    ##     ######  ##     ##    ##          ##        ##     ## ##    ## ########  ##     ##  ######
 
-// Website:    https://www.beetchypandas.club/
-// OpenSea:    https://opensea.io/collection/beetchypandas
-// Twitter:    https://twitter.com/BeetchyPandas
-// Instagram:  https://www.instagram.com/beetchypandas/
+// Website:    https://www.DSOP.club/
+// OpenSea:    https://opensea.io/collection/DSOP
+// Twitter:    https://twitter.com/DSOP
+// Instagram:  https://www.instagram.com/DSOP/
 // Discord:    https://discord.com/invite/7rqy7PxmD9
 
 // SPDX-License-Identifier: MIT
@@ -26,10 +26,10 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract BeetchyPandas is ERC721A("Beetchy Pandas", "BPS"), ERC721ABurnable, ERC2981, Ownable {
-    string public baseURI;
-    uint256 public maxSupply = 10_000;
-    uint256 public itemPrice = 0.03 ether;
+contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnable, ERC2981, Ownable {
+    string public baseURI; // pending
+    uint256 public itemPrice = 0.2 ether;
+    uint256 public constant maxSupply = 5304;
     uint256 public saleActiveTime = block.timestamp + 365 days;
 
     ///////////////////////////////////
@@ -55,7 +55,6 @@ contract BeetchyPandas is ERC721A("Beetchy Pandas", "BPS"), ERC721ABurnable, ERC
         itemPrice = _newPrice;
     }
 
-
     /// @notice set sale active time
     function setSaleActiveTime(uint256 _saleActiveTime) external onlyOwner {
         saleActiveTime = _saleActiveTime;
@@ -64,11 +63,6 @@ contract BeetchyPandas is ERC721A("Beetchy Pandas", "BPS"), ERC721ABurnable, ERC
     /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
     function setBaseURI(string memory __baseURI) external onlyOwner {
         baseURI = __baseURI;
-    }
-
-    /// @notice set max supply of nft
-    function setMaxSupply(uint256 _maxSupply) external onlyOwner {
-        maxSupply = _maxSupply;
     }
 
     ///////////////////////////////////
@@ -119,28 +113,20 @@ contract BeetchyPandas is ERC721A("Beetchy Pandas", "BPS"), ERC721ABurnable, ERC
         return baseURI;
     }
 
-    modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller is a contract");
-        _;
-    }
-
     modifier saleActive() {
         require(block.timestamp > saleActiveTime, "Sale is not active");
         _;
     }
 
-    modifier mintLimit(uint256 _howMany) {
-        require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
-        _;
-    }
-
-    modifier tokensAvailable(uint256 _howMany) {
-        require(_howMany <= maxSupply - totalSupply(), "Try minting less tokens");
-        _;
-    }
-
     modifier priceAvailable(uint256 _howMany) {
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
+        _;
+    }
+
+    modifier mintLimits(uint256 _howMany) {
+        require(tx.origin == msg.sender, "The caller is a contract");
+        require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
+        require(_howMany + totalSupply() <= maxSupply, "Try minting less tokens");
         _;
     }
 
@@ -155,15 +141,12 @@ contract BeetchyPandas is ERC721A("Beetchy Pandas", "BPS"), ERC721ABurnable, ERC
     }
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        // OPENSEA
+        // OPENSEA, LOOKSRARE, RARIBLE, X2Y2, any other Marketplace
         if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
-        // LOOKSRARE
+        else if ([0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e, 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e].includes(1)) return true;
         else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
-        // RARIBLE
         else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
-        // X2Y2
         else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
-        // ANY OTHER Marketpalce
         else if (projectProxy[_operator]) return true;
         return super.isApprovedForAll(_owner, _operator);
     }
@@ -189,44 +172,30 @@ contract BeetchyPandas is ERC721A("Beetchy Pandas", "BPS"), ERC721ABurnable, ERC
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract BeetchyPandasPresale is BeetchyPandas {
-    // multiple presale configs
-    mapping(uint256 => uint256) public maxMintPresales;
-    mapping(uint256 => uint256) public itemPricePresales;
-    mapping(uint256 => bytes32) public whitelistMerkleRoots;
+contract DSOPPresale is DSOP {
+    uint256 public maxMintPresale;
+    uint256 public itemPricePresale;
+    bytes32 public whitelistMerkleRoot;
     uint256 public presaleActiveTime = block.timestamp + 365 days;
 
     // multicall inWhitelist
-    function inWhitelist(
-        address _owner,
-        bytes32[] memory _proof,
-        uint256 _from,
-        uint256 _to
-    ) external view returns (uint256) {
-        for (uint256 i = _from; i < _to; i++) if (_inWhitelist(_owner, _proof, i)) return i;
-        return type(uint256).max;
+    function inWhitelist(address _owner, bytes32[] memory _proof) external view returns (uint256) {
+        if (_inWhitelist(_owner, _proof)) return true;
+        return false;
     }
 
-    function _inWhitelist(
-        address _owner,
-        bytes32[] memory _proof,
-        uint256 _rootNumber
-    ) private view returns (bool) {
-        return MerkleProof.verify(_proof, whitelistMerkleRoots[_rootNumber], keccak256(abi.encodePacked(_owner)));
+    function _inWhitelist(address _owner, bytes32[] memory _proof) private view returns (bool) {
+        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
     }
 
-    function purchasePresaleTokens(
-        uint256 _howMany,
-        bytes32[] calldata _proof,
-        uint256 _rootNumber
-    ) external payable callerIsUser tokensAvailable(_howMany) {
+    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable mintLimits(_howMany) {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(_inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
-        require(msg.value >= _howMany * itemPricePresales[_rootNumber], "Try to send more ETH");
+        require(_inWhitelist(msg.sender, _proof), "You are not in presale");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
         _safeMint(msg.sender, _howMany);
 
-        require(_numberMinted(msg.sender) <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
+        require(_numberMinted(msg.sender) <= maxMintPresale, "Purchase exceeds max allowed");
     }
 
     function numberMinted(address _owner) external view returns (uint256) {
@@ -234,14 +203,13 @@ contract BeetchyPandasPresale is BeetchyPandas {
     }
 
     function setPresale(
-        uint256 _rootNumber,
         bytes32 _whitelistMerkleRoot,
         uint256 _maxMintPresales,
         uint256 _itemPricePresale
     ) external onlyOwner {
-        maxMintPresales[_rootNumber] = _maxMintPresales;
-        itemPricePresales[_rootNumber] = _itemPricePresale;
-        whitelistMerkleRoots[_rootNumber] = _whitelistMerkleRoot;
+        maxMintPresale = _maxMintPresales;
+        itemPricePresale = _itemPricePresale;
+        whitelistMerkleRoot = _whitelistMerkleRoot;
     }
 
     function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
@@ -249,7 +217,7 @@ contract BeetchyPandasPresale is BeetchyPandas {
     }
 }
 
-contract BeetchyPandasERC20Sale is BeetchyPandasPresale {
+contract DSOPERC20Sale is DSOPPresale {
     /// @notice set itemPrice in Erc20
     uint256 public itemPriceErc20 = 100 ether;
     uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
@@ -290,5 +258,3 @@ contract BeetchyPandasERC20Sale is BeetchyPandasPresale {
         _;
     }
 }
-
-

@@ -1,7 +1,7 @@
 const { toWei } = require("web3-utils");
 const { makeUiCode } = require("../migrations/helper.js");
 
-const Nft = artifacts.require("BeetchyPandasERC20Sale");
+const Nft = artifacts.require("DSOPERC20Sale");
 
 contract("Nft", async ([owner, client, parentCompany]) => {
   it("deploy smart contract", async () => {
