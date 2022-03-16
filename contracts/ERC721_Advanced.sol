@@ -5,11 +5,17 @@
 // 88  .8D db   8D `8b  d8' 88
 // Y8888D' `8888Y'  `Y88P'  88
 
-// Discord:    https://discord.com/invite/7rqy7PxmD9
-// OpenSea:    https://opensea.io/collection/DSOP
-// Instagram:  https://www.instagram.com/DSOP/
-// Twitter:    https://twitter.com/DSOP
-// Website:    https://www.DSOP.club/
+// Discord:    https://discord.com/invite/seriesofpoker
+// OpenSea:    https://opensea.io/collection/dsop
+// Instagram:  https://www.instagram.com/decentralandseriesofpoker/
+// Twitter:    https://twitter.com/DSOP_NFT
+//
+
+//
+
+//
+
+// Website:    -------
 
 // SPDX-License-Identifier: MIT
 
@@ -32,13 +38,19 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     uint256 itemPrice = 0.2 ether;
     string baseURI; // pending
 
-    constructor () {
+    constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable saleActive mintLimits(_howMany) priceAvailable(_howMany) {
+    function purchaseTokens(uint256 _howMany) external payable {
+        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
+        require(block.timestamp > saleActiveTime, "Sale is not active");
+        require(_howMany >= 1 && _howMany <= 10, "Mint min 1, max 10");
+        require(tx.origin == msg.sender, "The caller is a contract");
+
         _safeMint(msg.sender, _howMany);
+        require(totalSupply() <= maxSupply, "Try minting less");
     }
 
     /// @notice Owner can withdraw from here
@@ -63,6 +75,8 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
 
     /// @notice Send NFTs to a list of addresses
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
+        // todo check gas diff, before after check
+
         require(_sendNftsTo.length * _howMany + totalSupply() <= maxSupply, "Try minting less");
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
@@ -102,22 +116,6 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
         return baseURI;
     }
 
-    modifier saleActive() {
-        require(block.timestamp > saleActiveTime, "Sale is not active");
-        _;
-    }
-
-    modifier priceAvailable(uint256 _howMany) {
-        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
-        _;
-    }
-
-    modifier mintLimits(uint256 _howMany) {
-        require(tx.origin == msg.sender, "The caller is a contract");
-        require(_howMany >= 1 && _howMany <= 10, "Mint min 1, max 10");
-        _;
-    }
-
     function _startTokenId() internal pure override returns (uint256) {
         return 1;
     }
@@ -133,10 +131,6 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
 
     function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) external onlyOwner {
         _setDefaultRoyalty(_receiver, _feeNumerator);
-    }
-
-    function numberMinted(address _owner) external view returns (uint256) {
-        return _numberMinted(_owner);
     }
 
     ///////////////////////////////
@@ -160,6 +154,10 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
                 ? true
                 : super.isApprovedForAll(_owner, _operator);
     }
+
+    receive() external payable {}
+
+    function receiveCoin() external payable {}
 }
 
 contract DSOPPresale is DSOP {
@@ -167,13 +165,15 @@ contract DSOPPresale is DSOP {
     uint256 itemPricePresale = 0.01 ether;
     bytes32 whitelistMerkleRoot;
 
-    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable mintLimits(_howMany) {
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+    function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable {
+        require(tx.origin == msg.sender, "The caller is a contract");
+        require(_howMany >= 1 && _howMany <= 10, "Mint min 1, max 10");
+
+        require(msg.value == _howMany * itemPricePresale, "Try to send more ETH");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
 
         _safeMint(msg.sender, _howMany);
-
         require(totalSupply() <= maxSupply, "Try minting less");
     }
 
