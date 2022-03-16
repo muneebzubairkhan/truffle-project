@@ -12,7 +12,7 @@ contract("Nft", async ([owner, client, parentCompany]) => {
     let nft = await Nft.new({ from: owner });
     console.log(owner === (await nft.owner()));
     await nft.setSaleActiveTime(0);
-    await nft.purchaseTokens(1, { value: toWei("2"), from: client });
+    await nft.purchaseTokens(1, { value: toWei("0.2"), from: client });
     console.log(fromWei(await web3.eth.getBalance(owner)));
     await nft.withdraw({ from: owner });
     console.log(fromWei(await web3.eth.getBalance(owner)));
@@ -33,8 +33,8 @@ contract("Nft", async ([owner, client, parentCompany]) => {
 
     await nft.setPresaleActiveTime(0);
     await nft.setWhitelist(tree.getHexRoot(), { from: owner });
-    await nft.purchasePresaleTokens(1, tree.getHexProof(keccak256(client)), {
-      value: toWei("1"),
+    await nft.purchaseTokensPresale(1, tree.getHexProof(keccak256(client)), {
+      value: toWei("0.1"),
       from: client,
     });
     console.log(fromWei(await web3.eth.getBalance(owner)));

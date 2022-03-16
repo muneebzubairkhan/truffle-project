@@ -169,7 +169,7 @@ contract DSOPPresale is DSOP {
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 10, "Mint min 1, max 10");
 
-        require(msg.value == _howMany * itemPricePresale, "Try to send more ETH");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
 
