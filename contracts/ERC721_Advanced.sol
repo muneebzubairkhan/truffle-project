@@ -35,7 +35,7 @@ interface OpenSea {
 contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnable, ERC2981, Ownable {
     uint256 saleActiveTime = 1647691200; // Saturday, March 19, 2022 11:00:00 PM French Timezone GMT + 1
     uint256 constant maxSupply = 5304;
-    uint256 itemPrice = 0.2 ether;
+    uint256 itemPrice = 0.15 ether;
     string baseURI; // pending
 
     constructor() {
@@ -46,7 +46,7 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     function purchaseTokens(uint256 _howMany) external payable {
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
         require(block.timestamp > saleActiveTime, "Sale is not active");
-        require(_howMany >= 1 && _howMany <= 10, "Mint min 1, max 10");
+        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(tx.origin == msg.sender, "The caller is a contract");
 
         _safeMint(msg.sender, _howMany);
@@ -133,6 +133,10 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
 
+    function receiveCoin() external payable {}
+
+    receive() external payable {}
+
     ///////////////////////////////
     // AUTO APPROVE MARKETPLACES //
     ///////////////////////////////
@@ -143,7 +147,7 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
 
-    // Auto Approve any Marketplace, Opensea, Looksrare, Rarible, X2Y2,
+    // Auto Approve any Marketplace, Opensea, Looksrare, Rarible, X2Y2
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         return
             projectProxy[_operator] ||
@@ -155,19 +159,17 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
                 : super.isApprovedForAll(_owner, _operator);
     }
 
-    receive() external payable {}
+    ///////////////////
+    // DSOP Presale  //
+    ///////////////////
 
-    function receiveCoin() external payable {}
-}
-
-contract DSOPPresale is DSOP {
     uint256 presaleActiveTime = 1648036800; // Saturday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
-    uint256 itemPricePresale = 0.01 ether;
+    uint256 itemPricePresale = 0.1 ether;
     bytes32 whitelistMerkleRoot;
 
     function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable {
         require(tx.origin == msg.sender, "The caller is a contract");
-        require(_howMany >= 1 && _howMany <= 10, "Mint min 1, max 10");
+        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
 
         require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
