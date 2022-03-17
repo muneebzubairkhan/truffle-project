@@ -50,7 +50,7 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
         require(tx.origin == msg.sender, "The caller is a contract");
 
         _safeMint(msg.sender, _howMany);
-        require(totalSupply() <= maxSupply, "Try minting less");
+        require(totalSupply() <= 5000, "Try minting less");
     }
 
     /// @notice Owner can withdraw from here
