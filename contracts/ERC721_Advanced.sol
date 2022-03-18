@@ -5,17 +5,11 @@
 // 88  .8D db   8D `8b  d8' 88
 // Y8888D' `8888Y'  `Y88P'  88
 
-// Discord:    https://discord.com/invite/seriesofpoker
+// Website:    https://dsopnft.com/
 // OpenSea:    https://opensea.io/collection/dsop
+// Discord:    https://discord.com/invite/seriesofpoker
 // Instagram:  https://www.instagram.com/decentralandseriesofpoker/
 // Twitter:    https://twitter.com/DSOP_NFT
-//
-
-//
-
-//
-
-// Website:    -------
 
 // SPDX-License-Identifier: MIT
 
