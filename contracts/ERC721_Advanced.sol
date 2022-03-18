@@ -41,7 +41,7 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     function purchaseTokens(uint256 _howMany) external payable {
         _safeMint(msg.sender, _howMany);
 
-        require(totalSupply() <= mintableSupply, "Try minting less");
+        require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
@@ -169,7 +169,7 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable {
         _safeMint(msg.sender, _howMany);
 
-        require(totalSupply() <= mintableSupply, "Try minting less");
+        require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
