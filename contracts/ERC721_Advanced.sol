@@ -36,7 +36,7 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     uint256 saleActiveTime = 1647691200; // Saturday, March 19, 2022 11:00:00 PM French Timezone GMT + 1
     uint256 constant maxSupply = 5304;
     uint256 itemPrice = 0.15 ether;
-    string baseURI; // pending
+    string baseURI = "ipfs://QmSkn6CzKA1LDy7jYVzuRJimKhi8X9EtDRfubnRKVdJZjN/";
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
