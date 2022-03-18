@@ -27,7 +27,8 @@ interface OpenSea {
 }
 
 contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnable, ERC2981, Ownable {
-    uint256 saleActiveTime = 1647691200; // Saturday, March 19, 2022 11:00:00 PM French Timezone GMT + 1
+    uint256 saleActiveTime = 1648036800; // Saturday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
+
     uint256 constant maxSupply = 5304;
     uint256 mintableSupply = 5000;
     uint256 itemPrice = 0.15 ether;
@@ -146,14 +147,13 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
 
-    // Auto Approve any Marketplace, Opensea, Looksrare, Rarible, X2Y2
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         return
-            projectProxy[_operator] ||
+            projectProxy[_operator] || // Auto Approve any Marketplace,
                 _operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner) ||
-                _operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354 ||
-                _operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e ||
-                _operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be
+                _operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354 || // Looksrare
+                _operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e || // Rarible
+                _operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be // X2Y2
                 ? true
                 : super.isApprovedForAll(_owner, _operator);
     }
@@ -162,7 +162,7 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     // DSOP Presale  //
     ///////////////////
 
-    uint256 presaleActiveTime = 1648036800; // Saturday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
+    uint256 presaleActiveTime = 1647691200; // Saturday, March 19, 2022 11:00:00 PM French Timezone GMT + 1
     uint256 itemPricePresale = 0.1 ether;
     bytes32 whitelistMerkleRoot;
 
