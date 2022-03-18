@@ -29,6 +29,7 @@ interface OpenSea {
 contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnable, ERC2981, Ownable {
     uint256 saleActiveTime = 1647691200; // Saturday, March 19, 2022 11:00:00 PM French Timezone GMT + 1
     uint256 constant maxSupply = 5304;
+    uint256 mintableSupply = 5000;
     uint256 itemPrice = 0.15 ether;
     string baseURI = "ipfs://QmSkn6CzKA1LDy7jYVzuRJimKhi8X9EtDRfubnRKVdJZjN/";
 
@@ -38,13 +39,13 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
 
     /// @notice Purchase multiple NFTs at once
     function purchaseTokens(uint256 _howMany) external payable {
-        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
-        require(block.timestamp > saleActiveTime, "Sale is not active");
-        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
-        require(tx.origin == msg.sender, "The caller is a contract");
-
         _safeMint(msg.sender, _howMany);
-        require(totalSupply() <= 5000, "Try minting less");
+
+        require(totalSupply() <= mintableSupply, "Try minting less");
+        require(tx.origin == msg.sender, "The caller is a contract");
+        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
+        require(block.timestamp > saleActiveTime, "Sale is not active");
+        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
     }
 
     /// @notice Owner can withdraw from here
@@ -62,6 +63,12 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
         saleActiveTime = _saleActiveTime;
     }
 
+    /// @notice set mintableSupply
+    function setMintableSupply(uint256 _mintableSupply) external onlyOwner {
+        require(_mintableSupply <= maxSupply, "put a number less than max supply");
+        mintableSupply = _mintableSupply;
+    }
+
     /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
     function setBaseURI(string memory __baseURI) external onlyOwner {
         baseURI = __baseURI;
@@ -69,10 +76,8 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
 
     /// @notice Send NFTs to a list of addresses
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
-        // todo check gas diff, before after check
-
-        require(_sendNftsTo.length * _howMany + totalSupply() <= maxSupply, "Try minting less");
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
+        require(totalSupply() <= maxSupply, "Try minting less");
     }
 
     ////////////////////
@@ -162,15 +167,14 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     bytes32 whitelistMerkleRoot;
 
     function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable {
+        _safeMint(msg.sender, _howMany);
+
+        require(totalSupply() <= mintableSupply, "Try minting less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
-
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
-        require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
-
-        _safeMint(msg.sender, _howMany);
-        require(totalSupply() <= maxSupply, "Try minting less");
+        require(block.timestamp > presaleActiveTime, "Presale is not active");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
     }
 
     function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {
