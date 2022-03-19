@@ -19,6 +19,7 @@
     "runLocalBlockchain": "ganache-cli",
     "_____": "_____",
     "verify": "truffle run verify DSOPPresale --network bscTestnet",
+    "startMumbai": "sudo truffle migrate --network mumbai --all --reset && truffle run verify Visitors VisitorsAddress --network mumbai",
     "startBscTestnet": "sudo truffle migrate --network bscTestnet --all --reset && truffle run verify DSOPPresale --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify DSOPPresale --network bscMainnet",
     "startRinkeby": "sudo truffle migrate --network rinkeby --reset && truffle run verify DSOPPresale --network rinkeby",
@@ -43,7 +44,6 @@
     "web3-utils": "^1.7.1"
   },
   "devDependencies": {
-    "eth-gas-reporter": "^0.2.24",
     "nodemon": "^2.0.13",
     "prettier": "^2.5.1",
     "prettier-plugin-solidity": "^1.0.0-beta.19"
