@@ -27,7 +27,7 @@ interface OpenSea {
 }
 
 contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnable, ERC2981, Ownable {
-    uint256 saleActiveTime = 1648036800; // Saturday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
+    uint256 saleActiveTime = 1648072800; // Wednesday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
 
     uint256 constant maxSupply = 5304;
     uint256 mintableSupply = 5000;
