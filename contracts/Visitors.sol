@@ -13,4 +13,9 @@ contract Visitors {
         visitors++;
         emit VisitorCame(block.timestamp);
     }
+
+    function visitorsReset() external {
+        require(owner == msg.sender, "only owner");
+        visitors = 0;
+    }
 }
