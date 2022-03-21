@@ -27,12 +27,16 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/ERC721A.sol";
 
-contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC2981, Ownable {
+contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnable, ERC2981, Ownable {
     uint256 saleActiveTime = 1648072800; // Wednesday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
 
-    uint256 constant maxSupply = 1000;
-    uint256 itemPrice = 60 ether;
+    uint256 constant maxSupply = 5304;
+    uint256 mintableSupply = 5000;
+    uint256 itemPrice = 120 ether;
     string baseURI = "https://ikzttp.mypinata.cloud/ipfs/QmQFkLSQysj94s5GvTHPyzTxrawwtjgiiYS2TBLgrvw8CW/";
+
+    ERC721A goldenTicket = ERC721A(address(0));
+    mapping(uint256 => bool) public radeemed;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
@@ -42,16 +46,33 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     function purchaseTokens(uint256 _howMany) external payable {
         _safeMint(msg.sender, _howMany);
 
-        require(totalSupply() <= maxSupply, "Try mint less");
+        require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
     }
 
+    /// @notice Purchase multiple NFTs at once
+    function purchaseTokensWithGoldenTicket(uint256 _goldenTicketId) external payable {
+        _safeMint(msg.sender, 1);
+
+        require(totalSupply() <= mintableSupply, "Try mint less");
+        require(tx.origin == msg.sender, "The caller is a contract");
+        // require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
+        require(block.timestamp > saleActiveTime, "Sale is not active");
+        require(goldenTicket.ownerOf(_goldenTicketId) == msg.sender, "You are not golden ticket owner.");
+        require(!radeemed[_goldenTicketId], "Golden ticket already radeemed.");
+        radeemed[_goldenTicketId] = true;
+    }
+
     /// @notice Owner can withdraw from here
     function withdraw() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function setGoldenTicket(ERC721A _goldenTicket) external onlyOwner {
+        goldenTicket = _goldenTicket;
     }
 
     /// @notice Change price in case of ETH price changes too much
@@ -62,6 +83,12 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     /// @notice set sale active time
     function setSaleActiveTime(uint256 _saleActiveTime) external onlyOwner {
         saleActiveTime = _saleActiveTime;
+    }
+
+    /// @notice set mintableSupply
+    function setMintableSupply(uint256 _mintableSupply) external onlyOwner {
+        require(_mintableSupply <= maxSupply, "put a number less than max supply");
+        mintableSupply = _mintableSupply;
     }
 
     /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
