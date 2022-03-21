@@ -15,7 +15,7 @@
 // OpenSea:    https://opensea.io/collection/beetchypandas
 // Instagram:  https://www.instagram.com/beetchypandas/
 // Discord:    https://discord.com/invite/7rqy7PxmD9
-// Twitter:    https://twitter.com/BeetchyPandas
+// Twitter:    https://twitter.com/beetchypandas
 // Website:    https://www.beetchypandas.club/
 
 pragma solidity ^0.8.0;
