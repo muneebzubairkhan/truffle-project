@@ -1,5 +1,5 @@
-const Migrations = artifacts.require("Migrations");
-const Nft = artifacts.require("DSOPPresale");
+// const Migrations = artifacts.require("Migrations");
+// const Nft = artifacts.require("DSOPPresale");
 // const _Contract_1_ = artifacts.require("_Contract_1_");
 
 module.exports = async (deployer, network, accounts) => {
@@ -9,7 +9,7 @@ module.exports = async (deployer, network, accounts) => {
   // if (network !== "development") return;
 
   // await deployer.deploy(Migrations);
-  let nft = await deployer.deploy(Nft);
+  // let nft = await deployer.deploy(Nft);
   // console.log(nft);
   // await nft.setSaleActiveTime(0);
   // nft.purchaseTokens(1, { value: toWei("0.03") });

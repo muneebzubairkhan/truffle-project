@@ -35,7 +35,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     uint256 itemPrice = 120 ether;
     string baseURI = "https://ikzttp.mypinata.cloud/ipfs/QmQFkLSQysj94s5GvTHPyzTxrawwtjgiiYS2TBLgrvw8CW/";
 
-    ERC721A goldenTicket = ERC721A(address(0));
+    ERC721A goldenTicket;
     mapping(uint256 => bool) public radeemed;
 
     constructor() {
@@ -54,9 +54,8 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokensWithGoldenTicket(uint256 _goldenTicketId) external payable {
+    function purchaseTokensWithGoldenTicket(uint256 _goldenTicketId) external {
         _safeMint(msg.sender, 1);
-
         require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         // require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
