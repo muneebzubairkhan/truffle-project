@@ -1,14 +1,15 @@
 const { toWei, fromWei } = require("web3-utils");
 // const { makeUiCode } = require("../migrations/helper.js");
 
-const Nft = artifacts.require("DSOPPresale");
+const Nft2 = artifacts.require("MetaDegenSociety");
+const Nft1 = artifacts.require("GoldenTicket");
 
 contract("Nft", async ([owner, client, parentCompany]) => {
   it("deploy smart contract", async () => {
     //
-    let nft = await Nft.new({ from: owner });
+    let nft = await Nft1.new({ from: owner });
     await nft.setSaleActiveTime(0, { from: owner });
-    await nft.purchaseTokens(1, { value: toWei("0.2"), from: client });
+    await nft.purchaseTokens(1, { value: toWei("60", "ether"), from: client });
     console.log(fromWei(await web3.eth.getBalance(owner)));
     await nft.withdraw({ from: owner });
     console.log(fromWei(await web3.eth.getBalance(owner)));
