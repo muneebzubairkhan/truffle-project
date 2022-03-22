@@ -21,19 +21,19 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/ERC721A.sol";
 
-contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnable, ERC2981, Ownable {
-    uint256 saleActiveTime = 1648072800; // Wednesday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
-
+contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
+    string baseURI = "https://ikzttp.mypinata.cloud/ipfs/QmQFkLSQysj94s5GvTHPyzTxrawwtjgiiYS2TBLgrvw8CW/";
+    uint256 saleActiveTime = block.timestamp + 365 days;
     uint256 constant maxSupply = 9999;
     uint256 mintableSupply = 9700;
     uint256 itemPrice = 0.0120 ether;
-    string baseURI = "https://ikzttp.mypinata.cloud/ipfs/QmQFkLSQysj94s5GvTHPyzTxrawwtjgiiYS2TBLgrvw8CW/";
 
     ERC721A goldenTicket;
     mapping(uint256 => bool) public radeemed;
@@ -43,26 +43,38 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable {
+    function purchaseTokens(uint256 _howMany) external payable nonReentrant {
+        // mint nfts
         _safeMint(msg.sender, _howMany);
 
+        // full fill some requirements
         require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
+
+        // Pay the price
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokensWithGoldenTicket(uint256 _goldenTicketId) external {
-        _safeMint(msg.sender, 1);
+    function purchaseTokensWithGoldenTickets(uint256[] memory _goldenTicketIds) external nonReentrant {
+        // mint nfts
+        uint256 _howMany = _goldenTicketIds.length;
+        _safeMint(msg.sender, _howMany);
+
+        // full fill some requirements
         require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
-        // require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
+        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
-        require(goldenTicket.ownerOf(_goldenTicketId) == msg.sender, "You are not golden ticket owner.");
-        require(!radeemed[_goldenTicketId], "Golden ticket already radeemed.");
-        radeemed[_goldenTicketId] = true;
+
+        // Pay the price
+        for (uint256 i = 0; i < _howMany; i++) {
+            require(goldenTicket.ownerOf(_goldenTicketIds[i]) == msg.sender, "You are not golden ticket owner.");
+            require(!radeemed[_goldenTicketIds[i]], "Golden ticket already radeemed.");
+            radeemed[_goldenTicketIds[i]] = true;
+        }
     }
 
     /// @notice Owner can withdraw from here
@@ -96,7 +108,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     }
 
     /// @notice Send NFTs to a list of addresses
-    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
+    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner nonReentrant {
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
         require(totalSupply() <= maxSupply, "Try minting less");
     }
