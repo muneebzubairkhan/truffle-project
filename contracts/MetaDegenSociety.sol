@@ -30,8 +30,8 @@ import "erc721a/contracts/ERC721A.sol";
 contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnable, ERC2981, Ownable {
     uint256 saleActiveTime = 1648072800; // Wednesday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
 
-    uint256 constant maxSupply = 5304;
-    uint256 mintableSupply = 5000;
+    uint256 constant maxSupply = 9999;
+    uint256 mintableSupply = 9700;
     uint256 itemPrice = 0.0120 ether;
     string baseURI = "https://ikzttp.mypinata.cloud/ipfs/QmQFkLSQysj94s5GvTHPyzTxrawwtjgiiYS2TBLgrvw8CW/";
 
