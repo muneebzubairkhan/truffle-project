@@ -32,7 +32,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
 
     uint256 constant maxSupply = 5304;
     uint256 mintableSupply = 5000;
-    uint256 itemPrice = 120 ether;
+    uint256 itemPrice = 0.0120 ether;
     string baseURI = "https://ikzttp.mypinata.cloud/ipfs/QmQFkLSQysj94s5GvTHPyzTxrawwtjgiiYS2TBLgrvw8CW/";
 
     ERC721A goldenTicket;

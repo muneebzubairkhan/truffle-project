@@ -31,7 +31,7 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     uint256 saleActiveTime = 1648072800; // Wednesday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
 
     uint256 constant maxSupply = 1000;
-    uint256 itemPrice = 60 ether;
+    uint256 itemPrice = 0.060 ether;
     string baseURI = "https://ikzttp.mypinata.cloud/ipfs/QmQFkLSQysj94s5GvTHPyzTxrawwtjgiiYS2TBLgrvw8CW/";
 
     constructor() {
