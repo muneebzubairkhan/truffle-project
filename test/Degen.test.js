@@ -10,28 +10,35 @@ contract("Nft", async ([owner1, owner2, owner]) => {
     //
     let nft1 = await Nft1.new({ from: owner });
     await nft1.setSaleActiveTime(0, { from: owner });
-    await nft1.purchaseTokens(1, { value: toWei("0.060", "ether"), from: owner });
+    await nft1.purchaseTokens(1, {
+      value: toWei("0.060", "ether"),
+      from: owner,
+    });
     console.log(fromWei(await web3.eth.getBalance(owner)));
     await nft1.withdraw({ from: owner });
     console.log(fromWei(await web3.eth.getBalance(owner)));
 
+    //
     let nft2 = await Nft2.new({ from: owner });
     await nft2.setGoldenTicket(nft1.address, { from: owner });
     await nft2.setSaleActiveTime(0, { from: owner });
-    await nft2.purchaseTokens(1, {
-      value: toWei("0.0120", "ether"),
+    await nft2.purchaseTokens(2, {
+      value: toWei("0.0240", "ether"),
       from: owner,
     });
     console.log(fromWei(await web3.eth.getBalance(owner)));
     await nft2.withdraw({ from: owner });
     console.log(fromWei(await web3.eth.getBalance(owner)));
 
-    await nft2.purchaseTokensWithGoldenTicket(1, {
+    await nft2.purchaseTokensWithGoldenTickets(["1"], {
       from: owner,
     });
     console.log(fromWei(await web3.eth.getBalance(owner)));
     await nft2.withdraw({ from: owner });
     console.log(fromWei(await web3.eth.getBalance(owner)));
+
+    console.log("" + (await nft1.balanceOf(owner)));
+    console.log("" + (await nft2.balanceOf(owner)));
 
     //
     // makeUiCode("development", { nft });

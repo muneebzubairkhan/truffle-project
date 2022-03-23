@@ -182,4 +182,39 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         return projectProxy[_operator] ? true : super.isApprovedForAll(_owner, _operator);
     }
+
+    /////////////////////////////////
+    // Meta Degen Society Presale  //
+    /////////////////////////////////
+
+    uint256 presaleActiveTime = block.timestamp + 365 days;
+    uint256 itemPricePresale = 0.1 ether;
+    bytes32 whitelistMerkleRoot;
+
+    function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable nonReentrant {
+        _safeMint(msg.sender, _howMany);
+
+        require(totalSupply() <= mintableSupply, "Try mint less");
+        require(tx.origin == msg.sender, "The caller is a contract");
+        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
+        require(inWhitelist(msg.sender, _proof), "You are not in presale");
+        require(block.timestamp > presaleActiveTime, "Presale is not active");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+    }
+
+    function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {
+        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
+    }
+
+    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
+        presaleActiveTime = _presaleActiveTime;
+    }
+
+    function setPresaleItemPrice(uint256 _itemPricePresale) external onlyOwner {
+        itemPricePresale = _itemPricePresale;
+    }
+
+    function setWhitelist(bytes32 _whitelistMerkleRoot) external onlyOwner {
+        whitelistMerkleRoot = _whitelistMerkleRoot;
+    }
 }

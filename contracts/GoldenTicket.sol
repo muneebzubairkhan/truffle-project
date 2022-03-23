@@ -21,31 +21,36 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/ERC721A.sol";
 
-contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC2981, Ownable {
-    uint256 saleActiveTime = 1648072800; // Wednesday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
-
-    uint256 constant maxSupply = 1000;
-    uint256 itemPrice = 0.060 ether;
+contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
     string baseURI = "https://ikzttp.mypinata.cloud/ipfs/QmQFkLSQysj94s5GvTHPyzTxrawwtjgiiYS2TBLgrvw8CW/";
+    uint256 saleActiveTime = block.timestamp + 365 days;
+    uint256 constant maxSupply = 1000;
+    uint256 mintableSupply = 9995;
+    uint256 itemPrice = 0.060 ether;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable {
+    function purchaseTokens(uint256 _howMany) external payable nonReentrant {
+        // mint nfts
         _safeMint(msg.sender, _howMany);
 
-        require(totalSupply() <= maxSupply, "Try mint less");
+        // full fill some requirements
+        require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
+
+        // Pay the price
         require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
     }
 
@@ -64,13 +69,19 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
         saleActiveTime = _saleActiveTime;
     }
 
+    /// @notice set mintableSupply
+    function setMintableSupply(uint256 _mintableSupply) external onlyOwner {
+        require(_mintableSupply <= maxSupply, "put a number less than max supply");
+        mintableSupply = _mintableSupply;
+    }
+
     /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
     function setBaseURI(string memory __baseURI) external onlyOwner {
         baseURI = __baseURI;
     }
 
     /// @notice Send NFTs to a list of addresses
-    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
+    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner nonReentrant {
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
         require(totalSupply() <= maxSupply, "Try minting less");
     }
