@@ -37,9 +37,6 @@ contract("Nft", async ([owner1, owner2, owner]) => {
     await nft2.withdraw({ from: owner });
     console.log(fromWei(await web3.eth.getBalance(owner)));
 
-    console.log("" + (await nft1.balanceOf(owner)));
-    console.log("" + (await nft2.balanceOf(owner)));
-
     //
     // makeUiCode("development", { nft });
   });
