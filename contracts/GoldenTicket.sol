@@ -33,7 +33,7 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     uint256 saleActiveTime = block.timestamp + 365 days;
     uint256 constant maxSupply = 1000;
     uint256 mintableSupply = 9995;
-    uint256 itemPrice = 0.060 ether;
+    uint256 itemPrice = 6.0 ether;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
@@ -51,7 +51,7 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
         require(block.timestamp > saleActiveTime, "Sale is not active");
 
         // Pay the price
-        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
+        require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
     }
 
     /// @notice Owner can withdraw from here

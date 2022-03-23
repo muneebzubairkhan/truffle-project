@@ -33,7 +33,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     uint256 saleActiveTime = block.timestamp + 365 days;
     uint256 constant maxSupply = 9999;
     uint256 mintableSupply = 9700;
-    uint256 itemPrice = 0.0120 ether;
+    uint256 itemPrice = 12.0 ether;
 
     ERC721A goldenTicket;
     mapping(uint256 => bool) public radeemed;
@@ -54,7 +54,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         require(block.timestamp > saleActiveTime, "Sale is not active");
 
         // Pay the price
-        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
+        require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
     }
 
     /// @notice Purchase multiple NFTs at once
@@ -199,7 +199,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+        require(msg.value == _howMany * itemPricePresale, "Send correct amount of ETH");
     }
 
     function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {
