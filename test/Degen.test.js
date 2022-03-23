@@ -10,8 +10,8 @@ contract("Nft", async ([owner1, owner2, owner]) => {
     //
     let nft1 = await Nft1.new({ from: owner });
     await nft1.setSaleActiveTime(0, { from: owner });
-    await nft1.purchaseTokens(1, {
-      value: toWei("0.060", "ether"),
+    await nft1.purchaseTokens(2, {
+      value: toWei("0.120", "ether"),
       from: owner,
     });
     console.log(fromWei(await web3.eth.getBalance(owner)));
@@ -30,7 +30,7 @@ contract("Nft", async ([owner1, owner2, owner]) => {
     await nft2.withdraw({ from: owner });
     console.log(fromWei(await web3.eth.getBalance(owner)));
 
-    await nft2.purchaseTokensWithGoldenTickets(["1"], {
+    await nft2.purchaseTokensWithGoldenTickets([1, 2], {
       from: owner,
     });
     console.log(fromWei(await web3.eth.getBalance(owner)));
