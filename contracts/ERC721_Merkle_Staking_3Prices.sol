@@ -23,7 +23,17 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     string public baseURI;
     string public baseExtension = ".json";
     string public notRevealedUri;
-    uint256 public cost = 0.075 * 1e18;
+    
+    uint256 public defaultCost = 0.01 * 1e18;
+
+    uint256 public costSecond = 0.02 * 1e18;
+    uint256 public amountSecond = 6; // 4 - 6 mints
+
+    uint256 public costFirst = 0.03 * 1e18;
+    uint256 public amountFirst = 3; // 1 - 3 mints
+
+    
+
     uint256 public maxSupply = 10_000;
     uint256 public reservedSupply = 250;
     uint256 public maxMintAmount = 20;
@@ -58,7 +68,14 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         require(_mintAmount > 0, "need to mint at least 1 NFT");
         require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
         require(supply + _mintAmount + reservedSupply <= maxSupply, "max NFT limit exceeded");
-        require(msg.value >= cost * _mintAmount, "insufficient funds");
+        
+
+        if(_mintAmount <= amountFirst)
+            require(msg.value >= costFirst * _mintAmount, "insufficient funds");
+        else if(_mintAmount <= amountSecond)
+            require(msg.value >= costSecond * _mintAmount, "insufficient funds");
+        else
+            require(msg.value >= defaultCost * _mintAmount, "insufficient funds");
 
         _safeMint(msg.sender, _mintAmount);
     }
@@ -112,7 +129,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     }
 
     function setCost(uint256 _newCost) public onlyOwner {
-        cost = _newCost;
+        defaultCost = _newCost;
     }
 
     function setMaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner {
@@ -157,8 +174,15 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     uint256 public presaleActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
     uint256 public presaleMaxMint = 3;
     bytes32 public whitelistMerkleRoot;
-    uint256 public itemPricePresale = 0.03 * 1e18;
     mapping(address => uint256) public presaleClaimedBy;
+
+    uint256 public costFirstPresale = 0.06 * 1e18;
+    uint256 public amountFirstPresale = 3;  // 1 - 3 mints
+
+    uint256 public costSecondPresale = 0.05 * 1e18; 
+    uint256 public amountSecondPresale = 6;  // 4 - 6 mints
+    
+    uint256 public itemPricePresale = 0.04 * 1e18;  // greater than 6
 
     function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
         whitelistMerkleRoot = _whitelistMerkleRoot;
@@ -176,7 +200,13 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
         require(inWhitelist(_proof, msg.sender), "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+
+        if(_howMany <= amountFirstPresale)
+            require(msg.value >= costFirstPresale * _howMany, "insufficient funds");
+        else if(_howMany <= amountSecondPresale)
+            require(msg.value >= costSecondPresale * _howMany, "insufficient funds");
+        else
+            require(msg.value >= itemPricePresale * _howMany, "insufficient funds");
 
         presaleClaimedBy[msg.sender] += _howMany;
 
