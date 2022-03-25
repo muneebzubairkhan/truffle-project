@@ -32,6 +32,7 @@ contract("Nft", async ([owner1, owner2, owner]) => {
 
     await nft2.purchaseTokensWithGoldenTickets([1, 2], {
       from: owner,
+      value: toWei("12.0", "ether"),
     });
     console.log(fromWei(await web3.eth.getBalance(owner)));
     await nft2.withdraw({ from: owner });
