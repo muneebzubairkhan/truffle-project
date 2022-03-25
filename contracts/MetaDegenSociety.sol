@@ -58,7 +58,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokensWithGoldenTickets(uint256[] memory _goldenTicketIds) external nonReentrant {
+    function purchaseTokensWithGoldenTickets(uint256[] memory _goldenTicketIds) external payable nonReentrant {
         // mint nfts
         uint256 _howMany = _goldenTicketIds.length;
         _safeMint(msg.sender, _howMany);
@@ -73,6 +73,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         for (uint256 i = 0; i < _howMany; i++) {
             require(goldenTicket.ownerOf(_goldenTicketIds[i]) == msg.sender, "You are not golden ticket owner.");
             require(!radeemed[_goldenTicketIds[i]], "Golden ticket already radeemed.");
+            require(msg.value == _howMany * (itemPrice / 2), "Send correct amount of ETH");
             radeemed[_goldenTicketIds[i]] = true;
         }
     }

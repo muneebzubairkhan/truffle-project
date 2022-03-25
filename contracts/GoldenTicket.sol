@@ -29,10 +29,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/ERC721A.sol";
 
 contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
-    string baseURI = "https://ikzttp.mypinata.cloud/ipfs/QmQFkLSQysj94s5GvTHPyzTxrawwtjgiiYS2TBLgrvw8CW/";
+    string baseURI = "ipfs://QmfKgWoKSDDU1qnLwGuRQq3wfW3fPrue4wEWGNgXfFkZHw/";
     uint256 saleActiveTime = block.timestamp + 365 days;
     uint256 constant maxSupply = 1000;
-    uint256 mintableSupply = 9995;
+    uint256 mintableSupply = 995;
     uint256 itemPrice = 6.0 ether;
 
     constructor() {
