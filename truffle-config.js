@@ -1,5 +1,4 @@
 var HDWalletProvider = require("@truffle/hdwallet-provider");
-var ethGasReporter = require("eth-gas-reporter");
 const { toWei } = require("web3-utils");
 require("dotenv").config();
 const MNEMONIC = process.env.MNEMONIC;
@@ -32,7 +31,7 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           MNEMONIC,
-          `https://api.avax-test.network/ext/bc/C/rpc`,
+          `https://api.avax-test.network/ext/bc/C/rpc`
         ),
       network_id: 1,
       // timeoutBlocks: 200,
@@ -58,7 +57,7 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           MNEMONIC,
-          "https://data-seed-prebsc-2-s2.binance.org:8545",
+          "https://data-seed-prebsc-2-s2.binance.org:8545"
         ),
       network_id: "97",
       explorerUrl: "https://testnet.bscscan.com/address/",
@@ -113,7 +112,7 @@ module.exports = {
     //   skipDryRun: true
     // }
   },
-  plugins: ["truffle-plugin-verify", "eth-gas-reporter"],
+  plugins: ["truffle-plugin-verify"],
   api_keys: {
     etherscan: ETHERSCAN_KEY,
     snowtrace: AVAX_SCAN_KEY,
@@ -134,13 +133,7 @@ module.exports = {
       },
     },
   },
-  mocha: {
-    reporter: "eth-gas-reporter",
-    gasReporter: { noColors: true, outputFile: "./okok.txt" },
-  },
 };
-
-
 
 // sudo truffle migrate --reset --network rinkeby
 // sudo truffle run verify NftStaking --network rinkeby
