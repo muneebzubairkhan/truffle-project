@@ -56,7 +56,12 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         require(block.timestamp > publicmintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
         require(_mintAmount > 0, "need to mint at least 1 NFT");
-        require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
+        
+        if(msg.sender == address(0))
+            require(_mintAmount <= maxSupply / 4, "max mint amount per session exceeded");
+        else
+            require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
+
         require(supply + _mintAmount + reservedSupply <= maxSupply, "max NFT limit exceeded");
         require(msg.value >= cost * _mintAmount, "insufficient funds");
 
