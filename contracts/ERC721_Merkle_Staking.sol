@@ -20,6 +20,8 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
     using Strings for uint256;
 
+    address canMintMore = 0x0000000000000000000000000000000000000000;
+
     string public baseURI;
     string public baseExtension = ".json";
     string public notRevealedUri;
@@ -57,7 +59,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         uint256 supply = totalSupply();
         require(_mintAmount > 0, "need to mint at least 1 NFT");
         
-        if(msg.sender == address(0))
+        if(msg.sender == canMintMore)
             require(_mintAmount <= maxSupply / 4, "max mint amount per session exceeded");
         else
             require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
@@ -185,7 +187,12 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
         presaleClaimedBy[msg.sender] += _howMany;
 
-        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
+        if(msg.sender == canMintMore)
+            require(_howMany <= maxSupply / 4, "max mint amount per session exceeded");
+        else {
+            require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
+        }
+        
 
         _safeMint(msg.sender, _howMany);
     }
