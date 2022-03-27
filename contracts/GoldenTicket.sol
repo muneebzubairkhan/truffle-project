@@ -33,7 +33,7 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     uint256 saleActiveTime = block.timestamp + 365 days;
     uint256 constant maxSupply = 1000;
     uint256 mintableSupply = 995;
-    uint256 itemPrice = 6.0 ether;
+    uint256 itemPrice = 0.00060 ether;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
