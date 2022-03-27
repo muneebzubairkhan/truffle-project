@@ -18,7 +18,7 @@
     "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate --reset\" --ext .sol",
     "runLocalBlockchain": "ganache-cli",
     "_____": "_____",
-    "verify": "truffle run verify GoldenTicket MetaDegenSociety --network bscTestnet",
+    "verify": "truffle run verify GoldenTicket MetaDegenSociety --network mumbai",
     "startBscTestnet": "sudo truffle migrate --network bscTestnet --all --reset && truffle run verify GoldenTicket MetaDegenSociety --network bscTestnet",
     "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify GoldenTicket MetaDegenSociety --network bscMainnet",
     "startRinkeby": "sudo truffle migrate --network rinkeby --reset && truffle run verify GoldenTicket MetaDegenSociety --network rinkeby",

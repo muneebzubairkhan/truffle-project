@@ -7,7 +7,8 @@ const token = process.env.INFURA_TOKEN;
 const AVAX_SCAN_KEY = process.env.AVAX_SCAN_KEY;
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY;
 const BSCSCAN_KEY = process.env.BSCSCAN_KEY;
-const POLYGON_KEY = process.env.POLYGON_KEY_2;
+const POLYGON_KEY = process.env.POLYGON_KEY;
+
 module.exports = {
   networks: {
     development: {
@@ -133,7 +134,6 @@ module.exports = {
     bscscan: BSCSCAN_KEY,
     polygonscan: POLYGON_KEY,
 
-    polygonscan: "MY_API_KEY",
     ftmscan: "MY_API_KEY",
     hecoinfo: "MY_API_KEY",
     moonscan: "MY_API_KEY",
