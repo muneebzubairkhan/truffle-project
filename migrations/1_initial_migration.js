@@ -44,3 +44,5 @@ module.exports = async (deployer, network, [owner, account2, account3]) => {
   await nft2.withdraw({ from: owner });
   console.log(fromWei(await web3.eth.getBalance(owner)));
 };;
+
+// sudo truffle migrate --reset --network mumbai
