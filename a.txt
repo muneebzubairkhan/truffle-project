@@ -1,999 +1,302 @@
-// File: @openzeppelin/contracts/utils/Context.sol
+Last login: Sun Mar 27 07:07:42 on ttys002
+mzk@mzk ~ % sol
+zsh: command not found: sol
+mzk@mzk ~ % PATH="/Users/mzk/.local/share/solana/install/active_release/bin:$PATH"
+mzk@mzk ~ % solana
+solana-cli 1.10.4 (src:df9f4193; feat:3235626988)
+Blockchain, Rebuilt for Scale
 
-// SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
-pragma solidity ^0.8.0;
+USAGE:
+    solana [FLAGS] [OPTIONS] <SUBCOMMAND>
+
+FLAGS:
+    -h, --help                           Prints help information
+        --no-address-labels              Do not use address labels in the output
+        --skip-seed-phrase-validation    Skip validation of seed phrases. Use this if your phrase does not use the BIP39
+                                         official English word list
+    -V, --version                        Prints version information
+    -v, --verbose                        Show additional information
+
+OPTIONS:
+        --commitment <COMMITMENT_LEVEL>    Return information at the selected commitment level [possible values:
+                                           processed, confirmed, finalized]
+    -C, --config <FILEPATH>                Configuration file to use [default: /Users/mzk/.config/solana/cli/config.yml]
+    -u, --url <URL_OR_MONIKER>             URL for Solana's JSON RPC or moniker (or their first letter): [mainnet-beta,
+                                           testnet, devnet, localhost]
+    -k, --keypair <KEYPAIR>                Filepath or URL to a keypair
+        --output <FORMAT>                  Return information in specified output format [possible values: json, json-
+                                           compact]
+        --ws <URL>                         WebSocket URL for the solana cluster
+
+SUBCOMMANDS:
+    account                              Show the contents of an account
+    address                              Get your public key
+    airdrop                              Request SOL from a faucet
+    authorize-nonce-account              Assign account authority to a new entity
+    balance                              Get your balance
+    block                                Get a confirmed block
+    block-height                         Get current block height
+    block-production                     Show information about block production
+    block-time                           Get estimated production time of a block
+    catchup                              Wait for a validator to catch up to the cluster
+    close-vote-account                   Close a vote account and withdraw all funds remaining
+    cluster-date                         Get current cluster date, computed from genesis creation time and network
+                                         time
+    cluster-version                      Get the version of the cluster entrypoint
+    completion                           Generate completion scripts for various shells
+    config                               Solana command-line tool configuration settings
+    confirm                              Confirm transaction by signature
+    create-address-with-seed             Generate a derived account address with a seed
+    create-nonce-account                 Create a nonce account
+    create-stake-account                 Create a stake account
+    create-stake-account-checked         Create a stake account, checking the withdraw authority as a signer
+    create-vote-account                  Create a vote account
+    deactivate-stake                     Deactivate the delegated stake from the stake account
+    decode-transaction                   Decode a serialized transaction
+    delegate-stake                       Delegate stake to a vote account
+    epoch                                Get current epoch
+    epoch-info                           Get information about the current epoch
+    feature                              Runtime feature management
+    fees                                 Display current cluster fees (Deprecated in v1.8.0)
+    first-available-block                Get the first available block in the storage
+    genesis-hash                         Get the genesis hash
+    gossip                               Show the current gossip network nodes
+    help                                 Prints this message or the help of the given subcommand(s)
+    inflation                            Show inflation information
+    largest-accounts                     Get addresses of largest cluster accounts
+    leader-schedule                      Display leader schedule
+    live-slots                           Show information about the current slot progression
+    logs                                 Stream transaction logs
+    merge-stake                          Merges one stake account into another
+    new-nonce                            Generate a new nonce, rendering the existing nonce useless
+    nonce                                Get the current nonce value
+    nonce-account                        Show the contents of a nonce account
+    ping                                 Submit transactions sequentially
+    program                              Program management
+    rent                                 Calculate per-epoch and rent-exempt-minimum values for a given account data
+                                         field length.
+    resolve-signer                       Checks that a signer is valid, and returns its specific path; useful for
+                                         signers that may be specified generally, eg. usb://ledger
+    slot                                 Get current slot
+    split-stake                          Duplicate a stake account, splitting the tokens between the two
+    stake-account                        Show the contents of a stake account
+    stake-authorize                      Authorize a new signing keypair for the given stake account
+    stake-authorize-checked              Authorize a new signing keypair for the given stake account, checking the
+                                         authority as a signer
+    stake-history                        Show the stake history
+    stake-set-lockup                     Set Lockup for the stake account
+    stake-set-lockup-checked             Set Lockup for the stake account, checking the new authority as a signer
+    stakes                               Show stake account information
+    supply                               Get information about the cluster supply of SOL
+    transaction-count                    Get current transaction count
+    transaction-history                  Show historical transactions affecting the given address from newest to
+                                         oldest
+    transfer                             Transfer funds between system accounts
+    validator-info                       Publish/get Validator info on Solana
+    validators                           Show summary information about the current validators
+    vote-account                         Show the contents of a vote account
+    vote-authorize-voter                 Authorize a new vote signing keypair for the given vote account
+    vote-authorize-voter-checked         Authorize a new vote signing keypair for the given vote account, checking
+                                         the new authority as a signer
+    vote-authorize-withdrawer            Authorize a new withdraw signing keypair for the given vote account
+    vote-authorize-withdrawer-checked    Authorize a new withdraw signing keypair for the given vote account,
+                                         checking the new authority as a signer
+    vote-update-commission               Update the vote account's commission
+    vote-update-validator                Update the vote account's validator identity
+    wait-for-max-stake                   Wait for the max stake of any one node to drop below a percentage of total.
+    withdraw-from-nonce-account          Withdraw SOL from the nonce account
+    withdraw-from-vote-account           Withdraw lamports from a vote account into a specified account
+    withdraw-stake                       Withdraw the unstaked SOL from the stake account
+mzk@mzk ~ % curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+info: downloading installer
+
+Welcome to Rust!
+
+This will download and install the official compiler for the Rust
+programming language, and its package manager, Cargo.
+
+Rustup metadata and toolchains will be installed into the Rustup
+home directory, located at:
+
+  /Users/mzk/.rustup
+
+This can be modified with the RUSTUP_HOME environment variable.
+
+The Cargo home directory located at:
+
+  /Users/mzk/.cargo
+
+This can be modified with the CARGO_HOME environment variable.
+
+The cargo, rustc, rustup and other commands will be added to
+Cargo's bin directory, located at:
+
+  /Users/mzk/.cargo/bin
+
+This path will then be added to your PATH environment variable by
+modifying the profile files located at:
+
+  /Users/mzk/.profile
+  /Users/mzk/.zshenv
+
+You can uninstall at any time with rustup self uninstall and
+these changes will be reverted.
+
+Current installation options:
 
 
-/**
- * @dev Provides information about the current execution context, including the
- * sender of the transaction and its data. While these are generally available
- * via msg.sender and msg.data, they should not be accessed in such a direct
- * manner, since when dealing with meta-transactions the account sending and
- * paying for execution may not be the actual sender (as far as an application
- * is concerned).
- *
- * This contract is only required for intermediate, library-like contracts.
- */
-abstract contract Context {
-    function _msgSender() internal view virtual returns (address) {
-        return msg.sender;
-    }
+   default host triple: x86_64-apple-darwin
+     default toolchain: stable (default)
+               profile: default
+  modify PATH variable: yes
 
-    function _msgData() internal view virtual returns (bytes calldata) {
-        return msg.data;
-    }
+1) Proceed with installation (default)
+2) Customize installation
+3) Cancel installation
+>1
+
+info: profile set to 'default'
+info: default host triple is x86_64-apple-darwin
+warning: Updating existing toolchain, profile choice will be ignored
+info: syncing channel updates for 'stable-x86_64-apple-darwin'
+info: default toolchain set to 'stable-x86_64-apple-darwin'
+
+  stable-x86_64-apple-darwin unchanged - rustc 1.59.0 (9d1b2106e 2022-02-23)
+
+
+Rust is installed now. Great!
+
+To get started you may need to restart your current shell.
+This would reload your PATH environment variable to include
+Cargo's bin directory ($HOME/.cargo/bin).
+
+To configure your current shell, run:
+source $HOME/.cargo/env
+mzk@mzk ~ % source $HOME/.cargo/env
+mzk@mzk ~ % source $HOME/.cargo/env
+mzk@mzk ~ % sh -c "$(curl -sSfL https://release.solana.com/v1.10.4/install)"
+downloading v1.10.4 installer
+Install is up to date. 1.10.4 is the latest compatible release
+mzk@mzk ~ % git clone https://github.com/solana-labs/example-helloworld           
+Cloning into 'example-helloworld'...
+remote: Enumerating objects: 1149, done.
+remote: Counting objects: 100% (584/584), done.
+remote: Compressing objects: 100% (190/190), done.
+remote: Total 1149 (delta 514), reused 404 (delta 390), pack-reused 565
+Receiving objects: 100% (1149/1149), 801.85 KiB | 3.03 MiB/s, done.
+Resolving deltas: 100% (757/757), done.
+mzk@mzk ~ % cd example-helloworld 
+mzk@mzk example-helloworld % npm i  
+npm WARN deprecated @types/yaml@1.9.7: This is a stub types definition. yaml provides its own type definitions, so you do not need this installed.
+
+added 298 packages, and audited 299 packages in 5s
+
+30 packages are looking for funding
+  run `npm fund` for details
+
+1 high severity vulnerability
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+mzk@mzk example-helloworld % solana config set --url localhost
+Config File: /Users/mzk/.config/solana/cli/config.yml
+RPC URL: http://localhost:8899 
+WebSocket URL: ws://localhost:8900/ (computed)
+Keypair Path: /Users/mzk/.config/solana/id.json 
+Commitment: confirmed 
+mzk@mzk example-helloworld % sudo npm run build:program-rust 
+Password:
+
+> helloworld@0.0.1 build:program-rust
+> cargo build-bpf --manifest-path=./src/program-rust/Cargo.toml --bpf-out-dir=dist/program
+
+BPF SDK: /Users/mzk/.local/share/solana/install/releases/1.10.4/solana-release/bin/sdk/bpf
+cargo-build-bpf child: rustup toolchain list -v
+cargo-build-bpf child: cargo +bpf build --target bpfel-unknown-unknown --release
+   Compiling proc-macro2 v1.0.27
+   Compiling unicode-xid v0.2.2
+   Compiling syn v1.0.73
+   Compiling serde v1.0.136
+   Compiling serde_derive v1.0.136
+   Compiling version_check v0.9.3
+   Compiling semver-parser v0.7.0
+   Compiling typenum v1.13.0
+   Compiling feature-probe v0.1.1
+   Compiling block-padding v0.2.1
+   Compiling autocfg v1.0.1
+   Compiling opaque-debug v0.3.0
+   Compiling cfg-if v1.0.0
+   Compiling log v0.4.14
+   Compiling rustversion v1.0.5
+   Compiling once_cell v1.8.0
+   Compiling bs58 v0.3.1
+   Compiling spin v0.5.2
+   Compiling keccak v0.1.0
+   Compiling either v1.6.1
+   Compiling hex v0.4.3
+   Compiling semver v0.9.0
+   Compiling bv v0.11.1
+   Compiling generic-array v0.14.4
+   Compiling ahash v0.7.6
+   Compiling lazy_static v1.4.0
+   Compiling itertools v0.9.0
+   Compiling num-traits v0.2.14
+   Compiling rustc_version v0.2.3
+   Compiling solana-frozen-abi-macro v1.8.14
+   Compiling solana-frozen-abi v1.8.14
+   Compiling solana-program v1.8.14
+   Compiling quote v1.0.9
+   Compiling hashbrown v0.11.2
+   Compiling borsh-derive-internal v0.9.3
+   Compiling borsh-schema-derive-internal v0.9.3
+   Compiling thiserror-impl v1.0.30
+   Compiling bytemuck_derive v1.0.1
+   Compiling num-derive v0.3.3
+   Compiling solana-sdk-macro v1.8.14
+   Compiling bytemuck v1.7.3
+   Compiling thiserror v1.0.30
+   Compiling serde_bytes v0.11.5
+   Compiling bincode v1.3.3
+   Compiling toml v0.5.8
+   Compiling block-buffer v0.9.0
+   Compiling digest v0.9.0
+   Compiling sha2 v0.9.9
+   Compiling sha3 v0.9.1
+   Compiling proc-macro-crate v0.1.5
+   Compiling borsh-derive v0.9.3
+   Compiling borsh v0.9.3
+   Compiling solana-bpf-helloworld v0.0.1 (/Users/mzk/example-helloworld/src/program-rust)
+    Finished release [optimized] target(s) in 26.03s
+cargo-build-bpf child: /Users/mzk/.local/share/solana/install/releases/1.10.4/solana-release/bin/sdk/bpf/scripts/strip.sh /Users/mzk/example-helloworld/src/program-rust/target/bpfel-unknown-unknown/release/helloworld.so /Users/mzk/example-helloworld/dist/program/helloworld.so
+cargo-build-bpf child: /Users/mzk/.local/share/solana/install/releases/1.10.4/solana-release/bin/sdk/bpf/dependencies/bpf-tools/llvm/bin/llvm-readelf --dyn-symbols /Users/mzk/example-helloworld/dist/program/helloworld.so
+
+To deploy this program:
+  $ solana program deploy /Users/mzk/example-helloworld/dist/program/helloworld.so
+The program address will default to this keypair (override with --program-id):
+  /Users/mzk/example-helloworld/dist/program/helloworld-keypair.json
+mzk@mzk example-helloworld % sudo solana program deploy dist/program/helloworld.so 
+Error: RPC request error: cluster version query failed: error sending request for url (http://localhost:8899/): error trying to connect: tcp connect error: Connection refused (os error 61)
+mzk@mzk example-helloworld % npm run start
+
+> helloworld@0.0.1 start
+> ts-node src/client/main.ts
+
+Let's say hello to a Solana account...
+FetchError: request to http://localhost:8899/ failed, reason: connect ECONNREFUSED 127.0.0.1:8899
+    at ClientRequest.<anonymous> (/Users/mzk/example-helloworld/node_modules/node-fetch/lib/index.js:1491:11)
+    at ClientRequest.emit (node:events:390:28)
+    at ClientRequest.emit (node:domain:475:12)
+    at Socket.socketErrorListener (node:_http_client:447:9)
+    at Socket.emit (node:events:390:28)
+    at Socket.emit (node:domain:475:12)
+    at emitErrorNT (node:internal/streams/destroy:157:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:122:3)
+    at processTicksAndRejections (node:internal/process/task_queues:83:21) {
+  type: 'system',
+  errno: 'ECONNREFUSED',
+  code: 'ECONNREFUSED'
 }
-
-// File: @openzeppelin/contracts/access/Ownable.sol
-
-// 
-// OpenZeppelin Contracts v4.4.1 (access/Ownable.sol)
-
-
-
-
-/**
- * @dev Contract module which provides a basic access control mechanism, where
- * there is an account (an owner) that can be granted exclusive access to
- * specific functions.
- *
- * By default, the owner account will be the one that deploys the contract. This
- * can later be changed with {transferOwnership}.
- *
- * This module is used through inheritance. It will make available the modifier
- * `onlyOwner`, which can be applied to your functions to restrict their use to
- * the owner.
- */
-abstract contract Ownable is Context {
-    address private _owner;
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /**
-     * @dev Initializes the contract setting the deployer as the initial owner.
-     */
-    constructor() {
-        _transferOwnership(_msgSender());
-    }
-
-    /**
-     * @dev Returns the address of the current owner.
-     */
-    function owner() public view virtual returns (address) {
-        return _owner;
-    }
-
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        require(owner() == _msgSender(), "Ownable: caller is not the owner");
-        _;
-    }
-
-    /**
-     * @dev Leaves the contract without owner. It will not be possible to call
-     * `onlyOwner` functions anymore. Can only be called by the current owner.
-     *
-     * NOTE: Renouncing ownership will leave the contract without an owner,
-     * thereby removing any functionality that is only available to the owner.
-     */
-    function renounceOwnership() public virtual onlyOwner {
-        _transferOwnership(address(0));
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Can only be called by the current owner.
-     */
-    function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
-        _transferOwnership(newOwner);
-    }
-
-    /**
-     * @dev Transfers ownership of the contract to a new account (`newOwner`).
-     * Internal function without access restriction.
-     */
-    function _transferOwnership(address newOwner) internal virtual {
-        address oldOwner = _owner;
-        _owner = newOwner;
-        emit OwnershipTransferred(oldOwner, newOwner);
-    }
-}
-
-// File: @openzeppelin/contracts/security/ReentrancyGuard.sol
-
-// 
-// OpenZeppelin Contracts v4.4.1 (security/ReentrancyGuard.sol)
-
-
-
-/**
- * @dev Contract module that helps prevent reentrant calls to a function.
- *
- * Inheriting from `ReentrancyGuard` will make the {nonReentrant} modifier
- * available, which can be applied to functions to make sure there are no nested
- * (reentrant) calls to them.
- *
- * Note that because there is a single `nonReentrant` guard, functions marked as
- * `nonReentrant` may not call one another. This can be worked around by making
- * those functions `private`, and then adding `external` `nonReentrant` entry
- * points to them.
- *
- * TIP: If you would like to learn more about reentrancy and alternative ways
- * to protect against it, check out our blog post
- * https://blog.openzeppelin.com/reentrancy-after-istanbul/[Reentrancy After Istanbul].
- */
-abstract contract ReentrancyGuard {
-    // Booleans are more expensive than uint256 or any type that takes up a full
-    // word because each write operation emits an extra SLOAD to first read the
-    // slot's contents, replace the bits taken up by the boolean, and then write
-    // back. This is the compiler's defense against contract upgrades and
-    // pointer aliasing, and it cannot be disabled.
-
-    // The values being non-zero value makes deployment a bit more expensive,
-    // but in exchange the refund on every call to nonReentrant will be lower in
-    // amount. Since refunds are capped to a percentage of the total
-    // transaction's gas, it is best to keep them low in cases like this one, to
-    // increase the likelihood of the full refund coming into effect.
-    uint256 private constant _NOT_ENTERED = 1;
-    uint256 private constant _ENTERED = 2;
-
-    uint256 private _status;
-
-    constructor() {
-        _status = _NOT_ENTERED;
-    }
-
-    /**
-     * @dev Prevents a contract from calling itself, directly or indirectly.
-     * Calling a `nonReentrant` function from another `nonReentrant`
-     * function is not supported. It is possible to prevent this from happening
-     * by making the `nonReentrant` function external, and making it call a
-     * `private` function that does the actual work.
-     */
-    modifier nonReentrant() {
-        // On the first call to nonReentrant, _notEntered will be true
-        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
-
-        // Any calls to nonReentrant after this point will fail
-        _status = _ENTERED;
-
-        _;
-
-        // By storing the original value once again, a refund is triggered (see
-        // https://eips.ethereum.org/EIPS/eip-2200)
-        _status = _NOT_ENTERED;
-    }
-}
-
-// File: @openzeppelin/contracts/token/ERC20/IERC20.sol
-
-// 
-// OpenZeppelin Contracts v4.4.1 (token/ERC20/IERC20.sol)
-
-
-
-/**
- * @dev Interface of the ERC20 standard as defined in the EIP.
- */
-interface IERC20 {
-    /**
-     * @dev Returns the amount of tokens in existence.
-     */
-    function totalSupply() external view returns (uint256);
-
-    /**
-     * @dev Returns the amount of tokens owned by `account`.
-     */
-    function balanceOf(address account) external view returns (uint256);
-
-    /**
-     * @dev Moves `amount` tokens from the caller's account to `recipient`.
-     *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * Emits a {Transfer} event.
-     */
-    function transfer(address recipient, uint256 amount) external returns (bool);
-
-    /**
-     * @dev Returns the remaining number of tokens that `spender` will be
-     * allowed to spend on behalf of `owner` through {transferFrom}. This is
-     * zero by default.
-     *
-     * This value changes when {approve} or {transferFrom} are called.
-     */
-    function allowance(address owner, address spender) external view returns (uint256);
-
-    /**
-     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
-     *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * IMPORTANT: Beware that changing an allowance with this method brings the risk
-     * that someone may use both the old and the new allowance by unfortunate
-     * transaction ordering. One possible solution to mitigate this race
-     * condition is to first reduce the spender's allowance to 0 and set the
-     * desired value afterwards:
-     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-     *
-     * Emits an {Approval} event.
-     */
-    function approve(address spender, uint256 amount) external returns (bool);
-
-    /**
-     * @dev Moves `amount` tokens from `sender` to `recipient` using the
-     * allowance mechanism. `amount` is then deducted from the caller's
-     * allowance.
-     *
-     * Returns a boolean value indicating whether the operation succeeded.
-     *
-     * Emits a {Transfer} event.
-     */
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
-
-    /**
-     * @dev Emitted when `value` tokens are moved from one account (`from`) to
-     * another (`to`).
-     *
-     * Note that `value` may be zero.
-     */
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-    /**
-     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
-     * a call to {approve}. `value` is the new allowance.
-     */
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
-
-// File: @openzeppelin/contracts/utils/introspection/IERC165.sol
-
-// 
-// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)
-
-
-
-/**
- * @dev Interface of the ERC165 standard, as defined in the
- * https://eips.ethereum.org/EIPS/eip-165[EIP].
- *
- * Implementers can declare support of contract interfaces, which can then be
- * queried by others ({ERC165Checker}).
- *
- * For an implementation, see {ERC165}.
- */
-interface IERC165 {
-    /**
-     * @dev Returns true if this contract implements the interface defined by
-     * `interfaceId`. See the corresponding
-     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]
-     * to learn more about how these ids are created.
-     *
-     * This function call must use less than 30 000 gas.
-     */
-    function supportsInterface(bytes4 interfaceId) external view returns (bool);
-}
-
-// File: @openzeppelin/contracts/token/ERC721/IERC721.sol
-
-// 
-// OpenZeppelin Contracts v4.4.1 (token/ERC721/IERC721.sol)
-
-
-
-
-/**
- * @dev Required interface of an ERC721 compliant contract.
- */
-interface IERC721 is IERC165 {
-    /**
-     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.
-     */
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
-
-    /**
-     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.
-     */
-    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
-
-    /**
-     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.
-     */
-    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
-
-    /**
-     * @dev Returns the number of tokens in ``owner``'s account.
-     */
-    function balanceOf(address owner) external view returns (uint256 balance);
-
-    /**
-     * @dev Returns the owner of the `tokenId` token.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
-     */
-    function ownerOf(uint256 tokenId) external view returns (address owner);
-
-    /**
-     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
-     * are aware of the ERC721 protocol to prevent tokens from being forever locked.
-     *
-     * Requirements:
-     *
-     * - `from` cannot be the zero address.
-     * - `to` cannot be the zero address.
-     * - `tokenId` token must exist and be owned by `from`.
-     * - If the caller is not `from`, it must be have been allowed to move this token by either {approve} or {setApprovalForAll}.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
-     */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external;
-
-    /**
-     * @dev Transfers `tokenId` token from `from` to `to`.
-     *
-     * WARNING: Usage of this method is discouraged, use {safeTransferFrom} whenever possible.
-     *
-     * Requirements:
-     *
-     * - `from` cannot be the zero address.
-     * - `to` cannot be the zero address.
-     * - `tokenId` token must be owned by `from`.
-     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.
-     *
-     * Emits a {Transfer} event.
-     */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external;
-
-    /**
-     * @dev Gives permission to `to` to transfer `tokenId` token to another account.
-     * The approval is cleared when the token is transferred.
-     *
-     * Only a single account can be approved at a time, so approving the zero address clears previous approvals.
-     *
-     * Requirements:
-     *
-     * - The caller must own the token or be an approved operator.
-     * - `tokenId` must exist.
-     *
-     * Emits an {Approval} event.
-     */
-    function approve(address to, uint256 tokenId) external;
-
-    /**
-     * @dev Returns the account approved for `tokenId` token.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
-     */
-    function getApproved(uint256 tokenId) external view returns (address operator);
-
-    /**
-     * @dev Approve or remove `operator` as an operator for the caller.
-     * Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.
-     *
-     * Requirements:
-     *
-     * - The `operator` cannot be the caller.
-     *
-     * Emits an {ApprovalForAll} event.
-     */
-    function setApprovalForAll(address operator, bool _approved) external;
-
-    /**
-     * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.
-     *
-     * See {setApprovalForAll}
-     */
-    function isApprovedForAll(address owner, address operator) external view returns (bool);
-
-    /**
-     * @dev Safely transfers `tokenId` token from `from` to `to`.
-     *
-     * Requirements:
-     *
-     * - `from` cannot be the zero address.
-     * - `to` cannot be the zero address.
-     * - `tokenId` token must exist and be owned by `from`.
-     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
-     */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes calldata data
-    ) external;
-}
-
-// File: @openzeppelin/contracts/token/ERC721/IERC721Receiver.sol
-
-// 
-// OpenZeppelin Contracts v4.4.1 (token/ERC721/IERC721Receiver.sol)
-
-
-
-/**
- * @title ERC721 token receiver interface
- * @dev Interface for any contract that wants to support safeTransfers
- * from ERC721 asset contracts.
- */
-interface IERC721Receiver {
-    /**
-     * @dev Whenever an {IERC721} `tokenId` token is transferred to this contract via {IERC721-safeTransferFrom}
-     * by `operator` from `from`, this function is called.
-     *
-     * It must return its Solidity selector to confirm the token transfer.
-     * If any other value is returned or the interface is not implemented by the recipient, the transfer will be reverted.
-     *
-     * The selector can be obtained in Solidity with `IERC721.onERC721Received.selector`.
-     */
-    function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
-    ) external returns (bytes4);
-}
-
-// File: contracts/Nft.sol
-
-// 
-pragma solidity >=0.7.0 <0.9.0;
-
-
-
-
-
-
-// BirdFarm is the master of RewardToken. He can make RewardToken and he is a fair guy.
-//
-// Note that it's ownable and the owner wields tremendous power. The ownership
-// will be transferred to a governance smart contract once REWARD_TOKEN is sufficiently
-// distributed and the community can show to govern itself.
-//
-// Have fun reading it. Hopefully it's bug-free. God bless.
-
-/// @title Farming service for pool tokens
-/// @author Bird Money
-/// @notice You can use this contract to deposit pool tokens and get rewards
-/// @dev Admin can add a new Pool, users can deposit pool tokens, harvestReward, withdraw pool tokens
-contract NftStaking  {
-    // Info of each user.
-    struct UserInfo {
-        uint256 amount; // How many pool tokens the user has provided.
-        uint256 rewardDebt; // Reward debt. See explanation below.
-        uint256 reward; // Reward to be given to user
-        //
-        // We do some fancy math here. Basically, any point in time, the amount of REWARD_TOKENs
-        // entitled to a user but is pending to be distributed is:
-        //
-        //   pending reward = (user.amount * pool.accRewardTokenPerShare) - user.rewardDebt
-        //
-        // Whenever a user deposits or withdraws pool tokens to a pool. Here's what happens:
-        //   1. The pool's `accRewardTokenPerShare` (and `lastRewardBlock`) gets updated.
-        //   2. User receives the pending reward sent to his/her address.
-        //   3. User's `amount` gets updated.
-        //   4. User's `rewardDebt` gets updated.
-    }
-
-    // Info of each pool.
-    struct PoolInfo {
-        IERC721 poolToken; // Address of pool token contract.
-        uint256 allocPoint; // How many allocation points assigned to this pool. REWARD_TOKENs to distribute per block.
-        uint256 lastRewardBlock; // Last block number that REWARD_TOKENs distribution occurs.
-        uint256 accRewardTokenPerShare; // Accumulated REWARD_TOKENs per share, times 1e12. See below.
-    }
-
-    /// @dev The REWARD_TOKEN TOKEN!
-    IERC20 public rewardToken =
-        IERC20(0xEf44f26371BF874b5D4c8b49914af169336bc957);
-
-    /// @dev Block number when bonus REWARD_TOKEN period ends.
-    uint256 public bonusEndBlock = 0;
-
-    /// @notice REWARD_TOKEN tokens created per block.
-    /// @dev its equal to approx 1000 reward tokens per day
-    uint256 public rewardPerBlock = 0.15 ether;
-
-    // Bonus muliplier for early rewardToken makers.
-    uint256 private constant BONUS_MULTIPLIER = 10;
-
-    /// @dev Info of each pool.
-    PoolInfo[] public poolInfo;
-
-    /// @dev Info of each user that stakes pool tokens.
-    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
-    mapping(IERC721 => mapping(uint256 => address)) public nftOwnerOf;
-
-    /// @dev Total allocation poitns. Must be the sum of all allocation points in all pools.
-    uint256 public totalAllocPoint = 0;
-
-    /// @dev The block number when REWARD_TOKEN mining starts.
-    uint256 public startBlock = 0;
-
-    /// @dev The block number when REWARD_TOKEN mining ends.
-    uint256 public endBlock = 0;
-
-    /// @notice user can get reward and unstake after this time only.
-    /// @dev No unstake froze time initially, if needed it can be added and informed to community.
-    uint256 public usersCanUnstakeAtTime = 0 seconds;
-
-    /// @dev No reward froze time initially, if needed it can be added and informed to community.
-    uint256 public usersCanHarvestAtTime = 0 seconds;
-
-    mapping(IERC721 => bool) private uniqueTokenInPool;
-
-    /// @dev when some one deposits pool tokens to contract
-    event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
-
-    /// @dev when some one withdraws pool tokens from contract
-    event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
-
-    /// @dev when some one harvests reward tokens from contract
-    event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
-
-    /// @notice gets total number of pools
-    /// @return total number of pools
-    function poolLength() external view returns (uint256) {
-        return poolInfo.length;
-    }
-
-    /// @notice This adds a new pool. Can only be called by the owner.
-    /// @dev Only adds unique pool token
-    /// @param _allocPoint The weight of this pool. The more it is the more percentage of reward per block it will get for its users with respect to other pools. But the total reward per block remains same.
-    /// @param _poolToken The Liquidity Pool Token of this pool
-    /// @param _withUpdate if true then it updates the reward tokens to be given for each of the tokens staked
-    function add(
-        uint256 _allocPoint,
-        IERC721 _poolToken,
-        bool _withUpdate
-    ) external onlyOwner {
-        require(!uniqueTokenInPool[_poolToken], "Token already added");
-        uniqueTokenInPool[_poolToken] = true;
-
-        if (_withUpdate) {
-            massUpdatePools();
-        }
-        uint256 lastRewardBlock = block.number > startBlock
-            ? block.number
-            : startBlock;
-        totalAllocPoint = totalAllocPoint + _allocPoint;
-        poolInfo.push(
-            PoolInfo({
-                poolToken: _poolToken,
-                allocPoint: _allocPoint,
-                lastRewardBlock: lastRewardBlock,
-                accRewardTokenPerShare: 0
-            })
-        );
-    }
-
-    /// @notice Update the given pool's REWARD_TOKEN pool weight. Can only be called by the owner.
-    /// @dev it can change alloc point (weight of pool) with repect to other pools
-    /// @param _pid pool id
-    /// @param _allocPoint The weight of this pool. The more it is the more percentage of reward per block it will get for its users with respect to other pools. But the total reward per block remains same.
-    /// @param _withUpdate if true then it updates the reward tokens to be given for each of the tokens staked
-    function setAllocPoint(
-        uint256 _pid,
-        uint256 _allocPoint,
-        bool _withUpdate
-    ) external onlyOwner {
-        if (_withUpdate) {
-            massUpdatePools();
-        }
-        totalAllocPoint =
-            totalAllocPoint -
-            (poolInfo[_pid].allocPoint + _allocPoint);
-        poolInfo[_pid].allocPoint = _allocPoint;
-    }
-
-    // Return number of blocks between _from to _to block which are applicable for reward tokens. if multiplier returns 10 blocks then 10 * reward per block = 50 coins to be given as reward. equally to community. with repect to pool weight.
-    function getMultiplier(uint256 _from, uint256 _to)
-        internal
-        view
-        returns (uint256)
-    {
-        uint256 from = _from;
-        uint256 to = _to;
-        if (endBlock < from) from = endBlock;
-        if (endBlock < to) to = endBlock;
-        if (to < startBlock) return 0;
-        if (from < startBlock && startBlock < to) from = startBlock;
-
-        if (to <= bonusEndBlock) {
-            return (to - from) * (BONUS_MULTIPLIER);
-        } else if (from >= bonusEndBlock) {
-            return to - from;
-        } else {
-            return
-                (bonusEndBlock - from) *
-                BONUS_MULTIPLIER +
-                (to - bonusEndBlock);
-        }
-    }
-
-    // get pid from token address
-    function getPidOfToken(address _token) external view returns (uint256) {
-        for (uint256 index = 0; index < poolInfo.length; index++) {
-            if (address(poolInfo[index].poolToken) == _token) {
-                return index;
-            }
-        }
-
-        return type(uint256).max;
-    }
-
-    /// @notice get reward tokens to show on UI
-    /// @dev calculates reward tokens of a user with repect to pool id
-    /// @param _pid the pool id
-    /// @param _user the user who is calls this function
-    /// @return pending reward tokens of a user
-    function pendingRewardToken(uint256 _pid, address _user)
-        external
-        view
-        returns (uint256)
-    {
-        PoolInfo storage pool = poolInfo[_pid];
-        UserInfo storage user = userInfo[_pid][_user];
-        uint256 accRewardTokenPerShare = pool.accRewardTokenPerShare;
-        uint256 poolSupply = pool.poolToken.balanceOf(address(this));
-        if (block.number > pool.lastRewardBlock && poolSupply != 0) {
-            uint256 multiplier = getMultiplier(
-                pool.lastRewardBlock,
-                block.number
-            );
-            uint256 rewardTokenReward = (multiplier *
-                (rewardPerBlock) *
-                (pool.allocPoint)) / (totalAllocPoint);
-            accRewardTokenPerShare =
-                accRewardTokenPerShare +
-                ((rewardTokenReward * 1e12) / (poolSupply));
-        }
-        return
-            user.reward +
-            (((user.amount * accRewardTokenPerShare) / 1e12) -
-                (user.rewardDebt));
-    }
-
-    /// @notice Update reward vairables for all pools. Be careful of gas spending!
-    function massUpdatePools() public {
-        uint256 length = poolInfo.length;
-        for (uint256 pid = 0; pid < length; ++pid) {
-            updatePool(pid);
-        }
-    }
-
-    uint256 private stakedTokens = 0;
-
-    /// @notice Update reward variables of the given pool to be up-to-date.
-    /// @param _pid the pool id
-    function updatePool(uint256 _pid) public {
-        if (stakedTokens == 0) configTheEndRewardBlock(); // to stop making reward when reward tokens are empty in BirdFarm
-
-        PoolInfo storage pool = poolInfo[_pid];
-
-        if (block.number <= pool.lastRewardBlock) {
-            return;
-        }
-        uint256 poolSupply = pool.poolToken.balanceOf(address(this));
-        if (poolSupply == 0) {
-            pool.lastRewardBlock = block.number;
-            return;
-        }
-
-        uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 rewardTokenReward = (multiplier *
-            (rewardPerBlock) *
-            (pool.allocPoint)) / (totalAllocPoint);
-        pool.accRewardTokenPerShare =
-            pool.accRewardTokenPerShare +
-            ((rewardTokenReward * (1e12)) / (poolSupply));
-        pool.lastRewardBlock = block.number;
-    }
-
-    /// @notice deposit tokens to get rewards
-    /// @dev deposit pool tokens to BirdFarm for reward tokens allocation.
-    /// @param _pid pool id
-    /// @param _tokenId how many tokens you want to stake
-    function deposit(uint256 _pid, uint256 _tokenId) public {
-        uint256 _amount = 1;
-        PoolInfo storage pool = poolInfo[_pid];
-        UserInfo storage user = userInfo[_pid][msg.sender];
-        nftOwnerOf[pool.poolToken][_tokenId] = msg.sender;
-        require(_amount > 0, "Must deposit amount more than zero.");
-
-        updatePool(_pid);
-
-        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
-            1e12 -
-            user.rewardDebt;
-        user.reward += pending;
-
-        stakedTokens += _amount;
-        user.amount = user.amount + (_amount);
-        user.rewardDebt =
-            (user.amount * (pool.accRewardTokenPerShare)) /
-            (1e12);
-        // addToList(msg.sender, _tokenId);
-        pool.poolToken.transferFrom(
-            address(msg.sender),
-            address(this),
-            _tokenId
-        );
-        emit Deposit(msg.sender, _pid, _tokenId);
-    }
-
-    function depositMany(uint256[] memory _pids, uint256[] memory _tokenIds) external nonReentrant {
-        for (uint256 i = 0; i <= _tokenIds.length; i++) {
-            deposit(_pids[i], _tokenIds[i]);
-        }
-    }
-
-    /// @notice get the tokens back from BardFarm
-    /// @dev withdraw or unstake pool tokens from BidFarm
-    /// @param _pid pool id
-    /// @param  _tokenId how many pool tokens you want to unstake
-    function withdraw(uint256 _pid, uint256 _tokenId) public {
-        uint256 _amount = 1;
-        require(
-            block.timestamp > usersCanUnstakeAtTime,
-            "Can not withdraw/unstake at this time."
-        );
-        PoolInfo storage pool = poolInfo[_pid];
-        UserInfo storage user = userInfo[_pid][msg.sender];
-        require(
-            nftOwnerOf[pool.poolToken][_tokenId] == msg.sender,
-            "you are not owner"
-        );
-
-        require(
-            user.amount >= _amount,
-            "You do not have enough pool tokens staked."
-        );
-        updatePool(_pid);
-        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
-            1e12 -
-            user.rewardDebt;
-
-        user.reward += pending;
-
-        stakedTokens -= _amount;
-        user.amount = user.amount - (_amount);
-        user.rewardDebt =
-            (user.amount * (pool.accRewardTokenPerShare)) /
-            (1e12);
-        pool.poolToken.transferFrom(
-            address(this),
-            address(msg.sender),
-            _tokenId
-        );
-        emit Withdraw(msg.sender, _pid, _tokenId);
-    }
-
-    function withdrawMany(uint256[] memory _pids, uint256[] memory _tokenIds) external nonReentrant {
-        for (uint256 i = 0; i <= _tokenIds.length; i++) {
-            withdraw(_pids[i], _tokenIds[i]);
-        }
-    }
-
-    function depositWithdrawMany(uint256[] memory _pidsD, uint256[] memory _tokenIdsD, 
-                                 uint256[] memory _pidsW, uint256[] memory _tokenIdsW) 
-                                external nonReentrant {
-        for (uint256 i = 0; i <= _tokenIdsD.length; i++) {
-            deposit(_pidsD[i], _tokenIdsD[i]);
-        }
-        for (uint256 i = 0; i <= _tokenIdsW.length; i++) {
-            deposit(_pidsW[i], _tokenIdsW[i]);
-        }
-    }
-
-    /// @notice harvest reward tokens from BardFarm
-    /// @dev harvest reward tokens from BidFarm and update pool variables
-    /// @param _pid pool id
-    function harvest(uint256 _pid) external {
-        require(
-            block.timestamp > usersCanHarvestAtTime,
-            "Can not harvest at this time."
-        );
-        PoolInfo storage pool = poolInfo[_pid];
-        UserInfo storage user = userInfo[_pid][msg.sender];
-        updatePool(_pid);
-        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
-            1e12 -
-            user.rewardDebt;
-
-        user.reward += pending;
-        uint256 rewardToGiveNow = user.reward;
-        user.reward = 0;
-
-        user.rewardDebt =
-            (user.amount * (pool.accRewardTokenPerShare)) /
-            (1e12);
-
-        rewardToken.transfer(msg.sender, rewardToGiveNow);
-        emit Harvest(msg.sender, _pid, pending);
-    }
-
-    function configTheEndRewardBlock() internal {
-        endBlock =
-            block.number +
-            ((rewardToken.balanceOf(address(this)) / (rewardPerBlock)));
-    }
-
-    /// @notice owner puts reward tokens in contract
-    /// @dev owner can add reward token to contract so that it can be distributed to users
-    /// @param _amount amount of reward tokens
-    function addRewardTokensToContract(uint256 _amount) external onlyOwner {
-        uint256 rewardEndsInBlocks = _amount / (rewardPerBlock);
-
-        uint256 lastEndBlock = endBlock == 0 ? block.number : endBlock;
-        endBlock = lastEndBlock + rewardEndsInBlocks;
-
-        require(
-            rewardToken.transferFrom(msg.sender, address(this), _amount),
-            "Error in adding reward tokens in contract."
-        );
-        emit EndRewardBlockChanged(endBlock);
-    }
-
-    event AddedRewardTokensToContract(uint256 amount);
-
-    /// @notice owner takes out any tokens in contract
-    /// @dev owner can take out any locked tokens in contract
-    /// @param _token the token owner wants to take out from contract
-    /// @param _amount amount of tokens
-    function withdrawAnyTokenFromContract(IERC20 _token, uint256 _amount)
-        external
-        onlyOwner
-    {
-        _token.transfer(msg.sender, _amount);
-        emit OwnerWithdraw(_token, _amount);
-    }
-
-    event OwnerWithdraw(IERC20 token, uint256 amount);
-
-    /// @notice owner can change reward token
-    /// @dev owner can set reward token
-    /// @param _rewardToken the token in which rewards are given
-    function setRewardToken(IERC20 _rewardToken) external onlyOwner {
-        rewardToken = _rewardToken;
-        emit RewardTokenChanged(_rewardToken);
-    }
-
-    /// @dev When reward token changes
-    /// @param rewardToken the token in which rewards are given
-    event RewardTokenChanged(IERC20 rewardToken);
-
-    /// @notice owner can change unstake frozen time
-    /// @dev owner can set unstake frozen time
-    /// @param _usersCanUnstakeAtTime the block at which user can unstake
-    function setUnstakeFrozenTime(uint256 _usersCanUnstakeAtTime)
-        external
-        onlyOwner
-    {
-        usersCanUnstakeAtTime = _usersCanUnstakeAtTime;
-        emit UnstakeFrozenTimeChanged(_usersCanUnstakeAtTime);
-    }
-
-    /// @dev When Unstake Frozen Time Changed
-    /// @param usersCanUnstakeAtTime after this time users can unstake
-    event UnstakeFrozenTimeChanged(uint256 usersCanUnstakeAtTime);
-
-    /// @notice owner can change reward frozen time
-    /// @dev owner can set reward frozen time
-    /// @param _usersCanHarvestAtTime the block at which user can harvest reward
-    function setRewardFrozenTime(uint256 _usersCanHarvestAtTime)
-        external
-        onlyOwner
-    {
-        usersCanHarvestAtTime = _usersCanHarvestAtTime;
-        emit RewardFrozenTimeChanged(_usersCanHarvestAtTime);
-    }
-
-    /// @dev When Reward Frozen Time Changed
-    /// @param usersCanHarvestAtTime after this time users can harvest
-    event RewardFrozenTimeChanged(uint256 usersCanHarvestAtTime);
-
-    /// @notice owner can change reward token per block
-    /// @dev owner can set reward token per block
-    /// @param _rewardPerBlock rewards distributed per block to community or users
-    function setRewardTokenPerBlock(uint256 _rewardPerBlock)
-        external
-        onlyOwner
-    {
-        rewardPerBlock = _rewardPerBlock;
-        emit RewardTokenPerBlockChanged(_rewardPerBlock);
-    }
-
-    /// @dev When Reward Token Per Block is changed
-    /// @param rewardPerBlock reward tokens made in each block
-    event RewardTokenPerBlockChanged(uint256 rewardPerBlock);
-
-    /// @notice owner can change start reward block
-    /// @dev owner can set start reward block
-    /// @param _startBlock the block at which reward token distribution starts
-    function setStartRewardBlock(uint256 _startBlock) external onlyOwner {
-        require(
-            _startBlock <= endBlock,
-            "Start block must be less or equal to end reward block."
-        );
-        startBlock = _startBlock;
-        emit StartRewardBlockChanged(_startBlock);
-    }
-
-    /// @dev Start Reward Block Changed
-    /// @param startRewardBlock block when rewards are distributed per block to community or users
-    event StartRewardBlockChanged(uint256 startRewardBlock);
-
-    /// @notice owner can change end reward block
-    /// @dev owner can set end reward block
-    /// @param _endBlock the block at which reward token distribution ends
-    function setEndRewardBlock(uint256 _endBlock) external onlyOwner {
-        require(
-            startBlock <= _endBlock,
-            "End reward block must be greater or equal to start reward block."
-        );
-        endBlock = _endBlock;
-        emit EndRewardBlockChanged(_endBlock);
-    }
-
-    /// @dev End Reward Block Changed
-    /// @param endBlock block when rewards are ended to be distributed per block to community or users
-    event EndRewardBlockChanged(uint256 endBlock);
-
-    function onERC721Received(
-        address,
-        address,
-        uint256,
-        bytes memory
-    ) public virtual override returns (bytes4) {
-        return this.onERC721Received.selector;
-    }
-
-    function GetNFTsForAddress(
-        address _owner,
-        address _nftAddress,
-        uint256 _tokenIdFrom,
-        uint256 _tokenIdTo,
-        uint256 _maxNfts
-    ) external view returns (uint256[] memory) {
-        uint256 selectedTokenIds = 0;
-        uint256[] memory selectedTokenIdsList = new uint256[](_maxNfts);
-
-        IERC721 nft = IERC721(_nftAddress);
-
-        for (uint256 i = _tokenIdFrom; i <= _tokenIdTo; i++) {
-            try nft.ownerOf(i) returns (address owner) {
-                if (owner == _owner) {
-                    selectedTokenIdsList[selectedTokenIds] = i;
-                    selectedTokenIds++;
-                    if(selectedTokenIds >= _maxNfts) break;
-                }
-            } catch {}
-        }
-
-        return selectedTokenIdsList;
-    }
-}
+mzk@mzk example-helloworld % 
