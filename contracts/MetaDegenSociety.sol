@@ -33,7 +33,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     uint256 saleActiveTime = block.timestamp + 365 days;
     uint256 constant maxSupply = 9999;
     uint256 mintableSupply = 9700;
-    uint256 itemPrice = 0.00120 ether;
+    uint256 itemPrice = 0.00090 ether;
 
     ERC721A goldenTicket;
     mapping(uint256 => bool) public radeemed;
