@@ -10,39 +10,40 @@ module.exports = async (deployer, network, [owner, account2, account3]) => {
 
   // console.log(fromWei(await web3.eth.getBalance(owner)));
   // //
-  // // let nft1 = await deployer.deploy(Nft1, { from: owner });
-  // // let nft2 = await deployer.deploy(Nft2, { from: owner });
-  
+  let nft1 = await deployer.deploy(Nft1, { from: owner });
+  let nft2 = await deployer.deploy(Nft2, { from: owner });
+
   // //
   // let nft1 = await Nft1.deployed();
+  // let nft1 = await deployer.deploy(Nft1, { from: owner });
   // await nft1.setSaleActiveTime(0, { from: owner });
   // await nft1.purchaseTokens(2, {
-  //   value: toWei("0.00120", "ether"),
+  //   value: toWei("0.00090", "ether"),
   //   from: owner,
   // });
   // console.log(fromWei(await web3.eth.getBalance(owner)));
   // await nft1.withdraw({ from: owner });
   // console.log(fromWei(await web3.eth.getBalance(owner)));
 
-  //
-  let nft2 = await Nft2.deployed();
+  // // let nft2 = await Nft2.deployed();
+  // let nft2 = await deployer.deploy(Nft2, { from: owner });
   // await nft2.setGoldenTicket(nft1.address, { from: owner });
   // await nft2.setSaleActiveTime(0, { from: owner });
   // await nft2.purchaseTokens(2, {
-  //   value: toWei("0.00240", "ether"),
+  //   value: toWei("0.00180", "ether"),
   //   from: owner,
   // });
   // console.log(fromWei(await web3.eth.getBalance(owner)));
   // await nft2.withdraw({ from: owner });
   // console.log(fromWei(await web3.eth.getBalance(owner)));
 
-  await nft2.purchaseTokensWithGoldenTickets([1, 2], {
-    from: owner,
-    value: toWei("0.00120", "ether"),
-  });
-  console.log(fromWei(await web3.eth.getBalance(owner)));
-  await nft2.withdraw({ from: owner });
-  console.log(fromWei(await web3.eth.getBalance(owner)));
+  // await nft2.purchaseTokensWithGoldenTickets([1, 2], {
+  //   from: owner,
+  //   value: toWei("0.00090", "ether"),
+  // });
+  // console.log(fromWei(await web3.eth.getBalance(owner)));
+  // await nft2.withdraw({ from: owner });
+  // console.log(fromWei(await web3.eth.getBalance(owner)));
 };;
 
 // sudo truffle migrate --reset --network mumbai
