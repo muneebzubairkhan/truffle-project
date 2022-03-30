@@ -10,10 +10,10 @@ module.exports = async (deployer, network, [owner1, owner, owner2]) => {
 
   // console.log(fromWei(await web3.eth.getBalance(owner)));
   // //
-  let nft1 = await deployer.deploy(Nft1, { from: owner });
-  let nft2 = await deployer.deploy(Nft2, { from: owner });
+  // let nft1 = await deployer.deploy(Nft1, { from: owner });
+  // let nft2 = await deployer.deploy(Nft2, { from: owner });
 
-  // //
+  // // //
   // let nft1 = await Nft1.deployed();
   // // let nft1 = await deployer.deploy(Nft1, { from: owner });
   // await nft1.setSaleActiveTime(0, { from: owner });
@@ -35,9 +35,7 @@ module.exports = async (deployer, network, [owner1, owner, owner2]) => {
   //   from: owner,
   // });
 
-  // console.log(fromWei(await web3.eth.getBalance(owner)));
   // await nft2.withdraw({ from: owner });
-  // console.log(fromWei(await web3.eth.getBalance(owner)));
 };;
 
 // sudo truffle migrate --reset --network mumbai
