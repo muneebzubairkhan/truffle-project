@@ -82,8 +82,8 @@ module.exports = {
           "https://matic-mumbai.chainstacklabs.com"
         ),
       network_id: "80001",
-      gas: "20000000",
-      gasPrice: toWei("20", "gwei"),
+      // gas: "20000000",
+      // gasPrice: toWei("20", "gwei"),
       explorerUrl: "https://mumbai.polygonscan.com/address/",
     },
     // bscMainnet: {

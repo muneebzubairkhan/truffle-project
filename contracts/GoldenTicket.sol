@@ -155,4 +155,30 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
         return projectProxy[_operator] ? true : super.isApprovedForAll(_owner, _operator);
     }
+
+    ///////////////////////////////////////
+    // CAN NOT SELL A USED GOLDEN TICKET //
+    ///////////////////////////////////////
+
+    MetaDegenSociety metaDegenSociety;
+
+    function setMetaDegenSociety(address _metaDegenSociety) external onlyOwner {
+        metaDegenSociety = MetaDegenSociety(_metaDegenSociety);
+    }
+
+    function _beforeTokenTransfers(
+        address from,
+        address to,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal override {
+        require(!metaDegenSociety.redeemed(startTokenId), "Can not transfer redeemed golden ticket");
+
+        super._beforeTokenTransfers(from, to, startTokenId, quantity);
+    }
+
+}
+
+contract MetaDegenSociety {
+    mapping(uint256 => bool) public redeemed;
 }
