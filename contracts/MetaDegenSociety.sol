@@ -41,7 +41,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     mapping(uint256 => bool) public redeemed;
 
     constructor() {
-        _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
+        _setDefaultRoyalty(msg.sender, 2_50); // 2.50%
     }
 
     /// @notice Purchase multiple NFTs at once
