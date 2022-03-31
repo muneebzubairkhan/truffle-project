@@ -32,12 +32,8 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     string baseURI = "ipfs://QmfKgWoKSDDU1qnLwGuRQq3wfW3fPrue4wEWGNgXfFkZHw/";
     uint256 saleActiveTime = block.timestamp + 365 days;
     uint256 constant maxSupply = 1000;
-    uint256 mintableSupply = 995;
-    uint256 itemPrice = 0.00045 ether;
-
-    constructor() {
-        _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
-    }
+    uint256 mintableSupply = 980;
+    uint256 itemPrice = 45 ether;
 
     /// @notice Purchase multiple NFTs at once
     function purchaseTokens(uint256 _howMany) external payable nonReentrant {
