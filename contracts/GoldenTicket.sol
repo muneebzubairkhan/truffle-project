@@ -91,7 +91,7 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     ////////////////////
 
     /// @notice get all nfts of a person
-    function walletOfOwner(address _owner) external view returns (uint256[] memory) {
+    function nftsOf(address _owner) external view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
         for (uint256 i; i < ownerTokenCount; i++) tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
@@ -160,25 +160,15 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     // CAN NOT SELL A USED GOLDEN TICKET //
     ///////////////////////////////////////
 
-    MetaDegenSociety metaDegenSociety;
+    address metaDegenSociety;
 
     function setMetaDegenSociety(address _metaDegenSociety) external onlyOwner {
-        metaDegenSociety = MetaDegenSociety(_metaDegenSociety);
+        metaDegenSociety = _metaDegenSociety;
     }
 
-    function _beforeTokenTransfers(
-        address from,
-        address to,
-        uint256 startTokenId,
-        uint256 quantity
-    ) internal override {
-        require(!metaDegenSociety.redeemed(startTokenId), "Can not transfer redeemed golden ticket");
+    function burnRedeemed(uint256[] memory tokenIds) external {
+        require(msg.sender == metaDegenSociety, "You are not MetaDegenSociety");
 
-        super._beforeTokenTransfers(from, to, startTokenId, quantity);
+        for (uint256 i = 0; i < tokenIds.length; i++) burn(tokenIds[i]);
     }
-
-}
-
-contract MetaDegenSociety {
-    mapping(uint256 => bool) public redeemed;
 }

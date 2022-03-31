@@ -28,6 +28,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/ERC721A.sol";
 
+import "./GoldenTicket.sol";
+
 contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
     string baseURI = "ipfs://QmTePqY26AcTBNzThaJdSyobDtJRJpDx7ime9m81ji1iXV/";
     uint256 saleActiveTime = block.timestamp + 365 days;
@@ -35,7 +37,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     uint256 mintableSupply = 9700;
     uint256 itemPrice = 0.00090 ether;
 
-    ERC721A goldenTicket;
+    GoldenTicket goldenTicket;
     mapping(uint256 => bool) public redeemed;
 
     constructor() {
@@ -50,8 +52,9 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         // full fill some requirements
         require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
-        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
+        
+        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
 
         // Pay the price
         require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
@@ -66,7 +69,6 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         // full fill some requirements
         require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
-        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
 
         // Pay the price
@@ -75,6 +77,8 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
             require(!redeemed[_goldenTicketIds[i]], "Golden ticket already redeemed.");
             redeemed[_goldenTicketIds[i]] = true;
         }
+
+        goldenTicket.burnRedeemed(_goldenTicketIds);
     }
 
     /// @notice Owner can withdraw from here
@@ -82,7 +86,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function setGoldenTicket(ERC721A _goldenTicket) external onlyOwner {
+    function setGoldenTicket(GoldenTicket _goldenTicket) external onlyOwner {
         goldenTicket = _goldenTicket;
     }
 
@@ -118,7 +122,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     ////////////////////
 
     /// @notice get all nfts of a person
-    function walletOfOwner(address _owner) external view returns (uint256[] memory) {
+    function nftsOf(address _owner) external view returns (uint256[] memory) {
         uint256 ownerTokenCount = balanceOf(_owner);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
         for (uint256 i; i < ownerTokenCount; i++) tokenIds[i] = tokenOfOwnerByIndex(_owner, i);

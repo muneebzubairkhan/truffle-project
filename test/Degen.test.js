@@ -3,10 +3,11 @@ const { makeUiCode } = require("../migrations/helper.js");
 
 const Nft2 = artifacts.require("MetaDegenSociety");
 const Nft1 = artifacts.require("GoldenTicket");
+const log = console.log;
 
 contract("Nft", async ([owner1, owner, owner2]) => {
   it("deploy smart contract", async () => {
-    // assert("100" === fromWei(await web3.eth.getBalance(owner)));
+    assert("100" === fromWei(await web3.eth.getBalance(owner)));
     //
     let goldenTicket = await Nft1.new({ from: owner });
     let metaDegenSociety = await Nft2.new({ from: owner });
@@ -22,9 +23,9 @@ contract("Nft", async ([owner1, owner, owner2]) => {
       value: toWei("0.00180", "ether"),
       from: owner,
     });
-    // assert("99.9982" === fromWei(await web3.eth.getBalance(owner)));
+    assert("99.9982" === fromWei(await web3.eth.getBalance(owner)));
     await goldenTicket.withdraw({ from: owner });
-    // assert("100" === fromWei(await web3.eth.getBalance(owner)));
+    assert("100" === fromWei(await web3.eth.getBalance(owner)));
 
     //
 
@@ -33,26 +34,31 @@ contract("Nft", async ([owner1, owner, owner2]) => {
       value: toWei("0.00180", "ether"),
       from: owner,
     });
-    // assert("99.9982" === fromWei(await web3.eth.getBalance(owner)));
+    assert("99.9982" === fromWei(await web3.eth.getBalance(owner)));
     await metaDegenSociety.withdraw({ from: owner });
-    // assert("100" === fromWei(await web3.eth.getBalance(owner)));
+    assert("100" === fromWei(await web3.eth.getBalance(owner)));
 
-    // assert("2" === "" + (await metaDegenSociety.balanceOf(owner)));
-    await metaDegenSociety.purchaseTokensWithGoldenTickets([1, 2], {
+    assert("2" === "" + (await metaDegenSociety.balanceOf(owner)));
+    await metaDegenSociety.purchaseTokensWithGoldenTickets([2, 3], {
       from: owner,
     });
-    // assert("4" === "" + (await metaDegenSociety.balanceOf(owner)));
-
+    assert("4" === "" + (await metaDegenSociety.balanceOf(owner)));
+    
+    let require;
     try {
-      await goldenTicket.safeTransferFrom(owner, owner1, 2, { from: owner });
+      await goldenTicket.safeTransferFrom(owner, owner1, 3, { from: owner });
+      require = false;
     } catch (e) {
-      // e && console.error(e.message);
+      require = true;
     }
 
-    await goldenTicket.safeTransferFrom(owner, owner1, 3, { from: owner });
+    assert(require);
+
+    const nftsOfOwner = await goldenTicket.nftsOf(owner);
+    nftsOfOwner.map((nft) => log("token id " + nft));
 
     //
-    makeUiCode("mumbai", { nft1: goldenTicket, nft2: metaDegenSociety });
+    // makeUiCode("mumbai", { goldenTicket, metaDegenSociety });
   });
 });
 
