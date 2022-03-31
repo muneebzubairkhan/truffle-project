@@ -69,8 +69,8 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(MNEMONIC, "https://rinkeby.infura.io/v3/" + token),
       network_id: "4",
-      gas: "3000000",
-      gasPrice: toWei("1.5", "gwei"),
+      // gas: "3000000",
+      // gasPrice: toWei("1.5", "gwei"),
       skipDryRun: true,
       explorerUrl: "https://rinkeby.etherscan.io/address/",
       web3Provider: "https://rinkeby.infura.io/v3/" + token,
@@ -82,8 +82,10 @@ module.exports = {
           "https://matic-mumbai.chainstacklabs.com"
         ),
       network_id: "80001",
-      // gas: "20000000",
-      // gasPrice: toWei("20", "gwei"),
+      gas: "20000000",
+      gasPrice: toWei("0.000000050", "ether"),
+      // maxFeePerGas: toWei("0.000000100", "ether"),
+      // maxPriorityFeePerGas: toWei("0.000000003", "ether"),
       explorerUrl: "https://mumbai.polygonscan.com/address/",
     },
     // bscMainnet: {
