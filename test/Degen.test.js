@@ -58,7 +58,7 @@ contract("Nft", async ([owner1, owner, owner2]) => {
     nftsOfOwner.map((nft) => log("token id " + nft));
 
     //
-    // makeUiCode("mumbai", { goldenTicket, metaDegenSociety });
+    makeUiCode("mumbai", { goldenTicket, metaDegenSociety });
   });
 });
 

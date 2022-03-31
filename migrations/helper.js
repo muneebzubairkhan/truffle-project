@@ -25,10 +25,10 @@ const makeUiCode = (network, contracts) => {
     explorerUrl = ' ';
     console.log('Please provide explorerUrl in truffle config file');
   }
-  if (web3Provider === undefined) {
-    web3Provider = ' ';
-    console.log('Please provide web3Provider in truffle config file');
-  }
+  // if (web3Provider === undefined) {
+  //   web3Provider = ' ';
+  //   console.log('Please provide web3Provider in truffle config file');
+  // }
 
   res += makeExplorerLink(explorerUrl, contracts);
   res += '//\n//=========================\n\n';
