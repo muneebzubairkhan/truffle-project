@@ -1,5 +1,4 @@
 Verifying GoldenTicket
-Contract source code already verified: https://mumbai.polygonscan.com/address/0x33aC6F885aF5A9BDbdC64D13e2398C38b7890787#code
+Pass - Verified: https://mumbai.polygonscan.com/address/0xE39c0998C471FA615cfA78EBF294D5E0Ffbb1356#code
 Verifying MetaDegenSociety
-Contract source code already verified: https://mumbai.polygonscan.com/address/0x71D8d222d3BcD6267c337B148f3F91547003E27E#code
-Successfully verified 2 contract(s).
+Pass - Verified: https://mumbai.polygonscan.com/address/0x1752D60e9D94CEE2BE4A15e856e33033A823BBA1#code
