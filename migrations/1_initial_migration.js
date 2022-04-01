@@ -3,7 +3,7 @@ const { makeUiCode } = require("./helper");
 
 const Nft2 = artifacts.require("MetaDegenSociety");
 const Nft1 = artifacts.require("GoldenTicket");
-module.exports = async (deployer, network, [owner1, owner, owner2]) => {
+module.exports = async (deployer, network, [owner1, owner3, owner2, owner]) => {
   let goldenTicket = await deployer.deploy(Nft1, { from: owner });
   let metaDegenSociety = await deployer.deploy(Nft2, { from: owner });
 

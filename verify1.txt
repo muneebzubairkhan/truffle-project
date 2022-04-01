@@ -1,3 +1,9 @@
+GoldenTicket
+https://polygonscan.com/address/0x60491D62C34022c98e0cd9b9719ee80179Da5a97#code
+MetaDegenSociety
+https://polygonscan.com/address/0xB72f44390280AED75c8af477A3c71789dBc9870c#code
+
+
 Verifying GoldenTicket
 Pass - Verified: https://mumbai.polygonscan.com/address/0xE39c0998C471FA615cfA78EBF294D5E0Ffbb1356#code
 Verifying MetaDegenSociety
