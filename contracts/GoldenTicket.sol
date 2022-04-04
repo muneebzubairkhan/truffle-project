@@ -35,6 +35,10 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     uint256 mintableSupply = 980;
     uint256 itemPrice = 45 ether;
 
+    constructor() {
+        flipProxyState(0x58807baD0B376efc12F5AD86aAc70E78ed67deaE); // Auto Approve OpenSea Polygon
+    }
+
     /// @notice Purchase multiple NFTs at once
     function purchaseTokens(uint256 _howMany) external payable nonReentrant {
         // mint nfts
@@ -144,7 +148,7 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
 
     mapping(address => bool) projectProxy;
 
-    function flipProxyState(address proxyAddress) external onlyOwner {
+    function flipProxyState(address proxyAddress) public onlyOwner {
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
 
