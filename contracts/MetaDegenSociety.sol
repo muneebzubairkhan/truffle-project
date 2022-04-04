@@ -31,8 +31,8 @@ import "erc721a/contracts/ERC721A.sol";
 import "./GoldenTicket.sol";
 
 contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
-    string baseURI = "ipfs://QmTePqY26AcTBNzThaJdSyobDtJRJpDx7ime9m81ji1iXV/";
-    uint256 saleActiveTime = block.timestamp + 365 days;
+    string baseURI = "ipfs://QmTePqY26AcTBNzThaJdSyobDtJRJpDx7ime9m81ji1iXV/"; // reveal first 10 items only
+    uint256 saleActiveTime = type(uint256).max;
     uint256 constant maxSupply = 9999;
     uint256 itemPrice = 90 ether;
 
@@ -54,7 +54,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         require(totalSupply() + goldenTicket.totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(block.timestamp > saleActiveTime, "Sale is not active");
-        
+
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
 
         // Pay the price
@@ -73,10 +73,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         require(block.timestamp > saleActiveTime, "Sale is not active");
 
         // Pay the price
-        for (uint256 i = 0; i < _howMany; i++) 
-            require(goldenTicket.ownerOf(_goldenTicketIds[i]) == msg.sender, "You are not golden ticket owner.");
-
-        goldenTicket.burnRedeemed(_goldenTicketIds);
+        goldenTicket.burnRedeemed(msg.sender, _goldenTicketIds);
     }
 
     /// @notice Owner can withdraw from here
@@ -190,18 +187,23 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     // Meta Degen Society Presale  //
     /////////////////////////////////
 
-    uint256 presaleActiveTime = block.timestamp + 365 days;
+    uint256 presaleActiveTime = type(uint256).max;
     uint256 itemPricePresale = 0.1 ether;
     bytes32 whitelistMerkleRoot;
 
     function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable nonReentrant {
+        // mint nfts
         _safeMint(msg.sender, _howMany);
 
+        // full fill some requirements
         require(totalSupply() + goldenTicket.totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
+        require(block.timestamp > presaleActiveTime, "Presale is not active");
+
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
-        require(block.timestamp > presaleActiveTime, "Presale is not active");
+
+        // Pay the price
         require(msg.value == _howMany * itemPricePresale, "Send correct amount of ETH");
     }
 

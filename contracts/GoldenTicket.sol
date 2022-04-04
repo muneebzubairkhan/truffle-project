@@ -162,9 +162,12 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
         metaDegenSociety = _metaDegenSociety;
     }
 
-    function burnRedeemed(uint256[] memory tokenIds) external {
+    function burnRedeemed(address _owner, uint256[] memory _tokenIds) external {
         require(msg.sender == metaDegenSociety, "You are not MetaDegenSociety");
 
-        for (uint256 i = 0; i < tokenIds.length; i++) burn(tokenIds[i]);
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            require(_owner == ownerOf(_tokenIds[i]), "You are not owner");
+            burn(_tokenIds[i]);
+        }
     }
 }
