@@ -23,7 +23,10 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     string public baseURI;
     string public baseExtension = ".json";
     string public notRevealedUri;
+
     uint256 public cost = 0.075 * 1e18;
+    uint256 public incCost = 0.001 * 1e18; 
+
     uint256 public maxSupply = 10_000;
     uint256 public reservedSupply = 250;
     uint256 public maxMintAmount = 20;
@@ -59,6 +62,8 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
         require(supply + _mintAmount + reservedSupply <= maxSupply, "max NFT limit exceeded");
         require(msg.value >= cost * _mintAmount, "insufficient funds");
+
+        cost += _mintAmount * incCost; 
 
         _safeMint(msg.sender, _mintAmount);
     }
@@ -111,8 +116,9 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         nftPerAddressLimit = _limit;
     }
 
-    function setCost(uint256 _newCost) public onlyOwner {
+    function setCost(uint256 _newCost, uint256 _incCost) public onlyOwner {
         cost = _newCost;
+        incCost = _incCost;
     }
 
     function setMaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner {
@@ -181,6 +187,8 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         presaleClaimedBy[msg.sender] += _howMany;
 
         require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
+
+        cost += _howMany * incCost; 
 
         _safeMint(msg.sender, _howMany);
     }
