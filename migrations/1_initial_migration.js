@@ -3,7 +3,11 @@ const { makeUiCode } = require("./helper");
 
 const Nft2 = artifacts.require("MetaDegenSociety");
 const Nft1 = artifacts.require("GoldenTicket");
-module.exports = async (deployer, network, [owner1, owner3, owner2, owner]) => {
+const Migrations = artifacts.require("Migrations");
+
+module.exports = async (deployer, network, [owner1, owner3, owner, owner11]) => {
+  await deployer.deploy(Migrations, { from: owner });
+
   let goldenTicket = await deployer.deploy(Nft1, { from: owner });
   let metaDegenSociety = await deployer.deploy(Nft2, { from: owner });
 
@@ -19,12 +23,12 @@ module.exports = async (deployer, network, [owner1, owner3, owner2, owner]) => {
 
   // assert("100" === fromWei(await web3.eth.getBalance(owner)));
   //
-  // await goldenTicket.setMetaDegenSociety(metaDegenSociety.address, {
-  //   from: owner,
-  // });
-  // await metaDegenSociety.setGoldenTicket(goldenTicket.address, {
-  //   from: owner,
-  // });
+  await goldenTicket.setMetaDegenSociety(metaDegenSociety.address, {
+    from: owner,
+  });
+  await metaDegenSociety.setGoldenTicket(goldenTicket.address, {
+    from: owner,
+  });
 
   // await goldenTicket.setSaleActiveTime(0, { from: owner });
   // await goldenTicket.purchaseTokens(4, {
