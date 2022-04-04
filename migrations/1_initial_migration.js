@@ -9,37 +9,34 @@ const Migrations = artifacts.require("Migrations");
 module.exports = async (deployer, network, [owner1, owner3, owner11, owner]) => {
   // await deployer.deploy(Migrations, { from: owner });
 
-  let goldenTicket = await deployer.deploy(Nft1, { from: owner });
-  // let goldenTicket = await Nft1.at(
-  //   "0x23A78ee90045069772610efCEa429f0F6462780a"
-  // );
+  // let goldenTicket = await deployer.deploy(Nft1, { from: owner });
   // let metaDegenSociety = await deployer.deploy(Nft2, { from: owner });
 
   // let goldenTicket = await Nft1.deployed()
   // let metaDegenSociety = await Nft2.deployed();
 
-  // // let goldenTicket = await Nft1.at(
-  // //   "0x3321D24907d2800766103541457Fc6358ec81DfD"
-  // // );
-  // // let metaDegenSociety = await Nft2.at(
-  // //   "0x79C89b5997BE60A9757226C6b3B6CfAD7444B658"
-  // // );
+  let goldenTicket = await Nft1.at(
+    "0xb508763a7413af3822d59df7662abbe61b6f06a4"
+  );
+  let metaDegenSociety = await Nft2.at(
+    "0x7CF723DBbdFd732107065f4957AFB39a33181A2a"
+  );
 
   // assert("100" === fromWei(await web3.eth.getBalance(owner)));
   //
-  // await goldenTicket.setMetaDegenSociety(metaDegenSociety.address, {
-  //   from: owner,
-  // });
-  // await metaDegenSociety.setGoldenTicket(goldenTicket.address, {
-  //   from: owner,
-  // });
+  await goldenTicket.setMetaDegenSociety(metaDegenSociety.address, {
+    from: owner,
+  });
+  await metaDegenSociety.setGoldenTicket(goldenTicket.address, {
+    from: owner,
+  });
   
-  // await goldenTicket.setPrice(toWei(0.01, "ether"), {
-  //   from: owner,
-  // });
-  // await metaDegenSociety.setPrice(toWei(0.02, "ether"), {
-  //   from: owner,
-  // });
+  await goldenTicket.setPrice(toWei(0.01, "ether"), {
+    from: owner,
+  });
+  await metaDegenSociety.setPrice(toWei(0.02, "ether"), {
+    from: owner,
+  });
 
   // await goldenTicket.setSaleActiveTime(0, { from: owner });
   // await goldenTicket.purchaseTokens(4, {
