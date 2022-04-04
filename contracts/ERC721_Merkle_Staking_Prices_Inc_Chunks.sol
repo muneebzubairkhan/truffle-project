@@ -23,7 +23,23 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     string public baseURI;
     string public baseExtension = ".json";
     string public notRevealedUri;
-    uint256 public cost = 0.075 * 1e18;
+    
+    uint basePrice = 0.0001;
+    uint chunkSize = 1000;
+    uint incPrice = 0.01;
+
+    function cost() public view returns (uint256) {
+        uint multiplier = totalSupply() / chunkSize;
+        return (basePrice + (multiplier * incPrice)) * 1e18;
+    }
+
+    function setCost(uint256 _basePrice, uint _chunkSize, uint _incPrice) public onlyOwner {
+       basePrice = _basePrice;
+       chunkSize = _chunkSize;
+       incPrice = _incPrice;
+    }
+
+
     uint256 public maxSupply = 10_000;
     uint256 public reservedSupply = 250;
     uint256 public maxMintAmount = 20;
@@ -58,7 +74,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         require(_mintAmount > 0, "need to mint at least 1 NFT");
         require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
         require(supply + _mintAmount + reservedSupply <= maxSupply, "max NFT limit exceeded");
-        require(msg.value >= cost * _mintAmount, "insufficient funds");
+        require(msg.value >= cost() * _mintAmount, "insufficient funds");
 
         _safeMint(msg.sender, _mintAmount);
     }
@@ -111,10 +127,6 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         nftPerAddressLimit = _limit;
     }
 
-    function setCost(uint256 _newCost) public onlyOwner {
-        cost = _newCost;
-    }
-
     function setMaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner {
         maxMintAmount = _newmaxMintAmount;
     }
@@ -157,7 +169,22 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     uint256 public presaleActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
     uint256 public presaleMaxMint = 3;
     bytes32 public whitelistMerkleRoot;
-    uint256 public itemPricePresale = 0.03 * 1e18;
+
+    uint public itemPricePresale = 0.0001;
+    uint public chunkSizePresale = 1000;
+    uint public incPricePresale = 0.01;
+
+    function costPresale() public view returns (uint256) {
+        uint multiplier = totalSupply() / chunkSizePresale;
+        return (itemPricePresale + (multiplier * incPricePresale)) * 1e18;
+    }
+
+    function setCostPresale(uint256 _basePrice, uint _chunkSize, uint _incPrice) public onlyOwner {
+       itemPricePresale = _basePrice;
+       chunkSizePresale = _chunkSize;
+       incPricePresale = _incPrice;
+    }
+    
     mapping(address => uint256) public presaleClaimedBy;
 
     function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
@@ -176,7 +203,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
         require(inWhitelist(_proof, msg.sender), "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+        require(msg.value >= _howMany * costPresale(), "Try to send more ETH");
 
         presaleClaimedBy[msg.sender] += _howMany;
 
@@ -188,11 +215,6 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     // set limit of presale
     function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
         presaleMaxMint = _presaleMaxMint;
-    }
-
-    // Change presale price in case of ETH price changes too much
-    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
-        itemPricePresale = _itemPricePresale;
     }
 
     function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
