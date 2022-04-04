@@ -1,11 +1,12 @@
-const { fromWei, toWei } = require("web3-utils");
+const { fromWei } = require("web3-utils");
 const { makeUiCode } = require("./helper");
+const toWei = (amount, unit) => web3.utils.toWei("" + amount, unit);
 
 const Nft2 = artifacts.require("MetaDegenSociety");
 const Nft1 = artifacts.require("GoldenTicket");
 const Migrations = artifacts.require("Migrations");
 
-module.exports = async (deployer, network, [owner1, owner3, owner, owner11]) => {
+module.exports = async (deployer, network, [owner1, owner3, owner11, owner]) => {
   await deployer.deploy(Migrations, { from: owner });
 
   let goldenTicket = await deployer.deploy(Nft1, { from: owner });
@@ -27,6 +28,13 @@ module.exports = async (deployer, network, [owner1, owner3, owner, owner11]) => 
     from: owner,
   });
   await metaDegenSociety.setGoldenTicket(goldenTicket.address, {
+    from: owner,
+  });
+  
+  await goldenTicket.setPrice(toWei(0.01, "ether"), {
+    from: owner,
+  });
+  await metaDegenSociety.setPrice(toWei(0.02, "ether"), {
     from: owner,
   });
 

@@ -34,8 +34,8 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     string baseURI = "ipfs://QmTePqY26AcTBNzThaJdSyobDtJRJpDx7ime9m81ji1iXV/"; // reveal first 10 items only
     uint256 saleActiveTime = type(uint256).max;
 
-    uint256 constant maxSupply = 100;
-    uint256 public reservedSupply = 45;
+    uint256 constant maxSupply = 9999;
+    uint256 public reservedSupply = 450;
 
     uint256 itemPrice = 90 ether;
 
