@@ -31,8 +31,10 @@ import "erc721a/contracts/ERC721A.sol";
 contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
     string baseURI = "ipfs://QmfKgWoKSDDU1qnLwGuRQq3wfW3fPrue4wEWGNgXfFkZHw/";
     uint256 saleActiveTime = block.timestamp + 365 days;
-    uint256 constant maxSupply = 1000;
-    uint256 public reservedSupply = 450;
+
+    uint256 constant maxSupply = 50;
+    uint256 public reservedSupply = 25;
+
     uint256 itemPrice = 45 ether;
 
     constructor() {

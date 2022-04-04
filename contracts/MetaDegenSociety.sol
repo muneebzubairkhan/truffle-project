@@ -33,10 +33,11 @@ import "./GoldenTicket.sol";
 contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
     string baseURI = "ipfs://QmTePqY26AcTBNzThaJdSyobDtJRJpDx7ime9m81ji1iXV/"; // reveal first 10 items only
     uint256 saleActiveTime = type(uint256).max;
-    uint256 constant maxSupply = 9999;
-    uint256 itemPrice = 90 ether;
 
-    uint256 public reservedSupply = 450;
+    uint256 constant maxSupply = 100;
+    uint256 public reservedSupply = 45;
+
+    uint256 itemPrice = 90 ether;
 
     GoldenTicket goldenTicket;
 
@@ -50,15 +51,15 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         // mint nfts
         _safeMint(msg.sender, _howMany);
 
+        // Pay the price
+        require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
+
         // full fill some requirements
         require(totalSupply() + goldenTicket.totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(block.timestamp > saleActiveTime, "Sale is not active");
 
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
-
-        // Pay the price
-        require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
     }
 
     /// @notice Purchase multiple NFTs at once
@@ -67,13 +68,13 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         uint256 _howMany = _goldenTicketIds.length;
         _safeMint(msg.sender, _howMany);
 
+        // Pay the price
+        goldenTicket.burnRedeemed(msg.sender, _goldenTicketIds);
+
         // full fill some requirements
         require(totalSupply() + goldenTicket.totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(block.timestamp > saleActiveTime, "Sale is not active");
-
-        // Pay the price
-        goldenTicket.burnRedeemed(msg.sender, _goldenTicketIds);
     }
 
     /// @notice Owner can withdraw from here
