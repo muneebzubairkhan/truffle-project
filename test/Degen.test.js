@@ -17,13 +17,19 @@ contract("Nft", async ([owner1, owner, owner2]) => {
     await metaDegenSociety.setGoldenTicket(goldenTicket.address, {
       from: owner,
     });
+    await goldenTicket.setPrice(toWei('0.01', 'ether'), {
+      from: owner,
+    });
+    await metaDegenSociety.setPrice(toWei("0.02", "ether"), {
+      from: owner,
+    });
 
     await goldenTicket.setSaleActiveTime(0, { from: owner });
     await goldenTicket.purchaseTokens(4, {
-      value: toWei("0.00180", "ether"),
+      value: toWei("0.04", "ether"),
       from: owner,
     });
-    assert("99.9982" === fromWei(await web3.eth.getBalance(owner)));
+    assert("99.96" === fromWei(await web3.eth.getBalance(owner)));
     await goldenTicket.withdraw({ from: owner });
     assert("100" === fromWei(await web3.eth.getBalance(owner)));
 
@@ -31,10 +37,10 @@ contract("Nft", async ([owner1, owner, owner2]) => {
 
     await metaDegenSociety.setSaleActiveTime(0, { from: owner });
     await metaDegenSociety.purchaseTokens(2, {
-      value: toWei("0.00180", "ether"),
+      value: toWei("0.04", "ether"),
       from: owner,
     });
-    assert("99.9982" === fromWei(await web3.eth.getBalance(owner)));
+    assert("99.96" === fromWei(await web3.eth.getBalance(owner)));
     await metaDegenSociety.withdraw({ from: owner });
     assert("100" === fromWei(await web3.eth.getBalance(owner)));
 
