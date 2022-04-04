@@ -92,7 +92,7 @@ module.exports = {
       provider: () => new HDWalletProvider(MNEMONIC, "https://polygon-rpc.com"),
       network_id: "137",
       gas: "6000000",
-      gasPrice: toWei("0.000000045", "ether"),
+      gasPrice: toWei("0.000000060", "ether"),
       // maxFeePerGas: toWei("0.000000100", "ether"),
       // maxPriorityFeePerGas: toWei("0.000000003", "ether"),
       explorerUrl: "https://mumbai.polygonscan.com/address/",
