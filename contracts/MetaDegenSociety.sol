@@ -51,7 +51,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         _safeMint(msg.sender, _howMany);
 
         // full fill some requirements
-        require(totalSupply() + reservedSupply <= maxSupply, "Try mint less");
+        require(totalSupply() + goldenTicket.totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(block.timestamp > saleActiveTime, "Sale is not active");
         
@@ -68,7 +68,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         _safeMint(msg.sender, _howMany);
 
         // full fill some requirements
-        require(totalSupply() + reservedSupply <= maxSupply, "Try mint less");
+        require(totalSupply() + goldenTicket.totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(block.timestamp > saleActiveTime, "Sale is not active");
 
@@ -197,7 +197,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable nonReentrant {
         _safeMint(msg.sender, _howMany);
 
-        require(totalSupply() + reservedSupply <= maxSupply, "Try mint less");
+        require(totalSupply() + goldenTicket.totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
