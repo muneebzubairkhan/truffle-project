@@ -41,6 +41,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     GoldenTicket goldenTicket;
 
     constructor() {
+        flipProxyState(0x58807baD0B376efc12F5AD86aAc70E78ed67deaE); // Auto Approve OpenSea Polygon
         _setDefaultRoyalty(msg.sender, 3_00); // 3.00%
     }
 
@@ -177,7 +178,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
 
     mapping(address => bool) projectProxy;
 
-    function flipProxyState(address proxyAddress) external onlyOwner {
+    function flipProxyState(address proxyAddress) public onlyOwner {
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
 
