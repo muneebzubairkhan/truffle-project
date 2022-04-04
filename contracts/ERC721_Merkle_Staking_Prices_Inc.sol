@@ -78,7 +78,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     }
 
     function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
-        if (index >= balanceOf(owner)) revert OwnerIndexOutOfBounds();
+        if (index >= balanceOf(owner)) revert ();
         uint256 numMintedSoFar = _currentIndex;
         uint256 tokenIdsIdx;
         address currOwnershipAddr;
@@ -244,7 +244,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     }
 
     function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
-        return ownershipOf(tokenId).startTimestamp;
+        return _ownershipOf(tokenId).startTimestamp;
     }
 
     //////////////////////////////

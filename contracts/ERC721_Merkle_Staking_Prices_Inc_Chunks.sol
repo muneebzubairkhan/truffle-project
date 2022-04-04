@@ -24,13 +24,13 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     string public baseExtension = ".json";
     string public notRevealedUri;
     
-    uint basePrice = 0.0001;
+    uint basePrice = 0.0001 * 1e18;
+    uint incPrice = 0.01 * 1e18;
     uint chunkSize = 1000;
-    uint incPrice = 0.01;
 
     function cost() public view returns (uint256) {
         uint multiplier = totalSupply() / chunkSize;
-        return (basePrice + (multiplier * incPrice)) * 1e18;
+        return basePrice + multiplier * incPrice;
     }
 
     function setCost(uint256 _basePrice, uint _chunkSize, uint _incPrice) public onlyOwner {
@@ -89,7 +89,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     }
 
     function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
-        if (index >= balanceOf(owner)) revert OwnerIndexOutOfBounds();
+        if (index >= balanceOf(owner)) revert ();
         uint256 numMintedSoFar = _currentIndex;
         uint256 tokenIdsIdx;
         address currOwnershipAddr;
@@ -170,13 +170,13 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     uint256 public presaleMaxMint = 3;
     bytes32 public whitelistMerkleRoot;
 
-    uint public itemPricePresale = 0.0001;
+    uint public itemPricePresale = 0.0001 * 1e18;
+    uint public incPricePresale = 0.01 * 1e18;
     uint public chunkSizePresale = 1000;
-    uint public incPricePresale = 0.01;
 
     function costPresale() public view returns (uint256) {
         uint multiplier = totalSupply() / chunkSizePresale;
-        return (itemPricePresale + (multiplier * incPricePresale)) * 1e18;
+        return itemPricePresale + multiplier * incPricePresale;
     }
 
     function setCostPresale(uint256 _basePrice, uint _chunkSize, uint _incPrice) public onlyOwner {
@@ -258,7 +258,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     }
 
     function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
-        return ownershipOf(tokenId).startTimestamp;
+        return _ownershipOf(tokenId).startTimestamp;
     }
 
     //////////////////////////////
