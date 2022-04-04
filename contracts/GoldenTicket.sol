@@ -32,7 +32,7 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     string baseURI = "ipfs://QmfKgWoKSDDU1qnLwGuRQq3wfW3fPrue4wEWGNgXfFkZHw/";
     uint256 saleActiveTime = block.timestamp + 365 days;
     uint256 constant maxSupply = 1000;
-    uint256 mintableSupply = 980;
+    uint256 public reservedSupply = 450;
     uint256 itemPrice = 45 ether;
 
     constructor() {
@@ -45,7 +45,7 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
         _safeMint(msg.sender, _howMany);
 
         // full fill some requirements
-        require(totalSupply() <= mintableSupply, "Try mint less");
+        require(totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
@@ -69,10 +69,10 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
         saleActiveTime = _saleActiveTime;
     }
 
-    /// @notice set mintableSupply
-    function setMintableSupply(uint256 _mintableSupply) external onlyOwner {
-        require(_mintableSupply <= maxSupply, "put a number less than max supply");
-        mintableSupply = _mintableSupply;
+    /// @notice set reservedSupply
+    function setReservedSupply(uint256 _reservedSupply) external onlyOwner {
+        require(_reservedSupply <= maxSupply, "put a number less than max supply");
+        reservedSupply = _reservedSupply;
     }
 
     /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
@@ -83,7 +83,8 @@ contract GoldenTicket is ERC721A("Golden Ticket", "GT"), ERC721ABurnable, ERC298
     /// @notice Send NFTs to a list of addresses
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner nonReentrant {
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
-        require(totalSupply() <= maxSupply, "Try minting less");
+
+        reservedSupply -= _sendNftsTo.length * _howMany; // below 0 it gives error
     }
 
     ////////////////////
