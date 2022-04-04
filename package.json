@@ -12,11 +12,11 @@
   "scripts": {
     "start": "truffle migrate --reset --network development",
     "____": "_____",
+    "runLocalBlockchain": "ganache-cli",
     "testRegular": "nodemon --exec \"truffle test\" --ext \".test.js .sol\"",
     "prettierRegular": "nodemon --watch contracts --exec \"npx prettier --write 'contracts/**/*.sol'\" --ext .sol",
     "compileRegular": "nodemon --watch contracts --exec \"truffle compile\" --ext .sol",
     "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate --reset\" --ext .sol",
-    "runLocalBlockchain": "ganache-cli",
     "_____": "_____",
     "verify": "truffle run verify GoldenTicket MetaDegenSociety --network mumbai",
     "startBscTestnet": "sudo truffle migrate --network bscTestnet --all --reset && truffle run verify GoldenTicket MetaDegenSociety --network bscTestnet",
