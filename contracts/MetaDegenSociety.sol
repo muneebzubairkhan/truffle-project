@@ -34,8 +34,9 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     string baseURI = "ipfs://QmTePqY26AcTBNzThaJdSyobDtJRJpDx7ime9m81ji1iXV/";
     uint256 saleActiveTime = block.timestamp + 365 days;
     uint256 constant maxSupply = 9999;
-    uint256 mintableSupply = 9700;
     uint256 itemPrice = 90 ether;
+
+    uint256 public reservedSupply = 450;
 
     GoldenTicket goldenTicket;
 
@@ -49,7 +50,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         _safeMint(msg.sender, _howMany);
 
         // full fill some requirements
-        require(totalSupply() <= mintableSupply, "Try mint less");
+        require(totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(block.timestamp > saleActiveTime, "Sale is not active");
         
@@ -66,7 +67,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         _safeMint(msg.sender, _howMany);
 
         // full fill some requirements
-        require(totalSupply() <= mintableSupply, "Try mint less");
+        require(totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(block.timestamp > saleActiveTime, "Sale is not active");
 
@@ -96,10 +97,10 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         saleActiveTime = _saleActiveTime;
     }
 
-    /// @notice set mintableSupply
-    function setMintableSupply(uint256 _mintableSupply) external onlyOwner {
-        require(_mintableSupply <= maxSupply, "put a number less than max supply");
-        mintableSupply = _mintableSupply;
+    /// @notice set reservedSupply
+    function setReservedSupply(uint256 _reservedSupply) external onlyOwner {
+        require(_reservedSupply <= maxSupply, "put a number less than max supply");
+        reservedSupply = _reservedSupply;
     }
 
     /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
@@ -110,7 +111,8 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     /// @notice Send NFTs to a list of addresses
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner nonReentrant {
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
-        require(totalSupply() <= maxSupply, "Try minting less");
+
+        reservedSupply -= _sendNftsTo.length * _howMany; // below 0 it gives error
     }
 
     ////////////////////
@@ -194,7 +196,7 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable nonReentrant {
         _safeMint(msg.sender, _howMany);
 
-        require(totalSupply() <= mintableSupply, "Try mint less");
+        require(totalSupply() + reservedSupply <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
