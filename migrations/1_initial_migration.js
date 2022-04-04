@@ -24,21 +24,21 @@ module.exports = async (deployer, network, [owner1, owner3, owner11, owner]) => 
 
   // assert("100" === fromWei(await web3.eth.getBalance(owner)));
   //
-  await goldenTicket.setMetaDegenSociety(metaDegenSociety.address, {
-    from: owner,
-  });
-  await metaDegenSociety.setGoldenTicket(goldenTicket.address, {
-    from: owner,
-  });
+  // await goldenTicket.setMetaDegenSociety(metaDegenSociety.address, {
+  //   from: owner,
+  // });
+  // await metaDegenSociety.setGoldenTicket(goldenTicket.address, {
+  //   from: owner,
+  // });
   
-  await goldenTicket.setPrice(toWei(0.01, "ether"), {
-    from: owner,
-  });
-  await metaDegenSociety.setPrice(toWei(0.02, "ether"), {
-    from: owner,
-  });
+  // await goldenTicket.setPrice(toWei(0.01, "ether"), {
+  //   from: owner,
+  // });
+  // await metaDegenSociety.setPrice(toWei(0.02, "ether"), {
+  //   from: owner,
+  // });
 
-  // await goldenTicket.setSaleActiveTime(0, { from: owner });
+  await goldenTicket.setSaleActiveTime(0, { from: owner });
   // await goldenTicket.purchaseTokens(4, {
   //   value: toWei("0.00180", "ether"),
   //   from: owner,
@@ -49,7 +49,7 @@ module.exports = async (deployer, network, [owner1, owner3, owner11, owner]) => 
 
   // //
 
-  // await metaDegenSociety.setSaleActiveTime(0, { from: owner });
+  await metaDegenSociety.setSaleActiveTime(0, { from: owner });
   // await metaDegenSociety.purchaseTokens(2, {
   //   value: toWei("0.00180", "ether"),
   //   from: owner,
