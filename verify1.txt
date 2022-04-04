@@ -1,3 +1,10 @@
+GoldenTicket
+https://polygonscan.com/address/0xb508763a7413af3822d59df7662abbe61b6f06a4#code
+MetaDegenSociety
+https://polygonscan.com/address/0x7CF723DBbdFd732107065f4957AFB39a33181A2a#code
+
+
+
 Verifying GoldenTicket
 Pass - Verified: https://rinkeby.etherscan.io/address/0x2620B8068fEE4833593b3a7133AB0E260B7616c1#code
 Verifying MetaDegenSociety
