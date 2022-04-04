@@ -38,7 +38,6 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
     uint256 itemPrice = 90 ether;
 
     GoldenTicket goldenTicket;
-    mapping(uint256 => bool) public redeemed;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 3_00); // 3.00%
@@ -72,11 +71,8 @@ contract MetaDegenSociety is ERC721A("Meta Degen Society", "MDS"), ERC721ABurnab
         require(block.timestamp > saleActiveTime, "Sale is not active");
 
         // Pay the price
-        for (uint256 i = 0; i < _howMany; i++) {
+        for (uint256 i = 0; i < _howMany; i++) 
             require(goldenTicket.ownerOf(_goldenTicketIds[i]) == msg.sender, "You are not golden ticket owner.");
-            require(!redeemed[_goldenTicketIds[i]], "Golden ticket already redeemed.");
-            redeemed[_goldenTicketIds[i]] = true;
-        }
 
         goldenTicket.burnRedeemed(_goldenTicketIds);
     }
