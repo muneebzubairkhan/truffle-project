@@ -7,15 +7,14 @@
 // Twitter:    https://twitter.com/Boredsone
 // Youtube:    https://www.youtube.com/watch?v=fmKltVVaVeI
 
-// 88888888ba                                                 88                                                   
-// 88      "8b                                                88                                                   
-// 88      ,8P                                                88                                                   
-// 88aaaaaa8P'   ,adPPYba,   8b,dPPYba,   ,adPPYba,   ,adPPYb,88  ,adPPYba,   ,adPPYba,   8b,dPPYba,    ,adPPYba,  
-// 88""""""8b,  a8"     "8a  88P'   "Y8  a8P_____88  a8"    `Y88  I8[    ""  a8"     "8a  88P'   `"8a  a8P_____88  
-// 88      `8b  8b       d8  88          8PP"""""""  8b       88   `"Y8ba,   8b       d8  88       88  8PP"""""""  
-// 88      a8P  "8a,   ,a8"  88          "8b,   ,aa  "8a,   ,d88  aa    ]8I  "8a,   ,a8"  88       88  "8b,   ,aa  
-// 88888888P"    `"YbbdP"'   88           `"Ybbd8"'   `"8bbdP"Y8  `"YbbdP"'   `"YbbdP"'   88       88   `"Ybbd8"'  
-                                                                                                                
+// 88888888ba                                                 88
+// 88      "8b                                                88
+// 88      ,8P                                                88
+// 88aaaaaa8P'   ,adPPYba,   8b,dPPYba,   ,adPPYba,   ,adPPYb,88  ,adPPYba,   ,adPPYba,   8b,dPPYba,    ,adPPYba,
+// 88""""""8b,  a8"     "8a  88P'   "Y8  a8P_____88  a8"    `Y88  I8[    ""  a8"     "8a  88P'   `"8a  a8P_____88
+// 88      `8b  8b       d8  88          8PP"""""""  8b       88   `"Y8ba,   8b       d8  88       88  8PP"""""""
+// 88      a8P  "8a,   ,a8"  88          "8b,   ,aa  "8a,   ,d88  aa    ]8I  "8a,   ,a8"  88       88  "8b,   ,aa
+// 88888888P"    `"YbbdP"'   88           `"Ybbd8"'   `"8bbdP"Y8  `"YbbdP"'   `"YbbdP"'   88       88   `"Ybbd8"'
 
 // SPDX-License-Identifier: MIT
 
@@ -85,7 +84,7 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Owna
     /// @notice Send NFTs to a list of addresses
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
         reservedSupply -= _sendNftsTo.length * _howMany; // below 0 it gives error
-        
+
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
 
@@ -169,4 +168,4 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Owna
 
 interface OpenSea {
     function proxies(address) external view returns (address);
-}    
+}
