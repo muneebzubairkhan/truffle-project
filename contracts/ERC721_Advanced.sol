@@ -33,7 +33,7 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Owna
     uint256 constant maxSupply = 9999;
     uint256 reservedSupply = 450;
 
-    uint256 itemPrice = 1 ether;
+    uint256 itemPrice = 0.1 ether;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 3_00); // 3.00%
