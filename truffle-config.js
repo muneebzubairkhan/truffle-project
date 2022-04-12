@@ -1,5 +1,4 @@
 var HDWalletProvider = require("@truffle/hdwallet-provider");
-var ethGasReporter = require("eth-gas-reporter");
 const { toWei } = require("web3-utils");
 require("dotenv").config();
 const MNEMONIC = process.env.MNEMONIC;
@@ -138,7 +137,6 @@ module.exports = {
   },
   mocha: {
     reporter: "eth-gas-reporter",
-    gasReporter: { noColors: true, outputFile: "./okok.txt" },
   },
 };
 
