@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable {
+contract DysfunctionalDogs6 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable {
     using Strings for uint256;
 
     string public baseURI;
@@ -54,7 +54,7 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     }
 
     function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
-        if (index >= balanceOf(owner)) revert OwnerIndexOutOfBounds();
+        if (index >= balanceOf(owner)) revert ();
         uint256 numMintedSoFar = _currentIndex;
         uint256 tokenIdsIdx;
         address currOwnershipAddr;
