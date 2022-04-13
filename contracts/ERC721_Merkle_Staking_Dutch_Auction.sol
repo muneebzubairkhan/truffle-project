@@ -35,8 +35,14 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     // Dutch Auction
 
     // immutable means you can not change value of this
-    uint256 public immutable startingPrice = 0.010 ether;
-    uint256 public immutable discountRate =  0.001 ether;
+    /*
+    Dutch auction feature in the smart contract. Starting price will be 1eth and decrease by .05eth every 30 minutes until it reaches the price of .1eth.
+
+    Whitelist will activate after public sale. Users should be able to purchase at 50% off of the final Dutch auction sale.
+    */
+    uint256 public immutable startingPrice = 1 ether;
+    uint256 public immutable endingPrice = 0.1 ether;
+    uint256 public immutable discountRate =  0.05 ether;
     uint256 public immutable startAt = type(uint256).max; // auction will not start automatically after deploying of contract
     uint256 public immutable expiresAt = 0; //  auction will not start automatically after deploying of contract
     uint256 public immutable timeBlock = 30 minutes; // prices decreases every 30 minutes
@@ -45,7 +51,7 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         uint256 timeElapsed = block.timestamp - startAt;
         uint256 timeBlocksPassed = timeElapsed / timeBlock;
         uint256 discount = discountRate * timeBlocksPassed;
-        return startingPrice - discount;
+        return discount > startingPrice ? endingPrice : startingPrice - discount;
     }
 
     // public
