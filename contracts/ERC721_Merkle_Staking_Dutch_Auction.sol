@@ -41,7 +41,7 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     uint256 public immutable expiresAt = 0; //  auction will not start automatically after deploying of contract
     uint256 public immutable timeBlock = 30 minutes; // prices decreases every 30 minutes
 
-    function getPrice() public view returns (uint256) {
+    function getDutchPrice() public view returns (uint256) {
         uint256 timeElapsed = block.timestamp - startAt;
         uint256 timeBlocksPassed = timeElapsed / timeBlock;
         uint256 discount = discountRate * timeBlocksPassed;
@@ -50,7 +50,7 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
     // public
     function dutchMint(uint256 _mintAmount) public payable {
-        uint price = getPrice();
+        uint price = getDutchPrice();
         cost = price / 2;
         itemPricePresale = price / 2;
 
