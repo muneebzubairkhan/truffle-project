@@ -61,6 +61,9 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         require(supply + _mintAmount + reservedSupply <= maxSupply, "max NFT limit exceeded");
         require(msg.value >= price * _mintAmount, "insufficient funds");
 
+        uint refund = msg.value - price;
+        if (refund > 0)
+            payable(msg.sender).transfer(refund);
         _safeMint(msg.sender, _mintAmount);
     }
 
