@@ -34,6 +34,7 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
     // Dutch Auction
 
+    // immutable means you can not change value of this
     uint256 public immutable startingPrice = 0.010 ether;
     uint256 public immutable discountRate =  0.001 ether;
     uint256 public immutable startAt = type(uint256).max; // auction will not start automatically after deploying of contract
