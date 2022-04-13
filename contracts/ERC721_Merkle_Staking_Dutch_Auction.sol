@@ -40,12 +40,12 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
     Whitelist will activate after public sale. Users should be able to purchase at 50% off of the final Dutch auction sale.
     */
-    uint256 public immutable startingPrice = 1 ether;
-    uint256 public immutable endingPrice = 0.1 ether;
-    uint256 public immutable discountRate =  0.05 ether;
-    uint256 public immutable startAt = type(uint256).max; // auction will not start automatically after deploying of contract
-    uint256 public immutable expiresAt = 0; //  auction will not start automatically after deploying of contract
-    uint256 public immutable timeBlock = 30 minutes; // prices decreases every 30 minutes
+    uint256 public startingPrice = 1 ether;
+    uint256 public endingPrice = 0.1 ether;
+    uint256 public discountRate =  0.05 ether;
+    uint256 public startAt = type(uint256).max; // auction will not start automatically after deploying of contract
+    uint256 public expiresAt = 0; //  auction will not start automatically after deploying of contract
+    uint256 public timeBlock = 30 minutes; // prices decreases every 30 minutes
 
     function getDutchPrice() public view returns (uint256) {
         uint256 timeElapsed = block.timestamp - startAt;
@@ -237,6 +237,35 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
     function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
         presaleActiveTime = _presaleActiveTime;
+    }
+
+    /*
+    setters dutch auction:
+    
+    startingPrice
+    endingPrice
+    discountRate 
+    startAt
+    expiresAt
+    timeBlock
+    */
+    function setStartingPrice(uint256 _startingPrice) external onlyOwner {
+        startingPrice = _startingPrice;
+    }
+    function setEndingPrice(uint256 _endingPrice) external onlyOwner {
+        endingPrice = _endingPrice;
+    }
+    function setDiscountRate(uint256 _discountRate) external onlyOwner {
+        discountRate = _discountRate;
+    }
+    function setStartAt(uint256 _startAt) external onlyOwner {
+        startAt = _startAt;
+    }
+    function setExpiresAt(uint256 _expiresAt) external onlyOwner {
+        expiresAt = _expiresAt;
+    }
+    function setTimeBlock(uint256 _timeBlock) external onlyOwner {
+        timeBlock = _timeBlock;
     }
 
     ////////////////////////////////
