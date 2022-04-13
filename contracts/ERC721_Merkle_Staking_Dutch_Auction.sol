@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable, ERC2981 {
+contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable, ERC2981 {
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
@@ -30,7 +30,38 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     uint256 public nftPerAddressLimit = 3;
     uint256 public publicmintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
     bool public revealed = false;
-    uint constant presaleSupply = 400;
+    uint256 constant presaleSupply = 400;
+
+    // Dutch Auction
+
+    uint256 public immutable startingPrice = 0.010 ether;
+    uint256 public immutable discountRate =  0.001 ether;
+    uint256 public immutable startAt = type(uint256).max; // auction will not start automatically after deploying of contract
+    uint256 public immutable expiresAt = 0; //  auction will not start automatically after deploying of contract
+    uint256 public immutable timeBlock = 30 minutes; // prices decreases every 30 minutes
+
+    function getPrice() public view returns (uint256) {
+        uint256 timeElapsed = block.timestamp - startAt;
+        uint256 timeBlocksPassed = timeElapsed / timeBlock;
+        uint256 discount = discountRate * timeBlocksPassed;
+        return startingPrice - discount;
+    }
+
+    // public
+    function dutchMint(uint256 _mintAmount) public payable {
+        uint price = getPrice();
+        cost = price / 2;
+        itemPricePresale = price / 2;
+
+        require(block.timestamp < expiresAt, "This auction has ended");
+        uint256 supply = totalSupply();
+        require(_mintAmount > 0, "need to mint at least 1 NFT");
+        require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
+        require(supply + _mintAmount + reservedSupply <= maxSupply, "max NFT limit exceeded");
+        require(msg.value >= price * _mintAmount, "insufficient funds");
+
+        _safeMint(msg.sender, _mintAmount);
+    }
 
     constructor() {
         whitelistedForStaking[msg.sender] = true;
@@ -73,7 +104,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     }
 
     function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
-        if (index >= balanceOf(owner)) revert OwnerIndexOutOfBounds();
+        if (index >= balanceOf(owner)) revert ();
         uint256 numMintedSoFar = _currentIndex;
         uint256 tokenIdsIdx;
         address currOwnershipAddr;
@@ -169,7 +200,6 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     }
 
     function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable {
-
         uint256 supply = totalSupply();
         require(supply <= presaleSupply, "presale limit reached");
         require(supply + _howMany + reservedSupply <= maxSupply, "max NFT limit exceeded");
@@ -236,7 +266,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     }
 
     function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
-        return ownershipOf(tokenId).startTimestamp;
+        return _ownershipOf(tokenId).startTimestamp;
     }
 
     //////////////////////////////
