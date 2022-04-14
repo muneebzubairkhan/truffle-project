@@ -24,10 +24,11 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/ERC721A.sol";
 
-contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
+contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
     string baseURI = "ipfs://QmNQnbjuesfcSMzcDShxZU1oGQjXaQWvYXchNYWHeieonh/";
     uint256 saleActiveTime = 1650297600;
 
@@ -78,33 +79,6 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Owna
     ////////////////////
     // HELPER METHOD  //
     ////////////////////
-
-    /// @notice get all nfts of a person
-    function walletOfOwner(address _owner) external view returns (uint256[] memory) {
-        uint256 ownerTokenCount = balanceOf(_owner);
-        uint256[] memory tokenIds = new uint256[](ownerTokenCount);
-        for (uint256 i; i < ownerTokenCount; i++) tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
-        return tokenIds;
-    }
-
-    function tokenOfOwnerByIndex(address _owner, uint256 index) public view returns (uint256) {
-        if (index >= balanceOf(_owner)) revert();
-        uint256 numMintedSoFar = _currentIndex;
-        uint256 tokenIdsIdx;
-        address currOwnershipAddr;
-        unchecked {
-            for (uint256 i; i < numMintedSoFar; i++) {
-                TokenOwnership memory ownership = _ownerships[i];
-                if (ownership.burned) continue;
-                if (ownership.addr != address(0)) currOwnershipAddr = ownership.addr;
-                if (currOwnershipAddr == _owner) {
-                    if (tokenIdsIdx == index) return i;
-                    tokenIdsIdx++;
-                }
-            }
-        }
-        revert();
-    }
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
