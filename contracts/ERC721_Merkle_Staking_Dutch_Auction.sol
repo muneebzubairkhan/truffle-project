@@ -51,7 +51,7 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         uint256 timeElapsed = block.timestamp - startAt;
         uint256 timeBlocksPassed = timeElapsed / timeBlock;
         uint256 discount = discountRate * timeBlocksPassed;
-        return discount > startingPrice ? endingPrice : startingPrice - discount;
+        return discount >= startingPrice ? endingPrice : startingPrice - discount;
     }
 
     // public
@@ -241,7 +241,7 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
     /*
     setters dutch auction:
-    
+
     startingPrice
     endingPrice
     discountRate 
