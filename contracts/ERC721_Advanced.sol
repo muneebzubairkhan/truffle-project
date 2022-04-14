@@ -32,7 +32,6 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Owna
     uint256 saleActiveTime = 1650297600;
 
     uint256 constant maxSupply = 4999;
-    uint256 mintableSupply = 4999;
     uint256 itemPrice = 0.12 ether;
 
     constructor() {
@@ -43,7 +42,7 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Owna
     function purchaseTokens(uint256 _howMany) external payable nonReentrant {
         _safeMint(msg.sender, _howMany);
 
-        require(totalSupply() <= mintableSupply, "Try mint less");
+        require(totalSupply() <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
@@ -63,12 +62,6 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Owna
     /// @notice set sale active time
     function setSaleActiveTime(uint256 _saleActiveTime) external onlyOwner {
         saleActiveTime = _saleActiveTime;
-    }
-
-    /// @notice set mintableSupply
-    function setMintableSupply(uint256 _mintableSupply) external onlyOwner {
-        require(_mintableSupply <= maxSupply, "put a number less than max supply");
-        mintableSupply = _mintableSupply;
     }
 
     /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
@@ -170,7 +163,7 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Owna
     function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable nonReentrant {
         _safeMint(msg.sender, _howMany);
 
-        require(totalSupply() <= mintableSupply, "Try mint less");
+        require(totalSupply() <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany <= 50, "Mint min 1, max 50");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
