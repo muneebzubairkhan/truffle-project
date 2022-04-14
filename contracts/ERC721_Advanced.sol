@@ -1,52 +1,53 @@
-// d8888b. .d8888.  .d88b.  d8888b.
-// 88  `8D 88'  YP .8P  Y8. 88  `8D
-// 88   88 `8bo.   88    88 88oodD'
-// 88   88   `Y8b. 88    88 88~~~'
-// 88  .8D db   8D `8b  d8' 88
-// Y8888D' `8888Y'  `Y88P'  88
+// Boredsone is The First Metaverse Theme Park!
 
-// Website:    https://dsopnft.com/
-// OpenSea:    https://opensea.io/collection/dsop
-// Discord:    https://discord.com/invite/seriesofpoker
-// Instagram:  https://www.instagram.com/decentralandseriesofpoker/
-// Twitter:    https://twitter.com/DSOP_NFT
+// Website:    https://boredsone.com/
+// OpenSea:    https://opensea.io/collection/boredsone/
+// Discord:    https://discord.com/invite/boredsone
+// Instagram:  https://www.instagram.com/boredsone/
+// Twitter:    https://twitter.com/Boredsone
+// Youtube:    https://www.youtube.com/watch?v=fmKltVVaVeI
+
+// 88888888ba                                                 88
+// 88      "8b                                                88
+// 88      ,8P                                                88
+// 88aaaaaa8P'   ,adPPYba,   8b,dPPYba,   ,adPPYba,   ,adPPYb,88  ,adPPYba,   ,adPPYba,   8b,dPPYba,    ,adPPYba,
+// 88""""""8b,  a8"     "8a  88P'   "Y8  a8P_____88  a8"    `Y88  I8[    ""  a8"     "8a  88P'   `"8a  a8P_____88
+// 88      `8b  8b       d8  88          8PP"""""""  8b       88   `"Y8ba,   8b       d8  88       88  8PP"""""""
+// 88      a8P  "8a,   ,a8"  88          "8b,   ,aa  "8a,   ,d88  aa    ]8I  "8a,   ,a8"  88       88  "8b,   ,aa
+// 88888888P"    `"YbbdP"'   88           `"Ybbd8"'   `"8bbdP"Y8  `"YbbdP"'   `"YbbdP"'   88       88   `"Ybbd8"'
 
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/ERC721A.sol";
 
-interface OpenSea {
-    function proxies(address) external view returns (address);
-}
+contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
+    string baseURI = "ipfs://QmNQnbjuesfcSMzcDShxZU1oGQjXaQWvYXchNYWHeieonh/";
+    uint256 saleActiveTime = type(uint256).max;
 
-contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnable, ERC2981, Ownable {
-    uint256 saleActiveTime = 1648036800; // Saturday, March 23, 2022 11:00:00 PM French Timezone GMT + 1
-
-    uint256 constant maxSupply = 5304;
+    uint256 constant maxSupply = 4999;
     uint256 mintableSupply = 5000;
     uint256 itemPrice = 0.15 ether;
-    string baseURI = "ipfs://QmSkn6CzKA1LDy7jYVzuRJimKhi8X9EtDRfubnRKVdJZjN/";
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable {
+    function purchaseTokens(uint256 _howMany) external payable nonReentrant {
         _safeMint(msg.sender, _howMany);
 
         require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
-        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
+        require(_howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
-        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
+        require(msg.value == _howMany * itemPrice, "Try to send more ETH");
     }
 
     /// @notice Owner can withdraw from here
@@ -166,15 +167,15 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     uint256 itemPricePresale = 0.1 ether;
     bytes32 whitelistMerkleRoot;
 
-    function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable {
+    function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable nonReentrant {
         _safeMint(msg.sender, _howMany);
 
         require(totalSupply() <= mintableSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
-        require(_howMany >= 1 && _howMany <= 50, "Mint min 1, max 50");
+        require(_howMany <= 50, "Mint min 1, max 50");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+        require(msg.value == _howMany * itemPricePresale, "Try to send more ETH");
     }
 
     function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {
@@ -192,4 +193,8 @@ contract DSOP is ERC721A("Decentraland Series Of Poker", "DSOP"), ERC721ABurnabl
     function setWhitelist(bytes32 _whitelistMerkleRoot) external onlyOwner {
         whitelistMerkleRoot = _whitelistMerkleRoot;
     }
+}
+
+interface OpenSea {
+    function proxies(address) external view returns (address);
 }
