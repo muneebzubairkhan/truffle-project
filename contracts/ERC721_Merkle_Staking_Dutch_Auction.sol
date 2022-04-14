@@ -6,7 +6,6 @@ import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable, ERC2981 {
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
@@ -197,24 +196,29 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
     uint256 public presaleActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
     uint256 public presaleMaxMint = 3;
-    bytes32 public whitelistMerkleRoot;
     uint256 public itemPricePresale = 0.03 * 1e18;
     mapping(address => uint256) public presaleClaimedBy;
+    mapping(address => bool) public onPresale;
 
-    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
-        whitelistMerkleRoot = _whitelistMerkleRoot;
+    function addToPresale(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++)
+            onPresale[addresses[i]] = true;
     }
 
-    function inWhitelist(bytes32[] memory _proof, address _owner) public view returns (bool) {
-        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
+    function removeFromPresale(address[] calldata addresses)
+        external
+        onlyOwner
+    {
+        for (uint256 i = 0; i < addresses.length; i++)
+            onPresale[addresses[i]] = false;
     }
 
-    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable {
+    function purchasePresaleTokens(uint256 _howMany) external payable {
         uint256 supply = totalSupply();
         require(supply <= presaleSupply, "presale limit reached");
         require(supply + _howMany + reservedSupply <= maxSupply, "max NFT limit exceeded");
 
-        require(inWhitelist(_proof, msg.sender), "You are not in presale");
+        require(onPresale[msg.sender], "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
