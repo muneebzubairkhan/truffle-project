@@ -29,11 +29,11 @@ import "erc721a/contracts/ERC721A.sol";
 
 contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
     string baseURI = "ipfs://QmNQnbjuesfcSMzcDShxZU1oGQjXaQWvYXchNYWHeieonh/";
-    uint256 saleActiveTime = type(uint256).max;
+    uint256 saleActiveTime = 1650297600;
 
     uint256 constant maxSupply = 4999;
-    uint256 mintableSupply = 5000;
-    uint256 itemPrice = 0.15 ether;
+    uint256 mintableSupply = 4999;
+    uint256 itemPrice = 0.12 ether;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
@@ -163,8 +163,8 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721ABurnable, ERC2981, Owna
     // DSOP Presale  //
     ///////////////////
 
-    uint256 presaleActiveTime = 1647691200; // Saturday, March 19, 2022 11:00:00 PM French Timezone GMT + 1
-    uint256 itemPricePresale = 0.1 ether;
+    uint256 presaleActiveTime = 1650297600; // Saturday, March 19, 2022 11:00:00 PM French Timezone GMT + 1
+    uint256 itemPricePresale = 0.09 ether;
     bytes32 whitelistMerkleRoot;
 
     function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable nonReentrant {
