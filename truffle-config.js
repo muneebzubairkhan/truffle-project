@@ -7,13 +7,15 @@ const token = process.env.INFURA_TOKEN;
 const AVAX_SCAN_KEY = process.env.AVAX_SCAN_KEY;
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY;
 const BSCSCAN_KEY = process.env.BSCSCAN_KEY;
+const POLYGON_KEY = process.env.POLYGON_KEY;
+
 module.exports = {
   networks: {
     development: {
       host: "127.0.0.1",
       port: 8545,
       network_id: "*",
-      gas: 6721975,
+      gas: 3000000,
       gasPrice: toWei("0", "gwei"),
       explorerUrl: " ",
       web3Provider: "http://127.0.0.1/",
@@ -31,7 +33,7 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           MNEMONIC,
-          `https://api.avax-test.network/ext/bc/C/rpc`,
+          `https://api.avax-test.network/ext/bc/C/rpc`
         ),
       network_id: 1,
       // timeoutBlocks: 200,
@@ -57,7 +59,7 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           MNEMONIC,
-          "https://data-seed-prebsc-2-s2.binance.org:8545",
+          "https://data-seed-prebsc-2-s2.binance.org:8545"
         ),
       network_id: "97",
       explorerUrl: "https://testnet.bscscan.com/address/",
@@ -67,11 +69,33 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(MNEMONIC, "https://rinkeby.infura.io/v3/" + token),
       network_id: "4",
-      gas: "3000000",
-      gasPrice: toWei("1.5", "gwei"),
+      // gas: "3000000",
+      // gasPrice: toWei("1.5", "gwei"),
       skipDryRun: true,
       explorerUrl: "https://rinkeby.etherscan.io/address/",
       web3Provider: "https://rinkeby.infura.io/v3/" + token,
+    },
+    mumbai: {
+      provider: () =>
+        new HDWalletProvider(
+          MNEMONIC,
+          "https://matic-mumbai.chainstacklabs.com"
+        ),
+      network_id: "80001",
+      gas: "20000000",
+      gasPrice: toWei("0.000000050", "ether"),
+      // maxFeePerGas: toWei("0.000000100", "ether"),
+      // maxPriorityFeePerGas: toWei("0.000000003", "ether"),
+      explorerUrl: "https://mumbai.polygonscan.com/address/",
+    },
+    polygon: {
+      provider: () => new HDWalletProvider(MNEMONIC, "https://polygon-rpc.com"),
+      network_id: "137",
+      gas: "4000000",
+      gasPrice: toWei("0.000000033", "ether"),
+      // maxFeePerGas: toWei("0.000000100", "ether"),
+      // maxPriorityFeePerGas: toWei("0.000000003", "ether"),
+      explorerUrl: "https://mumbai.polygonscan.com/address/",
     },
     // bscMainnet: {
     //   provider: () => {
@@ -96,11 +120,11 @@ module.exports = {
       provider: () => {
         return new HDWalletProvider(
           MNEMONIC,
-          'https://ropsten.infura.io/v3/' + token
+          "https://ropsten.infura.io/v3/" + token
         );
       },
-      network_id: '3',
-      skipDryRun: true
+      network_id: "3",
+      skipDryRun: true,
     },
 
     // kovan: {
@@ -114,12 +138,13 @@ module.exports = {
     //   skipDryRun: true
     // }
   },
-  plugins: ["truffle-plugin-verify", "eth-gas-reporter"],
+  plugins: ["truffle-plugin-verify"],
   api_keys: {
     etherscan: ETHERSCAN_KEY,
     snowtrace: AVAX_SCAN_KEY,
     bscscan: BSCSCAN_KEY,
-    polygonscan: "MY_API_KEY",
+    polygonscan: POLYGON_KEY,
+
     ftmscan: "MY_API_KEY",
     hecoinfo: "MY_API_KEY",
     moonscan: "MY_API_KEY",
@@ -135,12 +160,7 @@ module.exports = {
       },
     },
   },
-  mocha: {
-    reporter: "eth-gas-reporter",
-  },
 };
-
-
 
 // sudo truffle migrate --reset --network rinkeby
 // sudo truffle run verify NftStaking --network rinkeby
