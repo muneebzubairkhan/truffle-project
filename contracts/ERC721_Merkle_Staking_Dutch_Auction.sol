@@ -73,10 +73,10 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         _safeMint(msg.sender, _mintAmount);
     }
 
-    constructor() {
-        whitelistedForStaking[msg.sender] = true;
-        _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
-    }
+    // constructor() {
+    //     whitelistedForStaking[msg.sender] = true;
+    //     _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
+    // }
 
     function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
         _setDefaultRoyalty(_receiver, _feeNumerator);
