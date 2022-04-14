@@ -130,7 +130,7 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurna
     // DSOP Presale  //
     ///////////////////
 
-    uint256 presaleActiveTime = 1650297600; // Saturday, March 19, 2022 11:00:00 PM French Timezone GMT + 1
+    uint256 presaleActiveTime = 1650297600;
     uint256 itemPricePresale = 0.09 ether;
     bytes32 whitelistMerkleRoot;
 
