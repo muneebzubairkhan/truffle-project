@@ -126,9 +126,9 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurna
                 : super.isApprovedForAll(_owner, _operator);
     }
 
-    ///////////////////
-    // DSOP Presale  //
-    ///////////////////
+    //////////////
+    // Presale  //
+    //////////////
 
     uint256 presaleActiveTime = 1650297600;
     uint256 itemPricePresale = 0.09 ether;

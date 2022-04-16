@@ -6,9 +6,9 @@
   "directories": {
     "test": "test"
   },
-  "selectedContracts": "DSOPPresale",
+  "selectedContracts": "Boredsone",
   "selectedNetwork": "fuji",
-  "allContracts": "Migrations DSOPPresale",
+  "allContracts": "Migrations Boredsone",
   "scripts": {
     "start": "truffle migrate --reset --network development",
     "____": "_____",
@@ -18,13 +18,13 @@
     "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate --reset\" --ext .sol",
     "runLocalBlockchain": "ganache-cli",
     "_____": "_____",
-    "verify": "truffle run verify DSOPPresale --network bscTestnet",
-    "startBscTestnet": "sudo truffle migrate --network bscTestnet --all --reset && truffle run verify DSOPPresale --network bscTestnet",
-    "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify DSOPPresale --network bscMainnet",
-    "startRinkeby": "sudo truffle migrate --network rinkeby --reset && truffle run verify DSOPPresale --network rinkeby",
-    "startRopsten": "sudo truffle migrate --network ropsten --reset && truffle run verify DSOPPresale --network ropsten",
-    "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify DSOPPresale --network mainnet",
-    "startInnovate": "truffle migrate --network %(grep DEPLOY_NETWORK .env)% --reset && truffle run verify DSOPPresale --network $(grep DEPLOY_NETWORK .env)",
+    "verify": "truffle run verify Boredsone --network bscTestnet",
+    "startBscTestnet": "sudo truffle migrate --network bscTestnet --all --reset && truffle run verify Boredsone --network bscTestnet",
+    "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify Boredsone --network bscMainnet",
+    "startRinkeby": "sudo truffle migrate --network rinkeby --reset && truffle run verify Boredsone --network rinkeby",
+    "startRopsten": "sudo truffle migrate --network ropsten --reset && truffle run verify Boredsone --network ropsten",
+    "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify Boredsone --network mainnet",
+    "startInnovate": "truffle migrate --network %(grep DEPLOY_NETWORK .env)% --reset && truffle run verify Boredsone --network $(grep DEPLOY_NETWORK .env)",
     "___": "_____",
     "beep1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
     "beep2": "start wmplayer \"C:\\Windows\\Media\\Alarm10.wav\" && timeout 5 && taskkill /im wmplayer.exe"
