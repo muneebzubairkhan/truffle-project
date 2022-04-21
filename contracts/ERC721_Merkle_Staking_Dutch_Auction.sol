@@ -6,8 +6,44 @@ import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC721ABurnable, ERC2981 {
+contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable, Ownable, ERC721ABurnable, ERC2981 {
+    using Strings for uint256;
+
+    bool public revealed = false;
+    string public notRevealedMetadataFolderIpfsLink;
+    uint256 public maxMintAmount = 20;
+    uint256 public maxSupply = 10_000;
+    uint256 public costPerNft = 0.075 * 1e18;
+    uint256 public nftsForOwner = 250;
+    string public metadataFolderIpfsLink;
+    uint256 constant presaleSupply = 400;
+    uint256 public nftPerAddressLimit = 3;
+    string constant baseExtension = ".json";
+    uint256 public publicmintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
+
+    constructor() {
+        _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
+    }
+
+    // public
+    function mint(uint256 _mintAmount) public payable {
+        require(block.timestamp > publicmintActiveTime, "the contract is paused");
+        uint256 supply = totalSupply();
+        require(_mintAmount > 0, "need to mint at least 1 NFT");
+        require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
+        require(supply + _mintAmount + nftsForOwner <= maxSupply, "max NFT limit exceeded");
+        require(msg.value >= costPerNft * _mintAmount, "insufficient funds");
+
+        _safeMint(msg.sender, _mintAmount);
+    }
+
+    ///////////////////////////////////
+    //       OVERRIDE CODE STARTS    //
+    ///////////////////////////////////
+
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
@@ -17,130 +53,40 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         _resetTokenRoyalty(tokenId);
     }
 
-    using Strings for uint256;
-
-    string public baseURI;
-    string public baseExtension = ".json";
-    string public notRevealedUri;
-    uint256 public cost = 0.075 * 1e18;
-    uint256 public maxSupply = 10_000;
-    uint256 public reservedSupply = 250;
-    uint256 public maxMintAmount = 20;
-    uint256 public nftPerAddressLimit = 3;
-    uint256 public publicmintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
-    bool public revealed = false;
-    uint256 constant presaleSupply = 400;
-
-    // Dutch Auction
-
-    // immutable means you can not change value of this
-    /*
-    Dutch auction feature in the smart contract. Starting price will be 1eth and decrease by .05eth every 30 minutes until it reaches the price of .1eth.
-
-    Whitelist will activate after public sale. Users should be able to purchase at 50% off of the final Dutch auction sale.
-    */
-    uint256 public startingPrice = 1 ether;
-    uint256 public endingPrice = 0.1 ether;
-    uint256 public discountRate =  0.05 ether;
-    uint256 public startAt = type(uint256).max; // auction will not start automatically after deploying of contract
-    uint256 public expiresAt = 0; //  auction will not start automatically after deploying of contract
-    uint256 public timeBlock = 30 minutes; // prices decreases every 30 minutes
-
-    function getDutchPrice() public view returns (uint256) {
-        uint256 timeElapsed = block.timestamp - startAt;
-        uint256 timeBlocksPassed = timeElapsed / timeBlock;
-        uint256 discount = discountRate * timeBlocksPassed;
-        return discount >= startingPrice ? endingPrice : startingPrice - discount;
-    }
-
-    // public
-    function dutchMint(uint256 _mintAmount) public payable {
-        uint price = getDutchPrice();
-        cost = price / 2;
-        itemPricePresale = price / 2;
-
-        require(block.timestamp < expiresAt, "This auction has ended");
-        uint256 supply = totalSupply();
-        require(_mintAmount > 0, "need to mint at least 1 NFT");
-        require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
-        require(supply + _mintAmount + reservedSupply <= maxSupply, "max NFT limit exceeded");
-        require(msg.value >= price * _mintAmount, "insufficient funds");
-
-        uint refund = msg.value - price;
-        if (refund > 0)
-            payable(msg.sender).transfer(refund);
-        _safeMint(msg.sender, _mintAmount);
-    }
-
-    // constructor() {
-    //     whitelistedForStaking[msg.sender] = true;
-    //     _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
-    // }
-
-    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
-        _setDefaultRoyalty(_receiver, _feeNumerator);
-    }
-
-    // internal
     function _startTokenId() internal pure override returns (uint256) {
         return 1;
     }
 
-    // internal
     function _baseURI() internal view virtual override returns (string memory) {
-        return baseURI;
-    }
-
-    // public
-    function mint(uint256 _mintAmount) public payable {
-        require(block.timestamp > publicmintActiveTime, "the contract is paused");
-        uint256 supply = totalSupply();
-        require(_mintAmount > 0, "need to mint at least 1 NFT");
-        require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
-        require(supply + _mintAmount + reservedSupply <= maxSupply, "max NFT limit exceeded");
-        require(msg.value >= cost * _mintAmount, "insufficient funds");
-
-        _safeMint(msg.sender, _mintAmount);
-    }
-
-    function walletOfOwner(address _owner) public view returns (uint256[] memory) {
-        uint256 ownerTokenCount = balanceOf(_owner);
-        uint256[] memory tokenIds = new uint256[](ownerTokenCount);
-        for (uint256 i; i < ownerTokenCount; i++) {
-            tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
-        }
-        return tokenIds;
-    }
-
-    function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
-        if (index >= balanceOf(owner)) revert ();
-        uint256 numMintedSoFar = _currentIndex;
-        uint256 tokenIdsIdx;
-        address currOwnershipAddr;
-
-        unchecked {
-            for (uint256 i; i < numMintedSoFar; i++) {
-                TokenOwnership memory ownership = _ownerships[i];
-                if (ownership.burned) continue;
-
-                if (ownership.addr != address(0)) currOwnershipAddr = ownership.addr;
-
-                if (currOwnershipAddr == owner) {
-                    if (tokenIdsIdx == index) return i;
-                    tokenIdsIdx++;
-                }
-            }
-        }
-        revert();
+        return metadataFolderIpfsLink;
     }
 
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
-        if (revealed == false) return notRevealedUri;
+        if (revealed == false) return notRevealedMetadataFolderIpfsLink;
 
         string memory currentBaseURI = _baseURI();
         return bytes(currentBaseURI).length > 0 ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension)) : "";
+    }
+
+    //////////////////
+    //  ONLY OWNER  //
+    //////////////////
+
+    function withdraw() public payable onlyOwner {
+        (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+        require(success);
+    }
+
+    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
+        nftsForOwner -= _sendNftsTo.length * _howMany;
+
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
+    }
+
+    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
+        _setDefaultRoyalty(_receiver, _feeNumerator);
     }
 
     function revealFlip() public onlyOwner {
@@ -151,45 +97,28 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
         nftPerAddressLimit = _limit;
     }
 
-    function setCost(uint256 _newCost) public onlyOwner {
-        cost = _newCost;
+    function setCostPerNft(uint256 _newCostPerNft) public onlyOwner {
+        costPerNft = _newCostPerNft;
     }
 
     function setMaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner {
         maxMintAmount = _newmaxMintAmount;
     }
 
-    function setBaseURI(string memory _newBaseURI) public onlyOwner {
-        baseURI = _newBaseURI;
+    function setMetadataFolderIpfsLink(string memory _newMetadataFolderIpfsLink) public onlyOwner {
+        metadataFolderIpfsLink = _newMetadataFolderIpfsLink;
     }
 
-    function setBaseExtension(string memory _newBaseExtension) public onlyOwner {
-        baseExtension = _newBaseExtension;
-    }
-
-    function setNotRevealedURI(string memory _notRevealedURI) public onlyOwner {
-        notRevealedUri = _notRevealedURI;
+    function setNotRevealedMetadataFolderIpfsLink(string memory _notRevealedMetadataFolderIpfsLink) public onlyOwner {
+        notRevealedMetadataFolderIpfsLink = _notRevealedMetadataFolderIpfsLink;
     }
 
     function setPublicMintActiveTime(uint256 _publicmintActiveTime) public onlyOwner {
         publicmintActiveTime = _publicmintActiveTime;
     }
+}
 
-    function withdraw() public payable onlyOwner {
-        (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
-        require(success);
-    }
-
-    ///////////////////////////////////
-    //       AIRDROP CODE STARTS     //
-    ///////////////////////////////////
-
-    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
-        reservedSupply -= _sendNftsTo.length * _howMany;
-
-        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
-    }
-
+contract NftWhitelistSale is NftPublicSale {
     ///////////////////////////////
     //    PRESALE CODE STARTS    //
     ///////////////////////////////
@@ -201,22 +130,17 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     mapping(address => bool) public onPresale;
 
     function addToPresale(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onPresale[addresses[i]] = true;
+        for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = true;
     }
 
-    function removeFromPresale(address[] calldata addresses)
-        external
-        onlyOwner
-    {
-        for (uint256 i = 0; i < addresses.length; i++)
-            onPresale[addresses[i]] = false;
+    function removeFromPresale(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = false;
     }
 
     function purchasePresaleTokens(uint256 _howMany) external payable {
         uint256 supply = totalSupply();
         require(supply <= presaleSupply, "presale limit reached");
-        require(supply + _howMany + reservedSupply <= maxSupply, "max NFT limit exceeded");
+        require(supply + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
 
         require(onPresale[msg.sender], "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
@@ -242,76 +166,125 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
         presaleActiveTime = _presaleActiveTime;
     }
+}
 
+contract NftWhitelistSaleMerkle is NftPublicSale {
+    ///////////////////////////////
+    //    PRESALE CODE STARTS    //
+    ///////////////////////////////
+
+    uint256 public presaleActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
+    uint256 public presaleMaxMint = 3;
+    bytes32 public whitelistMerkleRoot;
+    uint256 public itemPricePresale = 0.03 * 1e18;
+    mapping(address => uint256) public presaleClaimedBy;
+
+    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
+        whitelistMerkleRoot = _whitelistMerkleRoot;
+    }
+
+    function inWhitelist(bytes32[] memory _proof, address _owner) public view returns (bool) {
+        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
+    }
+
+    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable {
+        uint256 supply = totalSupply();
+        require(supply + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
+
+        require(inWhitelist(_proof, msg.sender), "You are not in presale");
+        require(block.timestamp > presaleActiveTime, "Presale is not active");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+
+        presaleClaimedBy[msg.sender] += _howMany;
+
+        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
+
+        _safeMint(msg.sender, _howMany);
+    }
+
+    // set limit of presale
+    function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
+        presaleMaxMint = _presaleMaxMint;
+    }
+
+    // Change presale price in case of ETH price changes too much
+    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
+        itemPricePresale = _itemPricePresale;
+    }
+
+    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
+        presaleActiveTime = _presaleActiveTime;
+    }
+
+}
+
+contract NftDutchAuctionSale is NftWhitelistSaleMerkle {
+    // Dutch Auction
+
+    // immutable means you can not change value of this
     /*
-    setters dutch auction:
+    Dutch auction feature in the smart contract. Starting price will be 1eth and decrease by .05eth every 30 minutes until it reaches the price of .1eth.
 
-    startingPrice
-    endingPrice
-    discountRate 
-    startAt
-    expiresAt
-    timeBlock
+    Whitelist will activate after public sale. Users should be able to purchase at 50% off of the final Dutch auction sale.
     */
+    uint256 public startingPrice = 1 ether;
+    uint256 public endingPrice = 0.1 ether;
+    uint256 public discountRate = 0.05 ether;
+    uint256 public startAt = type(uint256).max; // auction will not start automatically after deploying of contract
+    uint256 public expiresAt = 0; //  auction will not start automatically after deploying of contract
+    uint256 public timeBlock = 30 minutes; // prices decreases every 30 minutes
+
+    function getDutchPrice() public view returns (uint256) {
+        uint256 timeElapsed = block.timestamp - startAt;
+        uint256 timeBlocksPassed = timeElapsed / timeBlock;
+        uint256 discount = discountRate * timeBlocksPassed;
+        return discount >= startingPrice ? endingPrice : startingPrice - discount;
+    }
+
+    // public
+    function dutchMint(uint256 _mintAmount) public payable {
+        uint256 price = getDutchPrice();
+        costPerNft = price / 2;
+        itemPricePresale = price / 2;
+
+        require(block.timestamp < expiresAt, "This auction has ended");
+        uint256 supply = totalSupply();
+        require(_mintAmount > 0, "need to mint at least 1 NFT");
+        require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
+        require(supply + _mintAmount + nftsForOwner <= maxSupply, "max NFT limit exceeded");
+        require(msg.value >= price * _mintAmount, "insufficient funds");
+
+        uint256 refund = msg.value - price;
+        if (refund > 0) payable(msg.sender).transfer(refund);
+        _safeMint(msg.sender, _mintAmount);
+    }
+
     function setStartingPrice(uint256 _startingPrice) external onlyOwner {
         startingPrice = _startingPrice;
     }
+
     function setEndingPrice(uint256 _endingPrice) external onlyOwner {
         endingPrice = _endingPrice;
     }
+
     function setDiscountRate(uint256 _discountRate) external onlyOwner {
         discountRate = _discountRate;
     }
+
     function setStartAt(uint256 _startAt) external onlyOwner {
         startAt = _startAt;
     }
+
     function setExpiresAt(uint256 _expiresAt) external onlyOwner {
         expiresAt = _expiresAt;
     }
+
     function setTimeBlock(uint256 _timeBlock) external onlyOwner {
         timeBlock = _timeBlock;
     }
+}
 
-    ////////////////////////////////
-    // AUTO APPROVE MARKETPLACES  //
-    ////////////////////////////////
-
-    mapping(address => bool) public projectProxy; // check public vs private vs internal gas
-
-    function flipProxyState(address proxyAddress) public onlyOwner {
-        projectProxy[proxyAddress] = !projectProxy[proxyAddress];
-    }
-
-    // set auto approve for trusted marketplaces here
-    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        if (projectProxy[_operator]) return true; // ANY OTHER Marketplace
-        return super.isApprovedForAll(_owner, _operator);
-    }
-
-    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropTokenToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
-        for (uint256 i = 0; i < _to.length; i++) {
-            (bool success, ) = payable(_to[i]).call{value: _toSend}("");
-            require(success);
-        }
-    }
-
-    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropTokenToHolders(
-        uint256 _toSend,
-        uint256 _fromTokenId,
-        uint256 _toTokenId
-    ) external onlyOwner {
-        for (uint256 i = _fromTokenId; i < _toTokenId; i++) {
-            (bool success, ) = payable(ownerOf(i)).call{value: _toSend}("");
-            require(success);
-        }
-    }
-
-    function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
-        return _ownershipOf(tokenId).startTimestamp;
-    }
-
+contract NftStaking is NftDutchAuctionSale {
     //////////////////////////////
     // WHITELISTING FOR STAKING //
     //////////////////////////////
@@ -347,4 +320,54 @@ contract DysfunctionalDogs2 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
+
+    function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
+        return _ownershipOf(tokenId).startTimestamp;
+    }
 }
+
+contract NftAirDropCoin is NftStaking {
+    function receiveCoin() external payable {}
+
+    receive() external payable {}
+
+    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
+    function airDropTokenToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
+        for (uint256 i = 0; i < _to.length; i++) {
+            (bool success, ) = payable(_to[i]).call{value: _toSend}("");
+            require(success);
+        }
+    }
+
+    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
+    function airDropTokenToHolders(
+        uint256 _toSend,
+        uint256 _fromTokenId,
+        uint256 _toTokenId
+    ) external onlyOwner {
+        for (uint256 i = _fromTokenId; i < _toTokenId; i++) {
+            (bool success, ) = payable(ownerOf(i)).call{value: _toSend}("");
+            require(success);
+        }
+    }
+}
+
+contract NftAutoApproveMarketPlaces is NftAirDropCoin {
+    ////////////////////////////////
+    // AUTO APPROVE MARKETPLACES  //
+    ////////////////////////////////
+
+    mapping(address => bool) public projectProxy; // check public vs private vs internal gas
+
+    function flipProxyState(address proxyAddress) public onlyOwner {
+        projectProxy[proxyAddress] = !projectProxy[proxyAddress];
+    }
+
+    // set auto approve for trusted marketplaces here
+    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+        if (projectProxy[_operator]) return true; // ANY OTHER Marketplace
+        return super.isApprovedForAll(_owner, _operator);
+    }
+}
+
+contract Nft is NftAutoApproveMarketPlaces {}
