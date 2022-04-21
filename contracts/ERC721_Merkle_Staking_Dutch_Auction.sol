@@ -29,7 +29,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     }
 
     // public
-    function mint(uint256 _mintAmount) public payable {
+    function purchaseTokens(uint256 _mintAmount) public payable {
         require(block.timestamp > publicmintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
         require(_mintAmount > 0, "need to mint at least 1 NFT");
@@ -113,7 +113,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         notRevealedMetadataFolderIpfsLink = _notRevealedMetadataFolderIpfsLink;
     }
 
-    function setPublicMintActiveTime(uint256 _publicmintActiveTime) public onlyOwner {
+    function setSaleActiveTime(uint256 _publicmintActiveTime) public onlyOwner {
         publicmintActiveTime = _publicmintActiveTime;
     }
 }
@@ -137,7 +137,7 @@ contract NftWhitelistSale is NftPublicSale {
         for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = false;
     }
 
-    function purchasePresaleTokens(uint256 _howMany) external payable {
+    function purchaseTokensPresale(uint256 _howMany) external payable {
         uint256 supply = totalSupply();
         require(supply <= presaleSupply, "presale limit reached");
         require(supply + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
@@ -179,7 +179,7 @@ contract NftWhitelistSaleMerkle is NftPublicSale {
     uint256 public itemPricePresale = 0.03 * 1e18;
     mapping(address => uint256) public presaleClaimedBy;
 
-    function setWhitelistMerkleRoot(bytes32 _whitelistMerkleRoot) external onlyOwner {
+    function setWhitelist(bytes32 _whitelistMerkleRoot) external onlyOwner {
         whitelistMerkleRoot = _whitelistMerkleRoot;
     }
 
@@ -187,7 +187,7 @@ contract NftWhitelistSaleMerkle is NftPublicSale {
         return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
     }
 
-    function purchasePresaleTokens(uint256 _howMany, bytes32[] calldata _proof) external payable {
+    function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable {
         uint256 supply = totalSupply();
         require(supply + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
 
