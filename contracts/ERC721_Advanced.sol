@@ -19,15 +19,17 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), ERC721ABurnable, ERC2981, Ownable {
+contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981, ReentrancyGuard {
     uint256 public maxSupply = 10_000;
     uint256 public itemPrice = 0.07 ether;
-    uint256 public saleActiveTime = block.timestamp + 365 days;
+    uint256 public saleActiveTime = type(uint256).max;
     string public baseURI;
 
     constructor() {
@@ -39,7 +41,7 @@ contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), ERC721ABurnable, ERC2
     ///////////////////////////////////
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable saleActive callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
+    function purchaseTokens(uint256 _howMany) external payable nonReentrant saleActive callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
         _safeMint(msg.sender, _howMany);
     }
 
@@ -81,37 +83,6 @@ contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), ERC721ABurnable, ERC2
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
 
-    ////////////////////
-    // HELPER METHOD  //
-    ////////////////////
-
-    /// @notice get all nfts of a person
-    function walletOfOwner(address _owner) external view returns (uint256[] memory) {
-        uint256 ownerTokenCount = balanceOf(_owner);
-        uint256[] memory tokenIds = new uint256[](ownerTokenCount);
-        for (uint256 i; i < ownerTokenCount; i++) tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
-        return tokenIds;
-    }
-
-    function tokenOfOwnerByIndex(address _owner, uint256 index) public view returns (uint256) {
-        if (index >= balanceOf(_owner)) revert();
-        uint256 numMintedSoFar = _currentIndex;
-        uint256 tokenIdsIdx;
-        address currOwnershipAddr;
-        unchecked {
-            for (uint256 i; i < numMintedSoFar; i++) {
-                TokenOwnership memory ownership = _ownerships[i];
-                if (ownership.burned) continue;
-                if (ownership.addr != address(0)) currOwnershipAddr = ownership.addr;
-                if (currOwnershipAddr == _owner) {
-                    if (tokenIdsIdx == index) return i;
-                    tokenIdsIdx++;
-                }
-            }
-        }
-        revert();
-    }
-
     ///////////////////
     //  HELPER CODE  //
     ///////////////////
@@ -149,10 +120,10 @@ contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), ERC721ABurnable, ERC2
     // AUTO APPROVE MARKETPLACES //
     ///////////////////////////////
 
-    mapping(address => bool) public projectProxy; // check public vs private vs internal gas
+    mapping(address => bool) private allowed;
 
-    function flipProxyState(address proxyAddress) public onlyOwner {
-        projectProxy[proxyAddress] = !projectProxy[proxyAddress];
+    function autoApproveMarketplace(address _spender) public onlyOwner {
+        allowed[_spender] = !allowed[_spender];
     }
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
@@ -165,7 +136,7 @@ contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), ERC721ABurnable, ERC2
         // X2Y2
         else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
         // ANY OTHER Marketpalce
-        else if (projectProxy[_operator]) return true;
+        else if (allowed[_operator]) return true;
         return super.isApprovedForAll(_owner, _operator);
     }
 
@@ -195,7 +166,7 @@ contract FoxNationDAOPresale is FoxNationDAO {
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
     mapping(uint256 => bytes32) public whitelistMerkleRoots;
-    uint256 public presaleActiveTime = block.timestamp + 365 days;
+    uint256 public presaleActiveTime = type(uint256).max;
 
     // multicall inWhitelist
     function inWhitelist(
@@ -216,11 +187,11 @@ contract FoxNationDAOPresale is FoxNationDAO {
         return MerkleProof.verify(_proof, whitelistMerkleRoots[_rootNumber], keccak256(abi.encodePacked(_owner)));
     }
 
-    function purchasePresaleTokens(
+    function purchaseTokensWhitelist(
         uint256 _howMany,
         bytes32[] calldata _proof,
         uint256 _rootNumber
-    ) external payable callerIsUser tokensAvailable(_howMany) {
+    ) external payable nonReentrant callerIsUser tokensAvailable(_howMany) {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(_inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
         require(msg.value >= _howMany * itemPricePresales[_rootNumber], "Try to send more ETH");
