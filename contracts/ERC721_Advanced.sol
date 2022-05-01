@@ -108,7 +108,7 @@ contract AlphaAliens is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable
     }
 
     modifier priceAvailable(uint256 _howMany) {
-        require(msg.value >= _howMany * itemPrice, "Try to send more ETH");
+        require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
         _;
     }
 
@@ -190,7 +190,7 @@ contract AlphaAliensPresale is AlphaAliens {
     ) external payable callerIsUser tokensAvailable(_howMany) {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(_inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
-        require(msg.value >= _howMany * itemPricePresales[_rootNumber], "Try to send more ETH");
+        require(msg.value == _howMany * itemPricePresales[_rootNumber], "Send correct amount of ETH");
         require(_numberMinted(msg.sender) + _howMany <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
 
         _safeMint(msg.sender, _howMany);
