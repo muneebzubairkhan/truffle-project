@@ -215,3 +215,45 @@ contract AlphaAliensPresale is AlphaAliens {
         presaleActiveTime = _presaleActiveTime;
     }
 }
+
+contract AlphaAliensStaking is AlphaAliensPresale {
+    //////////////////////////////
+    // WHITELISTING FOR STAKING //
+    //////////////////////////////
+
+    // tokenId => staked (yes or no)
+    mapping(address => bool) public canStake;
+
+    function addToWhitelistForStaking(address _operator) external onlyOwner {
+        canStake[_operator] = !canStake[_operator];
+    }
+
+    modifier onlyWhitelistedForStaking() {
+        require(canStake[msg.sender], "Caller is not whitelisted for staking");
+        _;
+    }
+
+    /////////////////////////
+    //  STAKE / PAUSE NFTS //
+    /////////////////////////
+
+    mapping(uint256 => bool) public staked;
+
+    function _beforeTokenTransfers(
+        address,
+        address,
+        uint256 startTokenId,
+        uint256
+    ) internal view override {
+        require(!staked[startTokenId], "Unstake tokenId it to transfer");
+    }
+
+    // stake / unstake nfts
+    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
+        for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
+    }
+
+    function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
+        return _ownershipOf(tokenId).startTimestamp;
+    }
+}
