@@ -1,14 +1,13 @@
-//  Nft Comics
-// ########  #######  ##     ##      ##    ##    ###    ######## ####  #######  ##    ##      ########     ###     #######
-// ##       ##     ##  ##   ##       ###   ##   ## ##      ##     ##  ##     ## ###   ##      ##     ##   ## ##   ##     ##
-// ##       ##     ##   ## ##        ####  ##  ##   ##     ##     ##  ##     ## ####  ##      ##     ##  ##   ##  ##     ##
-// ######   ##     ##    ###         ## ## ## ##     ##    ##     ##  ##     ## ## ## ##      ##     ## ##     ## ##     ##
-// ##       ##     ##   ## ##        ##  #### #########    ##     ##  ##     ## ##  ####      ##     ## ######### ##     ##
-// ##       ##     ##  ##   ##       ##   ### ##     ##    ##     ##  ##     ## ##   ###      ##     ## ##     ## ##     ##
-// ##        #######  ##     ##      ##    ## ##     ##    ##    ####  #######  ##    ##      ########  ##     ##  #######
+// Alpha Aliens
+                                                                                            
+//     // | |     //          /                     // | |     //                                
+//    //__| |    //  ___     / __      ___         //__| |    // ( )  ___       __      ___    
+//   / ___  |   // //   ) ) //   ) ) //   ) )     / ___  |   // / / //___) ) //   ) ) ((   ) ) 
+//  //    | |  // //___/ / //   / / //   / /     //    | |  // / / //       //   / /   \ \     
+// //     | | // //       //   / / ((___( (     //     | | // / / ((____   //   / / //__) )   
 
-// Website:  https://foxnationdao.com/
-// OpenSea:  https://opensea.io/collection/foxnationdao
+// Website:  https://AlphaAliens.com/
+// OpenSea:  https://opensea.io/collection/AlphaAliens
 
 // SPDX-License-Identifier: MIT
 
@@ -26,11 +25,11 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981, ReentrancyGuard {
+contract AlphaAliens is ERC721A("AlphaAliens", "FNDAO"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981, ReentrancyGuard {
     uint256 public maxSupply = 10_000;
     uint256 public itemPrice = 0.07 ether;
     uint256 public saleActiveTime = type(uint256).max;
-    string public baseURI;
+    string baseURI;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 7_50); // 7.50 %
@@ -161,7 +160,7 @@ contract FoxNationDAO is ERC721A("FoxNationDAO", "FNDAO"), Ownable, ERC721AQuery
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract FoxNationDAOPresale is FoxNationDAO {
+contract AlphaAliensPresale is AlphaAliens {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -218,46 +217,5 @@ contract FoxNationDAOPresale is FoxNationDAO {
 
     function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
         presaleActiveTime = _presaleActiveTime;
-    }
-}
-
-contract FoxNationDAOERC20 is FoxNationDAOPresale {
-    /// @notice set itemPrice in Erc20
-    uint256 public itemPriceErc20 = 200 ether;
-    uint256 public saleActiveTimeErc20 = block.timestamp + 365 days;
-    address public erc20 = 0xc3D6F4b97292f8d48344B36268BDd7400180667E; // To Buy In Token, USDT Token
-
-    /// @notice Purchase multiple NFTs at once
-    function purchaseTokensErc20(uint256 _howMany) external callerIsUser saleActiveErc20 mintLimit(_howMany) tokensAvailable(_howMany) priceAvailableERC20(_howMany) {
-        _safeMint(msg.sender, _howMany);
-    }
-
-    /// @notice Owner can withdraw from here
-    function withdrawERC20(address _erc20) external onlyOwner {
-        IERC20(_erc20).transferFrom(address(this), msg.sender, IERC20(_erc20).balanceOf(address(this)));
-    }
-
-    function setErc20(address _erc20) external onlyOwner {
-        erc20 = _erc20;
-    }
-
-    /// @notice set itemPrice in Erc20
-    function setItemPriceErc20(uint256 _itemPriceErc20) external onlyOwner {
-        itemPriceErc20 = _itemPriceErc20;
-    }
-
-    /// @notice set sale active time
-    function setSaleActiveTimeERC20(uint256 _saleActiveTimeErc20) external onlyOwner {
-        saleActiveTimeErc20 = _saleActiveTimeErc20;
-    }
-
-    modifier saleActiveErc20() {
-        require(block.timestamp > saleActiveTimeErc20, "Sale is not active");
-        _;
-    }
-
-    modifier priceAvailableERC20(uint256 _howMany) {
-        require(IERC20(erc20).transferFrom(msg.sender, address(this), _howMany * itemPriceErc20), "Try to send more ERC20");
-        _;
     }
 }
