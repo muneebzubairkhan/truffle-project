@@ -1,10 +1,10 @@
 // Alpha Aliens
-                                                                                            
-//     // | |     //          /                     // | |     //                                
-//    //__| |    //  ___     / __      ___         //__| |    // ( )  ___       __      ___    
-//   / ___  |   // //   ) ) //   ) ) //   ) )     / ___  |   // / / //___) ) //   ) ) ((   ) ) 
-//  //    | |  // //___/ / //   / / //   / /     //    | |  // / / //       //   / /   \ \     
-// //     | | // //       //   / / ((___( (     //     | | // / / ((____   //   / / //__) )   
+
+//     // | |     //          /                     // | |     //
+//    //__| |    //  ___     / __      ___         //__| |    // ( )  ___       __      ___
+//   / ___  |   // //   ) ) //   ) ) //   ) )     / ___  |   // / / //___) ) //   ) ) ((   ) )
+//  //    | |  // //___/ / //   / / //   / /     //    | |  // / / //       //   / /   \ \
+// //     | | // //       //   / / ((___( (     //     | | // / / ((____   //   / / //__) )
 
 // Website:  https://AlphaAliens.com/
 // OpenSea:  https://opensea.io/collection/AlphaAliens
@@ -15,17 +15,15 @@ pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract AlphaAliens is ERC721A("AlphaAliens", "FNDAO"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981, ReentrancyGuard {
+contract AlphaAliens is ERC721A("AlphaAliens", "FNDAO"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public maxSupply = 10_000;
     uint256 public itemPrice = 0.07 ether;
     uint256 public saleActiveTime = type(uint256).max;
@@ -40,7 +38,7 @@ contract AlphaAliens is ERC721A("AlphaAliens", "FNDAO"), Ownable, ERC721AQueryab
     ///////////////////////////////////
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable nonReentrant saleActive callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
+    function purchaseTokens(uint256 _howMany) external payable saleActive callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
         _safeMint(msg.sender, _howMany);
     }
 
@@ -190,14 +188,13 @@ contract AlphaAliensPresale is AlphaAliens {
         uint256 _howMany,
         bytes32[] calldata _proof,
         uint256 _rootNumber
-    ) external payable nonReentrant callerIsUser tokensAvailable(_howMany) {
+    ) external payable callerIsUser tokensAvailable(_howMany) {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(_inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
         require(msg.value >= _howMany * itemPricePresales[_rootNumber], "Try to send more ETH");
+        require(_numberMinted(msg.sender) + _howMany <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
 
         _safeMint(msg.sender, _howMany);
-
-        require(_numberMinted(msg.sender) <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
     }
 
     function numberMinted(address _owner) external view returns (uint256) {
