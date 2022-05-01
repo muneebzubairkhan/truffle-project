@@ -7,7 +7,6 @@
 //  //    | |  // //___/ / //   / / //   / /     //    | |  // / / //       //   / /   \ \
 // //     | | // //       //   / / ((___( (     //     | | // / / ((____   //   / / //__) )
 
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
@@ -216,28 +215,16 @@ contract AlphaAliensPresale is AlphaAliens {
     }
 }
 
+interface Staking {
+    function isStaked(address _collection, uint256 _tokenId) external view returns (bool);
+}
+
 contract AlphaAliensStaking is AlphaAliensPresale {
-    //////////////////////////////
-    // WHITELISTING FOR STAKING //
-    //////////////////////////////
+    address public stakingContract;
 
-    // tokenId => staked (yes or no)
-    mapping(address => bool) public canStake;
-
-    function addToWhitelistForStaking(address _operator) external onlyOwner {
-        canStake[_operator] = !canStake[_operator];
+    function addStakingContract(address _stakingContract) external onlyOwner {
+        stakingContract = _stakingContract;
     }
-
-    modifier onlyWhitelistedForStaking() {
-        require(canStake[msg.sender], "Caller is not whitelisted for staking");
-        _;
-    }
-
-    /////////////////////////
-    //  STAKE / PAUSE NFTS //
-    /////////////////////////
-
-    mapping(uint256 => bool) public staked;
 
     function _beforeTokenTransfers(
         address,
@@ -245,15 +232,6 @@ contract AlphaAliensStaking is AlphaAliensPresale {
         uint256 startTokenId,
         uint256
     ) internal view override {
-        require(!staked[startTokenId], "Unstake tokenId it to transfer");
-    }
-
-    // stake / unstake nfts
-    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
-        for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
-    }
-
-    function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
-        return _ownershipOf(tokenId).startTimestamp;
+        require(stakingContract != address(0) && !Staking(stakingContract).isStaked(address(this), startTokenId), "Unstake tokenId it to transfer");
     }
 }
