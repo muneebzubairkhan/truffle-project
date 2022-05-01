@@ -1,4 +1,5 @@
 // Alpha Aliens
+// https://alphaaliens.io
 
 //     // | |     //          /                     // | |     //
 //    //__| |    //  ___     / __      ___         //__| |    // ( )  ___       __      ___
@@ -6,8 +7,6 @@
 //  //    | |  // //___/ / //   / / //   / /     //    | |  // / / //       //   / /   \ \
 // //     | | // //       //   / / ((___( (     //     | | // / / ((____   //   / / //__) )
 
-// Website:  https://AlphaAliens.com/
-// OpenSea:  https://opensea.io/collection/AlphaAliens
 
 // SPDX-License-Identifier: MIT
 
@@ -23,9 +22,9 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract AlphaAliens is ERC721A("AlphaAliens", "FNDAO"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
-    uint256 public maxSupply = 10_000;
-    uint256 public itemPrice = 0.07 ether;
+contract AlphaAliens is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
+    uint256 public maxSupply = 9999;
+    uint256 public itemPrice = 0.025 ether;
     uint256 public saleActiveTime = type(uint256).max;
     string baseURI;
 
