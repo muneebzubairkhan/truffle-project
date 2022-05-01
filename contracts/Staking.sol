@@ -28,6 +28,8 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     mapping(uint256 => IERC721) depositToken;
     mapping(uint256 => uint256[7]) rewardRate;
 
+    mapping(IERC721 => uint256) pidOf;
+    
     constructor() {
         addPoolToken(IERC721(0x350b4CdD07CC5836e30086b993D27983465Ec014)); // penguin nft
         addPoolToken(IERC721(0x48E2CC829BfC611E822134a42D4F7646Ae51b2da)); // sardine nft
@@ -36,6 +38,7 @@ contract NftStaking is IERC721Receiver, Ownable, Pausable {
     function addPoolToken(IERC721 _depositToken) public onlyOwner {
         EXPIRATION[pidsLen] = 1000 ether;
         depositToken[pidsLen] = _depositToken;
+        pidOf[_depositToken] = pidsLen;
         rewardRate[pidsLen++] = [10, 30, 40, 50, 60, 120, 0];
     }
 
