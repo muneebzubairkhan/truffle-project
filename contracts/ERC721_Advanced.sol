@@ -7,7 +7,6 @@
 //  //    | |  // //___/ / //   / / //   / /     //    | |  // / / //       //   / /   \ \
 // //     | | // //       //   / / ((___( (     //     | | // / / ((____   //   / / //__) )
 
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
@@ -15,22 +14,18 @@ pragma solidity ^0.8.0;
 import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract AlphaAliens is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
+contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable, ERC2981 {
     uint256 public maxSupply = 9999;
     uint256 public itemPrice = 0.025 ether;
     uint256 public saleActiveTime = type(uint256).max;
     string baseURI;
-
-    constructor() {
-        _setDefaultRoyalty(msg.sender, 7_50); // 7.50 %
-    }
 
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
@@ -48,6 +43,11 @@ contract AlphaAliens is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable
     /// @notice Owner can withdraw from here
     function withdraw() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
+    }
+
+    /// @notice Send NFTs to a list of addresses
+    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_sendNftsTo.length * _howMany) {
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
 
     /// @notice Change price in case of ETH price changes too much
@@ -70,13 +70,8 @@ contract AlphaAliens is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable
         maxSupply = _maxSupply;
     }
 
-    ///////////////////////////////////
-    //       AIRDROP CODE STARTS     //
-    ///////////////////////////////////
-
-    /// @notice Send NFTs to a list of addresses
-    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_sendNftsTo.length * _howMany) {
-        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
+    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
+        _setDefaultRoyalty(_receiver, _feeNumerator);
     }
 
     ///////////////////
@@ -112,52 +107,12 @@ contract AlphaAliens is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable
         _;
     }
 
-    ///////////////////////////////
-    // AUTO APPROVE MARKETPLACES //
-    ///////////////////////////////
-
-    mapping(address => bool) private allowed;
-
-    function autoApproveMarketplace(address _spender) public onlyOwner {
-        allowed[_spender] = !allowed[_spender];
-    }
-
-    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        // OPENSEA
-        if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
-        // LOOKSRARE
-        else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
-        // RARIBLE
-        else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
-        // X2Y2
-        else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
-        // ANY OTHER Marketpalce
-        else if (allowed[_operator]) return true;
-        return super.isApprovedForAll(_owner, _operator);
-    }
-
-    /// @notice _startTokenId from 1 not 0
-    function _startTokenId() internal pure override returns (uint256) {
-        return 1;
-    }
-
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
-
-    function burn(uint256 tokenId) public override {
-        super._burn(tokenId);
-        _resetTokenRoyalty(tokenId);
-    }
-
-    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
-        _setDefaultRoyalty(_receiver, _feeNumerator);
-    }
 }
 
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-
-contract AlphaAliensPresale is AlphaAliens {
+contract AlphaAliensPresale is AlphaAliensSale {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -257,3 +212,27 @@ contract AlphaAliensStaking is AlphaAliensPresale {
         return _ownershipOf(tokenId).startTimestamp;
     }
 }
+
+contract AlphaAliensAutoApproval is AlphaAliensStaking {
+    mapping(address => bool) private allowed;
+
+    function autoApproveMarketplace(address _spender) public onlyOwner {
+        allowed[_spender] = !allowed[_spender];
+    }
+
+    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+        // OPENSEA
+        if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
+        // LOOKSRARE
+        else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
+        // RARIBLE
+        else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
+        // X2Y2
+        else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
+        // ANY OTHER Marketpalce
+        else if (allowed[_operator]) return true;
+        return super.isApprovedForAll(_owner, _operator);
+    }
+}
+
+contract AlphaAliens is AlphaAliensAutoApproval {}
