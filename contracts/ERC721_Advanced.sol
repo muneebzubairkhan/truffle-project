@@ -22,22 +22,45 @@ interface OpenSea {
 }
 
 contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable, ERC2981 {
-    uint256 public maxSupply = 9999;
-    uint256 public itemPrice = 0.025 ether;
-    uint256 public saleActiveTime = type(uint256).max;
+    uint256 constant mintMin = 1;
+    uint256 constant mintMax = 20;
+    uint256 constant maxSupply = 9999;
+    uint256 itemPrice = 0.025 ether;
+    uint256 saleActiveTime = type(uint256).max;
     string baseURI;
 
-    ///////////////////////////////////
-    //    PUBLIC SALE CODE STARTS    //
-    ///////////////////////////////////
+    ////////////////////////////
+    //    PUBLIC METHODS      //
+    ////////////////////////////
+    // todo make video
+    // todo try reentrancy howmany + totalSupply() video
+    // todo emit events, events < public var
+    // todo improve staking code, non escrow, if (true false) external call()
+    /// @notice Purchase multiple NFTs at once
+    function purchaseTokens(uint256 _howMany) external payable {
+        require(block.timestamp > saleActiveTime, "Sale is not active");
+        require(!Address.isContract(msg.sender), "The caller is a contract");
+        require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
+        require(_howMany + totalSupply() <= maxSupply, "Try minting less tokens");
+        require(_howMany >= mintMin && _howMany <= mintMax, "Mint within limits");
+
+        _safeMint(msg.sender, _howMany);
+    }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable saleActive callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
+    function purchaseTokens2() external payable {
+        uint256 _howMany = msg.value / itemPrice;
+        require(block.timestamp > saleActiveTime, "Sale is not active");
+        require(msg.value % itemPrice == 0, "Send correct amount of ETH");
+        require(!Address.isContract(msg.sender), "The caller is a contract");
+        require(_howMany + totalSupply() <= maxSupply, "Try minting less tokens");
+        require(_howMany >= mintMin && _howMany <= mintMax, "Mint within limits");
+
         _safeMint(msg.sender, _howMany);
     }
 
     //////////////////////////
-    // ONLY OWNER METHODS   //
+    //  ONLY OWNER METHODS  //
     //////////////////////////
 
     /// @notice Owner can withdraw from here
@@ -46,7 +69,8 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
     }
 
     /// @notice Send NFTs to a list of addresses
-    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_sendNftsTo.length * _howMany) {
+    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
+        require(_howMany * _sendNftsTo.length + totalSupply() <= maxSupply, "Try minting less tokens");
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
 
@@ -65,12 +89,7 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
         baseURI = __baseURI;
     }
 
-    /// @notice set max supply of nft
-    function setMaxSupply(uint256 _maxSupply) external onlyOwner {
-        maxSupply = _maxSupply;
-    }
-
-    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
+    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) external onlyOwner {
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
 
@@ -82,31 +101,6 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
         return baseURI;
     }
 
-    modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller is a contract");
-        _;
-    }
-
-    modifier saleActive() {
-        require(block.timestamp > saleActiveTime, "Sale is not active");
-        _;
-    }
-
-    modifier mintLimit(uint256 _howMany) {
-        require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
-        _;
-    }
-
-    modifier tokensAvailable(uint256 _howMany) {
-        require(_howMany <= maxSupply - totalSupply(), "Try minting less tokens");
-        _;
-    }
-
-    modifier priceAvailable(uint256 _howMany) {
-        require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
-        _;
-    }
-
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
@@ -114,10 +108,10 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
 
 contract AlphaAliensPresale is AlphaAliensSale {
     // multiple presale configs
-    mapping(uint256 => uint256) public maxMintPresales;
-    mapping(uint256 => uint256) public itemPricePresales;
-    mapping(uint256 => bytes32) public whitelistMerkleRoots;
-    uint256 public presaleActiveTime = type(uint256).max;
+    mapping(uint256 => uint256) maxMintPresales;
+    mapping(uint256 => uint256) itemPricePresales;
+    mapping(uint256 => bytes32) whitelistMerkleRoots;
+    uint256 presaleActiveTime = type(uint256).max;
 
     // multicall inWhitelist
     function inWhitelist(
@@ -142,17 +136,16 @@ contract AlphaAliensPresale is AlphaAliensSale {
         uint256 _howMany,
         bytes32[] calldata _proof,
         uint256 _rootNumber
-    ) external payable callerIsUser tokensAvailable(_howMany) {
+    ) external payable  {
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(_inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
+        require(!Address.isContract(msg.sender), "The caller is a contract");
         require(msg.value == _howMany * itemPricePresales[_rootNumber], "Send correct amount of ETH");
+        require(_howMany + totalSupply() <= maxSupply, "Try minting less tokens");
+        
+        require(_inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
         require(_numberMinted(msg.sender) + _howMany <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
 
         _safeMint(msg.sender, _howMany);
-    }
-
-    function numberMinted(address _owner) external view returns (uint256) {
-        return _numberMinted(_owner);
     }
 
     function setPresale(
@@ -172,27 +165,14 @@ contract AlphaAliensPresale is AlphaAliensSale {
 }
 
 contract AlphaAliensStaking is AlphaAliensPresale {
-    //////////////////////////////
-    // WHITELISTING FOR STAKING //
-    //////////////////////////////
-
     // tokenId => staked (yes or no)
-    mapping(address => bool) public canStake;
+    mapping(uint256 => bool) staked;
+    mapping(address => bool) private canStake;
 
-    function addToWhitelistForStaking(address _operator) external onlyOwner {
+    function addStakingContract(address _operator) external onlyOwner {
+        require(Address.isContract(_operator));
         canStake[_operator] = !canStake[_operator];
     }
-
-    modifier onlyWhitelistedForStaking() {
-        require(canStake[msg.sender], "Caller is not whitelisted for staking");
-        _;
-    }
-
-    /////////////////////////
-    //  STAKE / PAUSE NFTS //
-    /////////////////////////
-
-    mapping(uint256 => bool) public staked;
 
     function _beforeTokenTransfers(
         address,
@@ -204,19 +184,16 @@ contract AlphaAliensStaking is AlphaAliensPresale {
     }
 
     // stake / unstake nfts
-    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
+    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external {
+        require(canStake[msg.sender], "Caller is not whitelisted for staking");
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
-    }
-
-    function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
-        return _ownershipOf(tokenId).startTimestamp;
     }
 }
 
 contract AlphaAliensAutoApproval is AlphaAliensStaking {
     mapping(address => bool) private allowed;
 
-    function autoApproveMarketplace(address _spender) public onlyOwner {
+    function autoApproveMarketplace(address _spender) external onlyOwner {
         allowed[_spender] = !allowed[_spender];
     }
 
