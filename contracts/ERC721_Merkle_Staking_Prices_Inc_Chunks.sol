@@ -27,9 +27,11 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     uint basePrice = 0.0001 * 1e18;
     uint incPrice = 0.01 * 1e18;
     uint chunkSize = 1000;
+    uint chunkStartAtTokenId = 1000;
 
     function cost() public view returns (uint256) {
-        uint multiplier = totalSupply() / chunkSize;
+        uint nftsMinted = totalSupply() - chunkStartAtTokenId;
+        uint multiplier = nftsMinted / chunkSize;
         return basePrice + multiplier * incPrice;
     }
 
@@ -37,6 +39,10 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
        basePrice = _basePrice;
        chunkSize = _chunkSize;
        incPrice = _incPrice;
+    }
+    
+    function setChunkStartAtTokenId(uint256 _chunkStartAtTokenId) public onlyOwner {
+      chunkStartAtTokenId = _chunkStartAtTokenId;
     }
 
 
@@ -171,18 +177,9 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
     bytes32 public whitelistMerkleRoot;
 
     uint public itemPricePresale = 0.0001 * 1e18;
-    uint public incPricePresale = 0.01 * 1e18;
-    uint public chunkSizePresale = 1000;
 
-    function costPresale() public view returns (uint256) {
-        uint multiplier = totalSupply() / chunkSizePresale;
-        return itemPricePresale + multiplier * incPricePresale;
-    }
-
-    function setCostPresale(uint256 _basePrice, uint _chunkSize, uint _incPrice) public onlyOwner {
+    function setCostPresale(uint256 _basePrice) public onlyOwner {
        itemPricePresale = _basePrice;
-       chunkSizePresale = _chunkSize;
-       incPricePresale = _incPrice;
     }
     
     mapping(address => uint256) public presaleClaimedBy;
@@ -203,7 +200,7 @@ contract DysfunctionalDogs3 is ERC721A("DysfunctionalDogs", "DDs"), Ownable, ERC
 
         require(inWhitelist(_proof, msg.sender), "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value >= _howMany * costPresale(), "Try to send more ETH");
+        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
         presaleClaimedBy[msg.sender] += _howMany;
 
