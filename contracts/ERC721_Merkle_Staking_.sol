@@ -48,7 +48,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     //       OVERRIDE CODE STARTS    //
     ///////////////////////////////////
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981, IERC165) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -65,7 +65,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         return metadataFolderIpfsLink;
     }
 
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+    function tokenURI(uint256 tokenId) public view virtual override(ERC721A, IERC721Metadata) returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
         if (revealed == false) return notRevealedMetadataFolderIpfsLink;
@@ -169,7 +169,6 @@ contract NftWhitelistSaleMerkle is NftPublicSale {
     function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
         presaleActiveTime = _presaleActiveTime;
     }
-
 }
 
 contract NftStaking is NftWhitelistSaleMerkle {
@@ -219,13 +218,13 @@ contract NftAutoApproveMarketPlaces is NftStaking {
     // AUTO APPROVE MARKETPLACES  //
     ////////////////////////////////
 
-    mapping(address => bool) public projectProxy; 
+    mapping(address => bool) public projectProxy;
 
     function flipProxyState(address proxyAddress) public onlyOwner {
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
 
-    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721) returns (bool) {
         return
             projectProxy[_operator] || // Auto Approve any Marketplace,
                 _operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner) ||
@@ -235,7 +234,6 @@ contract NftAutoApproveMarketPlaces is NftStaking {
                 ? true
                 : super.isApprovedForAll(_owner, _operator);
     }
-
 }
 
 contract DysfunctionalDogsNft is NftAutoApproveMarketPlaces {}
