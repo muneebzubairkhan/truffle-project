@@ -122,56 +122,6 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     }
 }
 
-contract NftWhitelistSale is NftPublicSale {
-    ///////////////////////////////
-    //    PRESALE CODE STARTS    //
-    ///////////////////////////////
-
-    uint256 public presaleActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
-    uint256 public presaleMaxMint = 3;
-    uint256 public itemPricePresale = 0.03 * 1e18;
-    mapping(address => uint256) public presaleClaimedBy;
-    mapping(address => bool) public onPresale;
-
-    function addToPresale(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = true;
-    }
-
-    function removeFromPresale(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = false;
-    }
-
-    function purchaseTokensPresale(uint256 _howMany) external payable {
-        uint256 supply = totalSupply();
-        require(supply <= presaleSupply, "presale limit reached");
-        require(supply + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
-
-        require(onPresale[msg.sender], "You are not in presale");
-        require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
-
-        presaleClaimedBy[msg.sender] += _howMany;
-
-        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
-
-        _safeMint(msg.sender, _howMany);
-    }
-
-    // set limit of presale
-    function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
-        presaleMaxMint = _presaleMaxMint;
-    }
-
-    // Change presale price in case of ETH price changes too much
-    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
-        itemPricePresale = _itemPricePresale;
-    }
-
-    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
-        presaleActiveTime = _presaleActiveTime;
-    }
-}
-
 contract NftWhitelistSaleMerkle is NftPublicSale {
     ///////////////////////////////
     //    PRESALE CODE STARTS    //
@@ -222,73 +172,7 @@ contract NftWhitelistSaleMerkle is NftPublicSale {
 
 }
 
-contract NftDutchAuctionSale is NftWhitelistSaleMerkle {
-    // Dutch Auction
-
-    // immutable means you can not change value of this
-    /*
-    Dutch auction feature in the smart contract. Starting price will be 1eth and decrease by .05eth every 30 minutes until it reaches the price of .1eth.
-
-    Whitelist will activate after public sale. Users should be able to purchase at 50% off of the final Dutch auction sale.
-    */
-    uint256 public startingPrice = 1 ether;
-    uint256 public endingPrice = 0.1 ether;
-    uint256 public discountRate = 0.05 ether;
-    uint256 public startAt = type(uint256).max; // auction will not start automatically after deploying of contract
-    uint256 public expiresAt = 0; //  auction will not start automatically after deploying of contract
-    uint256 public timeBlock = 30 minutes; // prices decreases every 30 minutes
-
-    function getDutchPrice() public view returns (uint256) {
-        uint256 timeElapsed = block.timestamp - startAt;
-        uint256 timeBlocksPassed = timeElapsed / timeBlock;
-        uint256 discount = discountRate * timeBlocksPassed;
-        return discount >= startingPrice ? endingPrice : startingPrice - discount;
-    }
-
-    // public
-    function dutchMint(uint256 _mintAmount) public payable {
-        uint256 price = getDutchPrice();
-        costPerNft = price / 2;
-        itemPricePresale = price / 2;
-
-        require(block.timestamp < expiresAt, "This auction has ended");
-        uint256 supply = totalSupply();
-        require(_mintAmount > 0, "need to mint at least 1 NFT");
-        require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
-        require(supply + _mintAmount + nftsForOwner <= maxSupply, "max NFT limit exceeded");
-        require(msg.value >= price * _mintAmount, "insufficient funds");
-
-        uint256 refund = msg.value - price;
-        if (refund > 0) payable(msg.sender).transfer(refund);
-        _safeMint(msg.sender, _mintAmount);
-    }
-
-    function setStartingPrice(uint256 _startingPrice) external onlyOwner {
-        startingPrice = _startingPrice;
-    }
-
-    function setEndingPrice(uint256 _endingPrice) external onlyOwner {
-        endingPrice = _endingPrice;
-    }
-
-    function setDiscountRate(uint256 _discountRate) external onlyOwner {
-        discountRate = _discountRate;
-    }
-
-    function setStartAt(uint256 _startAt) external onlyOwner {
-        startAt = _startAt;
-    }
-
-    function setExpiresAt(uint256 _expiresAt) external onlyOwner {
-        expiresAt = _expiresAt;
-    }
-
-    function setTimeBlock(uint256 _timeBlock) external onlyOwner {
-        timeBlock = _timeBlock;
-    }
-}
-
-contract NftStaking is NftDutchAuctionSale {
+contract NftStaking is NftWhitelistSaleMerkle {
     //////////////////////////////
     // WHITELISTING FOR STAKING //
     //////////////////////////////
@@ -330,33 +214,7 @@ contract NftStaking is NftDutchAuctionSale {
     }
 }
 
-contract NftAirDropCoin is NftStaking {
-    function receiveCoin() external payable {}
-
-    receive() external payable {}
-
-    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropTokenToList(address[] calldata _to, uint256 _toSend) external onlyOwner {
-        for (uint256 i = 0; i < _to.length; i++) {
-            (bool success, ) = payable(_to[i]).call{value: _toSend}("");
-            require(success);
-        }
-    }
-
-    // tested gas on avax for 1000 addresses, 0.3 to 0.9 AVAX for sending avax to 1000 addresses
-    function airDropTokenToHolders(
-        uint256 _toSend,
-        uint256 _fromTokenId,
-        uint256 _toTokenId
-    ) external onlyOwner {
-        for (uint256 i = _fromTokenId; i < _toTokenId; i++) {
-            (bool success, ) = payable(ownerOf(i)).call{value: _toSend}("");
-            require(success);
-        }
-    }
-}
-
-contract NftAutoApproveMarketPlaces is NftAirDropCoin {
+contract NftAutoApproveMarketPlaces is NftStaking {
     ////////////////////////////////
     // AUTO APPROVE MARKETPLACES  //
     ////////////////////////////////
@@ -380,4 +238,4 @@ contract NftAutoApproveMarketPlaces is NftAirDropCoin {
 
 }
 
-contract Nft is NftAutoApproveMarketPlaces {}
+contract DysfunctionalDogsNft is NftAutoApproveMarketPlaces {}
