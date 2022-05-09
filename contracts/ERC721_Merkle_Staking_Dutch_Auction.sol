@@ -9,6 +9,10 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
+interface OpenSea {
+    function proxies(address) external view returns (address);
+}
+
 contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable, Ownable, ERC721ABurnable, ERC2981 {
     using Strings for uint256;
 
@@ -357,17 +361,23 @@ contract NftAutoApproveMarketPlaces is NftAirDropCoin {
     // AUTO APPROVE MARKETPLACES  //
     ////////////////////////////////
 
-    mapping(address => bool) public projectProxy; // check public vs private vs internal gas
+    mapping(address => bool) public projectProxy; 
 
     function flipProxyState(address proxyAddress) public onlyOwner {
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
 
-    // set auto approve for trusted marketplaces here
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        if (projectProxy[_operator]) return true; // ANY OTHER Marketplace
-        return super.isApprovedForAll(_owner, _operator);
+        return
+            projectProxy[_operator] || // Auto Approve any Marketplace,
+                _operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner) ||
+                _operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354 || // Looksrare
+                _operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e || // Rarible
+                _operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be // X2Y2
+                ? true
+                : super.isApprovedForAll(_owner, _operator);
     }
+
 }
 
 contract Nft is NftAutoApproveMarketPlaces {}
