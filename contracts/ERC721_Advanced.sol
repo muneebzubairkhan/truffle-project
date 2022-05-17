@@ -23,6 +23,7 @@ interface OpenSea {
 
 contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public txMaxMint = 10;
+    uint256 public freeMint = 1000; // first X tokens can be minted for free
     uint256 public maxSupply = 9999;
     uint256 public itemPrice = 0.025 ether;
     uint256 public saleActiveTime = type(uint256).max;
@@ -53,6 +54,11 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
     /// @notice Change price in case of ETH price changes too much
     function setPrice(uint256 _newPrice) external onlyOwner {
         itemPrice = _newPrice;
+    }
+
+    /// @notice set per transaction max mint
+    function setFreeMint(uint256 _freeMint) external onlyOwner {
+        freeMint = _freeMint;
     }
 
     /// @notice set per transaction max mint
@@ -113,7 +119,7 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
     }
 
     modifier priceAvailable(uint256 _howMany) {
-        require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
+        if (_totalMinted() > freeMint) require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
         _;
     }
 
