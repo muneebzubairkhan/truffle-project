@@ -109,7 +109,7 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
     }
 
     modifier mintLimit(uint256 _howMany) {
-        require(_howMany >= 1 && _howMany <= txMaxMint, "Mint with in limits");
+        require(_howMany >= 1 && _howMany <= txMaxMint, "Mint within limits");
         _;
     }
 
