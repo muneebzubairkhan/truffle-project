@@ -38,7 +38,7 @@ contract MouseSale is ERC721A("Mouse Mouseys", "MM"), Ownable, ERC721AQueryable,
 
     /// @notice get free nfts
     function purchaseTokensFree(uint256 _howMany) external saleActive callerIsUser mintLimit(_howMany) tokensAvailable(_howMany) {
-        require(_totalMinted() <= freeMint, "Can not get free nft now");
+        require(_totalMinted() < freeMint, "Can not get free nft now");
 
         _safeMint(msg.sender, _howMany);
     }
