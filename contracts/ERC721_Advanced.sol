@@ -23,7 +23,7 @@ interface OpenSea {
 
 contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public txMaxMint = 10;
-    uint256 public freeMint = 1000; // first X tokens can be minted for free
+    uint256 public freeMint = 0; // first X tokens can be minted for free
     uint256 public maxSupply = 9999;
     uint256 public itemPrice = 0.025 ether;
     uint256 public saleActiveTime = type(uint256).max;
@@ -40,6 +40,17 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
     /// @notice Purchase multiple NFTs at once
     function purchaseTokens(uint256 _howMany) external payable saleActive callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
         _safeMint(msg.sender, _howMany);
+    }
+
+    /// @notice get free nfts
+    function purchaseTokensFree(uint256 _howMany) external saleActive callerIsUser mintLimit(_howMany) tokensAvailable(_howMany) {
+        require(_totalMinted() <= freeMint, "Can not get free nft now");
+
+        _safeMint(msg.sender, _howMany);
+    }
+
+    function totalMinted() external view returns (uint256) {
+        return _totalMinted();
     }
 
     //////////////////////////
@@ -119,7 +130,7 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
     }
 
     modifier priceAvailable(uint256 _howMany) {
-        if (_totalMinted() > freeMint) require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
+        require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
         _;
     }
 
