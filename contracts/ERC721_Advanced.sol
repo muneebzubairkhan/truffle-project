@@ -22,7 +22,8 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract AlphaAliens is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
+contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
+    uint256 public txMaxMint = 10;
     uint256 public maxSupply = 9999;
     uint256 public itemPrice = 0.025 ether;
     uint256 public saleActiveTime = type(uint256).max;
@@ -53,6 +54,11 @@ contract AlphaAliens is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable
     /// @notice Change price in case of ETH price changes too much
     function setPrice(uint256 _newPrice) external onlyOwner {
         itemPrice = _newPrice;
+    }
+
+    /// @notice set per transaction max mint
+    function setTxMaxMint(uint256 _txMaxMint) external onlyOwner {
+        txMaxMint = _txMaxMint;
     }
 
     /// @notice set sale active time
@@ -98,7 +104,7 @@ contract AlphaAliens is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable
     }
 
     modifier mintLimit(uint256 _howMany) {
-        require(_howMany >= 1 && _howMany <= 20, "Mint min 1, max 20");
+        require(_howMany >= 1 && _howMany <= txMaxMint, "Mint with in limits");
         _;
     }
 
@@ -157,7 +163,7 @@ contract AlphaAliens is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract AlphaAliensPresale is AlphaAliens {
+contract AlphaAliensPresale is AlphaAliensSale {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -257,3 +263,5 @@ contract AlphaAliensStaking is AlphaAliensPresale {
         return _ownershipOf(tokenId).startTimestamp;
     }
 }
+
+contract AlphaAliens is AlphaAliensStaking {}
