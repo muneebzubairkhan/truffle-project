@@ -7,7 +7,6 @@
 //  //    | |  // //___/ / //   / / //   / /     //    | |  // / / //       //   / /   \ \
 // //     | | // //       //   / / ((___( (     //     | | // / / ((____   //   / / //__) )
 
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
@@ -202,10 +201,6 @@ contract AlphaAliensPresale is AlphaAliensSale {
         _safeMint(msg.sender, _howMany);
     }
 
-    function numberMinted(address _owner) external view returns (uint256) {
-        return _numberMinted(_owner);
-    }
-
     function setPresale(
         uint256 _rootNumber,
         bytes32 _whitelistMerkleRoot,
@@ -257,10 +252,6 @@ contract AlphaAliensStaking is AlphaAliensPresale {
     // stake / unstake nfts
     function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
-    }
-
-    function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
-        return _ownershipOf(tokenId).startTimestamp;
     }
 }
 
