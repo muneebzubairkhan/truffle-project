@@ -128,7 +128,7 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
         allowed[_spender] = !allowed[_spender];
     }
 
-    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721) returns (bool) {
         // OPENSEA
         if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
         // LOOKSRARE
@@ -147,7 +147,7 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
         return 1;
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981, IERC165) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
