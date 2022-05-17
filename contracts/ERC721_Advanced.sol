@@ -1,11 +1,5 @@
-// Alpha Aliens
-// https://alphaaliens.io
-
-//     // | |     //          /                     // | |     //
-//    //__| |    //  ___     / __      ___         //__| |    // ( )  ___       __      ___
-//   / ___  |   // //   ) ) //   ) ) //   ) )     / ___  |   // / / //___) ) //   ) ) ((   ) )
-//  //    | |  // //___/ / //   / / //   / /     //    | |  // / / //       //   / /   \ \
-// //     | | // //       //   / / ((___( (     //     | | // / / ((____   //   / / //__) )
+// Mouse Mouseys
+// https://Mouse.io
 
 // SPDX-License-Identifier: MIT
 
@@ -21,7 +15,7 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
+contract MouseSale is ERC721A("Mouse Mouseys", "MM"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public txMaxMint = 10;
     uint256 public freeMint = 0; // first X tokens can be minted for free
     uint256 public maxSupply = 9999;
@@ -179,7 +173,7 @@ contract AlphaAliensSale is ERC721A("Alpha Aliens", "AA"), Ownable, ERC721AQuery
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract AlphaAliensPresale is AlphaAliensSale {
+contract MousePresale is MouseSale {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -234,7 +228,7 @@ contract AlphaAliensPresale is AlphaAliensSale {
     }
 }
 
-contract AlphaAliensStaking is AlphaAliensPresale {
+contract MouseStaking is MousePresale {
     //////////////////////////////
     // WHITELISTING FOR STAKING //
     //////////////////////////////
@@ -272,4 +266,4 @@ contract AlphaAliensStaking is AlphaAliensPresale {
     }
 }
 
-contract AlphaAliens is AlphaAliensStaking {}
+contract Mouse is MouseStaking {}
