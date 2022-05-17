@@ -1,5 +1,4 @@
-// Mouse Mouseys
-// https://Mouse.io
+// BoredSol
 
 // SPDX-License-Identifier: MIT
 
@@ -15,7 +14,7 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract MouseSale is ERC721A("Mouse Mouseys", "MM"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
+contract BoredSolSale is ERC721A("BoredSol", "BS"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public txMaxMint = 10;
     uint256 public freeMint = 0; // first X tokens can be minted for free
     uint256 public maxSupply = 9999;
@@ -173,7 +172,7 @@ contract MouseSale is ERC721A("Mouse Mouseys", "MM"), Ownable, ERC721AQueryable,
 
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract MousePresale is MouseSale {
+contract BoredSolPresale is BoredSolSale {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -228,7 +227,7 @@ contract MousePresale is MouseSale {
     }
 }
 
-contract MouseStaking is MousePresale {
+contract BoredSolStaking is BoredSolPresale {
     //////////////////////////////
     // WHITELISTING FOR STAKING //
     //////////////////////////////
@@ -266,4 +265,4 @@ contract MouseStaking is MousePresale {
     }
 }
 
-contract Mouse is MouseStaking {}
+contract BoredSol is BoredSolStaking {}
