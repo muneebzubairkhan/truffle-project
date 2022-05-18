@@ -17,6 +17,7 @@ interface OpenSea {
 contract MousInDaRightHousSale is ERC721A("Mous In Da Right Hous", "MIDRH"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public txMaxMint = 10;
     uint256 public freeMint = 0; // first X tokens can be minted for free
+    uint256 public maxPerWallet = 10;
     uint256 public maxSupply = 4444;
     uint256 public itemPrice = 0.02 ether;
     uint256 public saleActiveTime = type(uint256).max;
@@ -63,6 +64,11 @@ contract MousInDaRightHousSale is ERC721A("Mous In Da Right Hous", "MIDRH"), Own
     /// @notice set per transaction max mint
     function setFreeMint(uint256 _freeMint) external onlyOwner {
         freeMint = _freeMint;
+    }
+
+    /// @notice set per transaction max mint
+    function setMaxPerWallet(uint256 _maxPerWallet) external onlyOwner {
+        maxPerWallet = _maxPerWallet;
     }
 
     /// @notice set per transaction max mint
@@ -114,6 +120,7 @@ contract MousInDaRightHousSale is ERC721A("Mous In Da Right Hous", "MIDRH"), Own
 
     modifier mintLimit(uint256 _howMany) {
         require(_howMany <= txMaxMint, "Mint within limits");
+        require(_numberMinted(msg.sender) + _howMany <= maxPerWallet, "Purchase exceeds max allowed");
         _;
     }
 
