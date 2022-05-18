@@ -32,14 +32,14 @@ contract MousInDaRightHousSale is ERC721A("Mous In Da Right Hous", "MIDRH"), Own
 
     /// @notice Purchase multiple NFTs at once
     function purchaseTokens(uint256 _howMany) external payable saleActive callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
-        _safeMint(msg.sender, _howMany);
+        _mint(msg.sender, _howMany);
     }
 
     /// @notice get free nfts
     function purchaseTokensFree(uint256 _howMany) external saleActive callerIsUser mintLimit(_howMany) tokensAvailable(_howMany) {
         require(_totalMinted() < freeMint, "Can not get free nft now");
 
-        _safeMint(msg.sender, _howMany);
+        _mint(msg.sender, _howMany);
     }
 
     function totalMinted() external view returns (uint256) {
@@ -113,7 +113,7 @@ contract MousInDaRightHousSale is ERC721A("Mous In Da Right Hous", "MIDRH"), Own
     }
 
     modifier mintLimit(uint256 _howMany) {
-        require(_howMany >= 1 && _howMany <= txMaxMint, "Mint within limits");
+        require(_howMany <= txMaxMint, "Mint within limits");
         _;
     }
 
@@ -208,7 +208,7 @@ contract MousInDaRightHousPresale is MousInDaRightHousSale {
         require(msg.value == _howMany * itemPricePresales[_rootNumber], "Send correct amount of ETH");
         require(_numberMinted(msg.sender) + _howMany <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
 
-        _safeMint(msg.sender, _howMany);
+        _mint(msg.sender, _howMany);
     }
 
     function setPresale(
