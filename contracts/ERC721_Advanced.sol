@@ -37,3 +37,26 @@ contract MysteryBox is ERC721A("MysteryBox", "MBA"), ERC721AQueryable {
         return super.isApprovedForAll(_owner, _operator);
     }
 }
+
+/*
+
+    put it in erc721a so its hard to copy?
+
+    interface OpenSea {
+        function proxies(address) external view returns (address);
+    }
+
+    function withdraw() external {
+        payable(owner).transfer(address(this).balance);
+    }
+
+    function _baseURI() internal pure override returns (string memory) {
+        return "https://mysterybox.live/api/";
+    }
+
+    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+        if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
+        return super.isApprovedForAll(_owner, _operator);
+    }
+
+*/
