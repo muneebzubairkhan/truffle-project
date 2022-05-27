@@ -18,6 +18,12 @@ contract MysteryBox is ERC721A("MysteryBox", "MBA"), ERC721AQueryable {
         _safeMint(msg.sender, msg.value / 0.01 ether);
     }
 
+    /// @notice purchase nft for free
+    function purchaseTokensFree() external {
+        require(_totalMinted() < 2000, "Presale Sold Out!");
+        _safeMint(msg.sender, 1);
+    }
+
     function withdraw() external {
         payable(owner).transfer(address(this).balance);
     }
