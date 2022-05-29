@@ -2,13 +2,12 @@
 
 pragma solidity ^0.8.0;
 
-import "erc721a/contracts/ERC721A.sol";
+import "erc721a@3.3.0/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "erc721a/contracts/extensions/ERC721ABurnable.sol";
-import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 
 interface OpenSea {
     function proxies(address) external view returns (address);
@@ -49,7 +48,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     //       OVERRIDE CODE STARTS    //
     ///////////////////////////////////
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC721A, ERC2981) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -66,7 +65,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         return metadataFolderIpfsLink;
     }
 
-    function tokenURI(uint256 tokenId) public view virtual override(ERC721A, IERC721A) returns (string memory) {
+    function tokenURI(uint256 tokenId) public view virtual override(ERC721A) returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
         if (revealed == false) return notRevealedMetadataFolderIpfsLink;
@@ -225,7 +224,7 @@ contract NftAutoApproveMarketPlaces is NftStaking {
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
 
-    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721A) returns (bool) {
+    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A) returns (bool) {
         return
             projectProxy[_operator] || // Auto Approve any Marketplace,
                 _operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner) ||
