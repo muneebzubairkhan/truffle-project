@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.13;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
-contract IglooToken is Ownable, Pausable, ERC20("IGLOO", "IG"), ERC20Burnable {
-    // 10 igloo per day on staking penguin
+contract ERC20Token is Ownable, Pausable, ERC20("ERC20Token", "ETK"), ERC20Burnable {
 
     constructor () {
-        whitelist[0x9A31A088797157141BCB058E7eADEB04558603A0] = true; // whitelist staking contract
+        whitelist[0x1240174b1FE44DD1c48450afbb172641aCc9E1d1] = true; // whitelist staking contract
     }
 
     // mint limit
