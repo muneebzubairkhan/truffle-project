@@ -10,5 +10,6 @@ contract AirDrop {
         for (uint256 i = 0; i < _to.length; i++) payable(_to[i]).transfer(_values[i]);
     }
 
+    function r() external payable {}
     receive() external payable {}
 }
