@@ -5,7 +5,6 @@ pragma solidity ^0.8.0;
 import "erc721a@3.3.0/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
@@ -13,7 +12,7 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable, Ownable, ERC721ABurnable, ERC2981 {
+contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable, Ownable, ERC2981 {
     using Strings for uint256;
 
     bool public revealed = false;
@@ -50,11 +49,6 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981, IERC165) returns (bool) {
         return super.supportsInterface(interfaceId);
-    }
-
-    function burn(uint256 tokenId) public override {
-        super._burn(tokenId);
-        _resetTokenRoyalty(tokenId);
     }
 
     function _startTokenId() internal pure override returns (uint256) {
