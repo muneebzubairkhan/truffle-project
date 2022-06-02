@@ -165,11 +165,6 @@ contract GandalfTownSale is ERC721A("Gandalf Town", "GF"), Ownable, ERC721AQuery
         return super.supportsInterface(interfaceId);
     }
 
-    function burn(uint256 tokenId) public override {
-        super._burn(tokenId);
-        _resetTokenRoyalty(tokenId);
-    }
-
     function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
