@@ -21,10 +21,6 @@ contract GandalfTownSale is ERC721A("Gandalf Town", "GF"), Ownable, ERC721AQuery
     uint256 public saleActiveTime = type(uint256).max;
     string baseURI;
 
-    constructor() {
-        _setDefaultRoyalty(msg.sender, 7_50); // 7.50 %
-    }
-
     ///////////////////////////////////
     //    PUBLIC SALE CODE STARTS    //
     ///////////////////////////////////
