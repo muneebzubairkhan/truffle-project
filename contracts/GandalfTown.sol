@@ -13,17 +13,16 @@ interface OpenSea {
 }
 
 contract GandalfTownSale is ERC721A("Gandalf Town", "GF"), Ownable, ERC721AQueryable, ERC2981 {
-    uint256 public txMaxMint = 10;
+    uint256 public txMaxMint = 2;
     uint256 public freeMint = 0; // first X tokens can be minted for free
-    uint256 public maxPerWallet = 10;
-    uint256 public maxSupply = 4444;
-    uint256 public itemPrice = 0.02 ether;
+    uint256 public maxPerWallet = 2;
+    uint256 public maxSupply = 9999;
+    uint256 public itemPrice = 0.00 ether;
     uint256 public saleActiveTime = type(uint256).max;
     string baseURI;
 
-    ///////////////////////////////////
-    //    PUBLIC SALE CODE STARTS    //
-    ///////////////////////////////////
+
+    // PUBLIC SALE CODE STARTS //
 
     /// @notice Purchase multiple NFTs at once
     function purchaseTokens(uint256 _howMany) external payable saleActive callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
@@ -32,7 +31,7 @@ contract GandalfTownSale is ERC721A("Gandalf Town", "GF"), Ownable, ERC721AQuery
 
     /// @notice get free nfts
     function purchaseTokensFree(uint256 _howMany) external saleActive callerIsUser mintLimit(_howMany) tokensAvailable(_howMany) {
-        require(_totalMinted() < freeMint, "Can not get free nft now");
+        require(_totalMinted() < freeMint, "Max free limit reached");
 
         _mint(msg.sender, _howMany);
     }
@@ -41,9 +40,8 @@ contract GandalfTownSale is ERC721A("Gandalf Town", "GF"), Ownable, ERC721AQuery
         return _totalMinted();
     }
 
-    //////////////////////////
-    // ONLY OWNER METHODS   //
-    //////////////////////////
+
+    // ONLY OWNER METHODS //
 
     /// @notice Owner can withdraw from here
     function withdraw() external onlyOwner {
@@ -85,52 +83,49 @@ contract GandalfTownSale is ERC721A("Gandalf Town", "GF"), Ownable, ERC721AQuery
         maxSupply = _maxSupply;
     }
 
-    ///////////////////////////////////
-    //       AIRDROP CODE STARTS     //
-    ///////////////////////////////////
+
+    // AIRDROP CODE STARTS //
 
     /// @notice Send NFTs to a list of addresses
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_sendNftsTo.length * _howMany) {
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
 
-    ///////////////////
-    //  HELPER CODE  //
-    ///////////////////
+
+    // HELPER CODE //
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 
     modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller is a contract");
+        require(tx.origin == msg.sender, "The caller is a sm");
         _;
     }
 
     modifier saleActive() {
-        require(block.timestamp > saleActiveTime, "Sale is not active");
+        require(block.timestamp > saleActiveTime, "Please, come back when the sale goes live");
         _;
     }
 
     modifier mintLimit(uint256 _howMany) {
-        require(_howMany <= txMaxMint, "Mint within limits");
-        require(_numberMinted(msg.sender) + _howMany <= maxPerWallet, "Purchase exceeds max allowed");
+        require(_howMany <= txMaxMint, "Max x tx exceeded");
+        require(_numberMinted(msg.sender) + _howMany <= maxPerWallet, "Max x wallet exceeded");
         _;
     }
 
     modifier tokensAvailable(uint256 _howMany) {
-        require(_howMany <= maxSupply - totalSupply(), "Try minting less tokens");
+        require(_howMany <= maxSupply - totalSupply(), "Sorry, we are sold out");
         _;
     }
 
     modifier priceAvailable(uint256 _howMany) {
-        require(msg.value == _howMany * itemPrice, "Send correct amount of ETH");
+        require(msg.value == _howMany * itemPrice, "Please, send the exact amount of ETH");
         _;
     }
 
-    ///////////////////////////////
+
     // AUTO APPROVE MARKETPLACES //
-    ///////////////////////////////
 
     mapping(address => bool) private allowed;
 
@@ -147,7 +142,7 @@ contract GandalfTownSale is ERC721A("Gandalf Town", "GF"), Ownable, ERC721AQuery
         else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
         // X2Y2
         else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
-        // ANY OTHER Marketpalce
+        // ANY OTHER Marketplace
         else if (allowed[_operator]) return true;
         return super.isApprovedForAll(_owner, _operator);
     }
@@ -197,10 +192,10 @@ contract GandalfTownPresale is GandalfTownSale {
         bytes32[] calldata _proof,
         uint256 _rootNumber
     ) external payable callerIsUser tokensAvailable(_howMany) {
-        require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(_inWhitelist(msg.sender, _proof, _rootNumber), "You are not in presale");
-        require(msg.value == _howMany * itemPricePresales[_rootNumber], "Send correct amount of ETH");
-        require(_numberMinted(msg.sender) + _howMany <= maxMintPresales[_rootNumber], "Purchase exceeds max allowed");
+        require(block.timestamp > presaleActiveTime, "Please, come back when the presale goes live");
+        require(_inWhitelist(msg.sender, _proof, _rootNumber), "Sorry, you are not allowed");
+        require(msg.value == _howMany * itemPricePresales[_rootNumber], "Please, send the exact amount of ETH");
+        require(_numberMinted(msg.sender) + _howMany <= maxMintPresales[_rootNumber], "Max x wallet exceeded");
 
         _mint(msg.sender, _howMany);
     }
@@ -222,9 +217,9 @@ contract GandalfTownPresale is GandalfTownSale {
 }
 
 contract GandalfTownStaking is GandalfTownPresale {
-    //////////////////////////////
+   
+
     // WHITELISTING FOR STAKING //
-    //////////////////////////////
 
     // tokenId => staked (yes or no)
     mapping(address => bool) public canStake;
@@ -234,13 +229,12 @@ contract GandalfTownStaking is GandalfTownPresale {
     }
 
     modifier onlyWhitelistedForStaking() {
-        require(canStake[msg.sender], "Caller is not whitelisted for staking");
+        require(canStake[msg.sender], "This contract is not allowed to stake");
         _;
     }
 
-    /////////////////////////
-    //  STAKE / PAUSE NFTS //
-    /////////////////////////
+
+    // STAKE / PAUSE NFTS //
 
     mapping(uint256 => bool) public staked;
 
@@ -250,7 +244,7 @@ contract GandalfTownStaking is GandalfTownPresale {
         uint256 startTokenId,
         uint256
     ) internal view override {
-        require(!staked[startTokenId], "Unstake tokenId it to transfer");
+        require(!staked[startTokenId], "Please, unstake the NFT first");
     }
 
     // stake / unstake nfts
