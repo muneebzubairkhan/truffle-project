@@ -9,15 +9,6 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract PassivePandaNodeClub is ERC721A("PassivePandaNodeClub", "PPNC"), Ownable, ERC2981 {
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
-
-    function burn(uint256 tokenId) public {
-        super._burn(tokenId);
-        _resetTokenRoyalty(tokenId);
-    }
-
     using Strings for uint256;
 
     string public baseURI;
@@ -34,6 +25,10 @@ contract PassivePandaNodeClub is ERC721A("PassivePandaNodeClub", "PPNC"), Ownabl
         _setDefaultRoyalty(msg.sender, 7_50); // 7.5%
     }
 
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+    
     function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
