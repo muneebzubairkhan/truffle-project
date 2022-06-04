@@ -14,11 +14,11 @@ contract CheekyLionClub is ERC721("Cheeky Lion Club", "CLC") {
     uint256 public circulatingSupply;
 
     constructor(){
-        mint();
+        mint(250);
     }
 
-    function mint() public {
-        for (uint256 i = 0; i < 250; i++)
+    function mint(uint qty) public {
+        for (uint256 i = 0; i < qty; i++)
             _mint(owner, ++circulatingSupply);
     }
     
