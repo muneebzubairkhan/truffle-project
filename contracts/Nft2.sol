@@ -13,11 +13,12 @@ contract CheekyLionClub is Ownable, ERC721("Cheeky Lion Club", "CLC") {
     uint256 public maxSupply = 10000;
     uint256 public circulatingSupply = 0;
 
-    function mint(uint256 qty) public {
+    function mint(uint256 qty) external onlyOwner {
         uint256 _circulatingSupply = circulatingSupply;
 
-        require(_circulatingSupply + qty <= maxSupply, "Mint exceeds");
         for (uint256 i = 0; i < qty; i++) _mint(msg.sender, ++_circulatingSupply);
+
+        require(_circulatingSupply <= maxSupply, "Mint exceeds limit");
 
         circulatingSupply = _circulatingSupply;
     }
