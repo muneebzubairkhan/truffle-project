@@ -72,7 +72,7 @@ contract StakeNft is IERC721Receiver, Ownable {
         return IERC721Receiver.onERC721Received.selector;
     }
 
-    function depositsOf(address account) external view returns (uint256[] memory) {
+    function depositsOf(address account) public view returns (uint256[] memory) {
         EnumerableSet.UintSet storage depositSet = _deposits[account];
         uint256[] memory tokenIds = new uint256[](depositSet.length());
 
@@ -120,7 +120,7 @@ contract StakeNft is IERC721Receiver, Ownable {
         }
 
         if (reward > 0) {
-            IERC20(ERC20_CONTRACT).transferFrom(address(this), msg.sender, reward);
+            IERC20(ERC20_CONTRACT).transfer(msg.sender, reward);
         }
     }
 
@@ -156,7 +156,7 @@ contract StakeNft is IERC721Receiver, Ownable {
         }
     }
 
-    function claimTheRewards(uint256[] calldata tokenIds) external {
-        claimRewards(tokenIds);
+    function calculateRewardsAggregate(address _owner) external view returns (uint256[] memory) {
+        return calculateRewards(_owner, depositsOf(_owner));
     }
 }

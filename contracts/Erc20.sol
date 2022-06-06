@@ -1,27 +1,25 @@
 // SPDX-License-Identifier: MIT
 /**
-* ______              ______                   _____                            
-* |  ___|             |  ___|                 /  ___|                           
-* | |_ _ __ ___   __ _| |_ _ __ ___ _ __  ___ \ `--. _ __   __ ___      ___ __  
-* |  _| '__/ _ \ / _` |  _| '__/ _ \ '_ \/ __| `--. \ '_ \ / _` \ \ /\ / / '_ \ 
-* | | | | | (_) | (_| | | | | |  __/ | | \__ \/\__/ / |_) | (_| |\ V  V /| | | |
-* \_| |_|  \___/ \__, \_| |_|  \___|_| |_|___/\____/| .__/ \__,_| \_/\_/ |_| |_|
-*                 __/ |                             | |                         
-*                |___/                              |_|                         
-*/
+ * ______              ______                   _____
+ * |  ___|             |  ___|                 /  ___|
+ * | |_ _ __ ___   __ _| |_ _ __ ___ _ __  ___ \ `--. _ __   __ ___      ___ __
+ * |  _| '__/ _ \ / _` |  _| '__/ _ \ '_ \/ __| `--. \ '_ \ / _` \ \ /\ / / '_ \
+ * | | | | | (_) | (_| | | | | |  __/ | | \__ \/\__/ / |_) | (_| |\ V  V /| | | |
+ * \_| |_|  \___/ \__, \_| |_|  \___|_| |_|___/\____/| .__/ \__,_| \_/\_/ |_| |_|
+ *                 __/ |                             | |
+ *                |___/                              |_|
+ */
 
 pragma solidity 0.8.3;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
     mapping(address => uint256) private _balances;
     mapping(address => mapping(address => uint256)) private _allowances;
-    mapping(address=>bool) isBlacklisted;
+    mapping(address => bool) isBlacklisted;
     uint256 private constant maxSupply = 5 * 10**8 * 1e18; // 500,000,000 Tokens
 
     uint256 private _totalSupply;
@@ -33,7 +31,13 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
     uint8 public _percentageBurn;
     uint8 public _percentageFee;
 
-    constructor(string memory name_, string memory symbol_, address feeWallet_, uint8 percentageBurn_, uint8 percentageFee_) {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        address feeWallet_,
+        uint8 percentageBurn_,
+        uint8 percentageFee_
+    ) {
         _name = name_;
         _symbol = symbol_;
         _burnWallet = 0x000000000000000000000000000000000000dEaD;
@@ -42,7 +46,7 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
         _percentageFee = percentageFee_;
         _mint(msg.sender, maxSupply);
     }
-    
+
     function name() public view virtual override returns (string memory) {
         return _name;
     }
@@ -54,7 +58,7 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
     function burnPercentage() public view virtual returns (uint8) {
         return _percentageBurn;
     }
-    
+
     function symbol() public view virtual override returns (string memory) {
         return _symbol;
     }
@@ -62,11 +66,11 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
     function decimals() public view virtual override returns (uint8) {
         return 18;
     }
-    
+
     function totalSupply() public view virtual override returns (uint256) {
         return _totalSupply;
     }
-    
+
     function balanceOf(address account) public view virtual override returns (uint256) {
         return _balances[account];
     }
@@ -79,7 +83,7 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return _allowances[owner][spender];
     }
-    
+
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
@@ -107,7 +111,7 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
         _approve(_msgSender(), spender, _allowances[_msgSender()][spender] + addedValue);
         return true;
     }
-    
+
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
         uint256 currentAllowance = _allowances[_msgSender()][spender];
         require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
@@ -117,7 +121,7 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
 
         return true;
     }
-    
+
     function _transfer(
         address sender,
         address recipient,
@@ -130,9 +134,9 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
         _beforeTokenTransfer(sender, recipient, amount);
 
         uint256 senderBalance = _balances[sender];
-        uint256 amountToBurn = amount * _percentageBurn / type(uint8).max;
-        uint256 FeeAmount = amount * _percentageFee / type(uint8).max;
-        amount = amount - (FeeAmount+amountToBurn);
+        uint256 amountToBurn = (amount * _percentageBurn) / type(uint8).max;
+        uint256 FeeAmount = (amount * _percentageFee) / type(uint8).max;
+        amount = amount - (FeeAmount + amountToBurn);
         require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
         unchecked {
             _balances[sender] = senderBalance - amount;
@@ -147,7 +151,7 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
 
         _afterTokenTransfer(sender, recipient, amount);
     }
-    
+
     function _mint(address account, uint256 amount) internal virtual {
         require(!isBlacklisted[account], "Account is blacklisted");
         require(account != address(0), "ERC20: mint to the zero address");
@@ -160,7 +164,7 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
 
         _afterTokenTransfer(address(0), account, amount);
     }
-    
+
     function _burn(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: burn from the zero address");
 
@@ -177,7 +181,7 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
 
         _afterTokenTransfer(account, address(0), amount);
     }
-    
+
     function _approve(
         address owner,
         address spender,
@@ -189,7 +193,7 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
-    
+
     function _beforeTokenTransfer(
         address from,
         address to,
@@ -211,5 +215,4 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
         require(isBlacklisted[_user], "User already whitelisted");
         isBlacklisted[_user] = false;
     }
-    
 }
