@@ -1,14 +1,4 @@
 // SPDX-License-Identifier: MIT
-/**
- * ______              ______                   _____
- * |  ___|             |  ___|                 /  ___|
- * | |_ _ __ ___   __ _| |_ _ __ ___ _ __  ___ \ `--. _ __   __ ___      ___ __
- * |  _| '__/ _ \ / _` |  _| '__/ _ \ '_ \/ __| `--. \ '_ \ / _` \ \ /\ / / '_ \
- * | | | | | (_) | (_| | | | | |  __/ | | \__ \/\__/ / |_) | (_| |\ V  V /| | | |
- * \_| |_|  \___/ \__, \_| |_|  \___|_| |_|___/\____/| .__/ \__,_| \_/\_/ |_| |_|
- *                 __/ |                             | |
- *                |___/                              |_|
- */
 
 pragma solidity 0.8.3;
 
@@ -16,11 +6,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
+contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
     mapping(address => uint256) private _balances;
     mapping(address => mapping(address => uint256)) private _allowances;
     mapping(address => bool) isBlacklisted;
-    uint256 private constant maxSupply = 5 * 10**8 * 1e18; // 500,000,000 Tokens
+    uint256 private constant maxSupply = 100_000_000 * 1e18;
 
     uint256 private _totalSupply;
 
@@ -32,14 +22,12 @@ contract FrogFrensSpawn is Context, IERC20, IERC20Metadata, Ownable {
     uint8 public _percentageFee;
 
     constructor(
-        string memory name_,
-        string memory symbol_,
         address feeWallet_,
         uint8 percentageBurn_,
         uint8 percentageFee_
     ) {
-        _name = name_;
-        _symbol = symbol_;
+        _name = "PPNC";
+        _symbol = "PPNC";
         _burnWallet = 0x000000000000000000000000000000000000dEaD;
         _feeWallet = feeWallet_;
         _percentageBurn = percentageBurn_;
