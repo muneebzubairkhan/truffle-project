@@ -1,162 +1,488 @@
-//SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
-
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.7;
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract StakeNft is IERC721Receiver, Ownable {
-    using EnumerableSet for EnumerableSet.UintSet;
+// BirdFarm is the master of RewardToken. He can make RewardToken and he is a fair guy.
+//
+// Note that it's ownable and the owner wields tremendous power. The ownership
+// will be transferred to a governance smart contract once REWARD_TOKEN is sufficiently
+// distributed and the community can show to govern itself.
+//
+// Have fun reading it. Hopefully it's bug-free. God bless.
 
-    address public ERC20_CONTRACT;
-    address public ERC721_CONTRACT;
-    uint256 public EXPIRATION; // expiry block number (avg 15s per block)
-
-    mapping(address => EnumerableSet.UintSet) private _deposits;
-    mapping(address => mapping(uint256 => uint256)) public depositBlocks;
-    mapping(uint256 => uint256) public tokenRarity;
-    uint256[7] public rewardRate;
-    bool started;
-
-    constructor(
-        address _erc20,
-        address _erc721,
-        uint256 _expiration
-    ) {
-        ERC20_CONTRACT = _erc20;
-        ERC721_CONTRACT = _erc721;
-        EXPIRATION = block.number + _expiration;
-
-        // number of tokens Per day
-        rewardRate = [50, 60, 75, 100, 150, 500, 0];
-        started = false;
+/// @title Farming service for pool tokens
+/// @author Bird Money
+/// @notice You can use this contract to deposit pool tokens and get rewards
+/// @dev Admin can add a new Pool, users can deposit pool tokens, harvestReward, withdraw pool tokens
+contract NftStaking is Ownable, IERC721Receiver {
+    // Info of each user.
+    struct UserInfo {
+        uint256 amount; // How many pool tokens the user has provided.
+        uint256 rewardDebt; // Reward debt. See explanation below.
+        uint256 reward; // Reward to be given to user
+        //
+        // We do some fancy math here. Basically, any point in time, the amount of REWARD_TOKENs
+        // entitled to a user but is pending to be distributed is:
+        //
+        //   pending reward = (user.amount * pool.accRewardTokenPerShare) - user.rewardDebt
+        //
+        // Whenever a user deposits or withdraws pool tokens to a pool. Here's what happens:
+        //   1. The pool's `accRewardTokenPerShare` (and `lastRewardBlock`) gets updated.
+        //   2. User receives the pending reward sent to his/her address.
+        //   3. User's `amount` gets updated.
+        //   4. User's `rewardDebt` gets updated.
     }
 
-    function setRate(uint256 _rarity, uint256 _rate) public onlyOwner {
-        rewardRate[_rarity] = _rate;
+    // Info of each pool.
+    struct PoolInfo {
+        IERC721 poolToken; // Address of pool token contract.
+        uint256 allocPoint; // How many allocation points assigned to this pool. REWARD_TOKENs to distribute per block.
+        uint256 lastRewardBlock; // Last block number that REWARD_TOKENs distribution occurs.
+        uint256 accRewardTokenPerShare; // Accumulated REWARD_TOKENs per share, times 1e12. See below.
     }
 
-    function setRarity(uint256 _tokenId, uint256 _rarity) public onlyOwner {
-        tokenRarity[_tokenId] = _rarity;
+    /// @dev The REWARD_TOKEN TOKEN!
+    IERC20 public rewardToken =
+        IERC20(0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a);
+
+    /// @dev Block number when bonus REWARD_TOKEN period ends.
+    uint256 public bonusEndBlock = 0;
+
+    /// @notice REWARD_TOKEN tokens created per block.
+    /// @dev its equal to approx 1000 reward tokens per day
+    uint256 public rewardPerBlock = 0.15 ether;
+
+    // Bonus muliplier for early rewardToken makers.
+    uint256 private constant BONUS_MULTIPLIER = 10;
+
+    /// @dev Info of each pool.
+    PoolInfo[] public poolInfo;
+
+    /// @dev Info of each user that stakes pool tokens.
+    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
+    mapping(IERC721 => mapping(uint256 => address)) public nftOwnerOf;
+
+    /// @dev Total allocation poitns. Must be the sum of all allocation points in all pools.
+    uint256 public totalAllocPoint = 0;
+
+    /// @dev The block number when REWARD_TOKEN mining starts.
+    uint256 public startBlock = 0;
+
+    /// @dev The block number when REWARD_TOKEN mining ends.
+    uint256 public endBlock = 0;
+
+    /// @notice user can get reward and unstake after this time only.
+    /// @dev No unstake froze time initially, if needed it can be added and informed to community.
+    uint256 public usersCanUnstakeAtTime = 0 seconds;
+
+    /// @dev No reward froze time initially, if needed it can be added and informed to community.
+    uint256 public usersCanHarvestAtTime = 0 seconds;
+
+    mapping(IERC721 => bool) private uniqueTokenInPool;
+
+    /// @dev when some one deposits pool tokens to contract
+    event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
+
+    /// @dev when some one withdraws pool tokens from contract
+    event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
+
+    /// @dev when some one harvests reward tokens from contract
+    event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
+
+    /// @notice gets total number of pools
+    /// @return total number of pools
+    function poolLength() external view returns (uint256) {
+        return poolInfo.length;
     }
 
-    function setBatchRarity(uint256[] memory _tokenIds, uint256 _rarity) public onlyOwner {
-        for (uint256 i; i < _tokenIds.length; i++) tokenRarity[_tokenIds[i]] = _rarity;
+    /// @notice This adds a new pool. Can only be called by the owner.
+    /// @dev Only adds unique pool token
+    /// @param _allocPoint The weight of this pool. The more it is the more percentage of reward per block it will get for its users with respect to other pools. But the total reward per block remains same.
+    /// @param _poolToken The Liquidity Pool Token of this pool
+    /// @param _withUpdate if true then it updates the reward tokens to be given for each of the tokens staked
+    function add(
+        uint256 _allocPoint,
+        IERC721 _poolToken,
+        bool _withUpdate
+    ) external onlyOwner {
+        require(!uniqueTokenInPool[_poolToken], "Token already added");
+        uniqueTokenInPool[_poolToken] = true;
+
+        if (_withUpdate) {
+            massUpdatePools();
+        }
+        uint256 lastRewardBlock = block.number > startBlock
+            ? block.number
+            : startBlock;
+        totalAllocPoint = totalAllocPoint + _allocPoint;
+        poolInfo.push(
+            PoolInfo({
+                poolToken: _poolToken,
+                allocPoint: _allocPoint,
+                lastRewardBlock: lastRewardBlock,
+                accRewardTokenPerShare: 0
+            })
+        );
     }
 
-    function setExpiration(uint256 _expiration) public onlyOwner {
-        EXPIRATION = _expiration;
+    /// @notice Update the given pool's REWARD_TOKEN pool weight. Can only be called by the owner.
+    /// @dev it can change alloc point (weight of pool) with repect to other pools
+    /// @param _pid pool id
+    /// @param _allocPoint The weight of this pool. The more it is the more percentage of reward per block it will get for its users with respect to other pools. But the total reward per block remains same.
+    /// @param _withUpdate if true then it updates the reward tokens to be given for each of the tokens staked
+    function setAllocPoint(
+        uint256 _pid,
+        uint256 _allocPoint,
+        bool _withUpdate
+    ) external onlyOwner {
+        if (_withUpdate) {
+            massUpdatePools();
+        }
+        totalAllocPoint =
+            totalAllocPoint -
+            (poolInfo[_pid].allocPoint + _allocPoint);
+        poolInfo[_pid].allocPoint = _allocPoint;
     }
 
-    function toggleStart() public onlyOwner {
-        started = !started;
+    // Return number of blocks between _from to _to block which are applicable for reward tokens. if multiplier returns 10 blocks then 10 * reward per block = 50 coins to be given as reward. equally to community. with repect to pool weight.
+    function getMultiplier(uint256 _from, uint256 _to)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 from = _from;
+        uint256 to = _to;
+        if (endBlock < from) from = endBlock;
+        if (endBlock < to) to = endBlock;
+        if (to < startBlock) return 0;
+        if (from < startBlock && startBlock < to) from = startBlock;
+
+        if (to <= bonusEndBlock) {
+            return (to - from) * (BONUS_MULTIPLIER);
+        } else if (from >= bonusEndBlock) {
+            return to - from;
+        } else {
+            return
+                (bonusEndBlock - from) *
+                BONUS_MULTIPLIER +
+                (to - bonusEndBlock);
+        }
     }
 
-    function setTokenAddress(address _tokenAddress) public onlyOwner {
-        // Used to change rewards token if needed
-        ERC20_CONTRACT = _tokenAddress;
+    // get pid from token address
+    function getPidOfToken(address _token) external view returns (uint256) {
+        for (uint256 index = 0; index < poolInfo.length; index++) {
+            if (address(poolInfo[index].poolToken) == _token) {
+                return index;
+            }
+        }
+
+        return type(uint256).max;
     }
+
+    /// @notice get reward tokens to show on UI
+    /// @dev calculates reward tokens of a user with repect to pool id
+    /// @param _pid the pool id
+    /// @param _user the user who is calls this function
+    /// @return pending reward tokens of a user
+    function pendingRewardToken(uint256 _pid, address _user)
+        external
+        view
+        returns (uint256)
+    {
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][_user];
+        uint256 accRewardTokenPerShare = pool.accRewardTokenPerShare;
+        uint256 poolSupply = pool.poolToken.balanceOf(address(this));
+        if (block.number > pool.lastRewardBlock && poolSupply != 0) {
+            uint256 multiplier = getMultiplier(
+                pool.lastRewardBlock,
+                block.number
+            );
+            uint256 rewardTokenReward = (multiplier *
+                (rewardPerBlock) *
+                (pool.allocPoint)) / (totalAllocPoint);
+            accRewardTokenPerShare =
+                accRewardTokenPerShare +
+                ((rewardTokenReward * 1e12) / (poolSupply));
+        }
+        return
+            user.reward +
+            (((user.amount * accRewardTokenPerShare) / 1e12) -
+                (user.rewardDebt));
+    }
+
+    /// @notice Update reward vairables for all pools. Be careful of gas spending!
+    function massUpdatePools() public {
+        uint256 length = poolInfo.length;
+        for (uint256 pid = 0; pid < length; ++pid) {
+            updatePool(pid);
+        }
+    }
+
+    uint256 private stakedTokens = 0;
+
+    /// @notice Update reward variables of the given pool to be up-to-date.
+    /// @param _pid the pool id
+    function updatePool(uint256 _pid) public {
+        if (stakedTokens == 0) configTheEndRewardBlock(); // to stop making reward when reward tokens are empty in BirdFarm
+
+        PoolInfo storage pool = poolInfo[_pid];
+
+        if (block.number <= pool.lastRewardBlock) {
+            return;
+        }
+        uint256 poolSupply = pool.poolToken.balanceOf(address(this));
+        if (poolSupply == 0) {
+            pool.lastRewardBlock = block.number;
+            return;
+        }
+
+        uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+        uint256 rewardTokenReward = (multiplier *
+            (rewardPerBlock) *
+            (pool.allocPoint)) / (totalAllocPoint);
+        pool.accRewardTokenPerShare =
+            pool.accRewardTokenPerShare +
+            ((rewardTokenReward * (1e12)) / (poolSupply));
+        pool.lastRewardBlock = block.number;
+    }
+
+    /// @notice deposit tokens to get rewards
+    /// @dev deposit pool tokens to BirdFarm for reward tokens allocation.
+    /// @param _pid pool id
+    /// @param _tokenId how many tokens you want to stake
+    function deposit(uint256 _pid, uint256 _tokenId) external {
+        uint256 _amount = 1;
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+        nftOwnerOf[pool.poolToken][_tokenId] = msg.sender;
+        require(_amount > 0, "Must deposit amount more than zero.");
+
+        updatePool(_pid);
+
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
+            1e12 -
+            user.rewardDebt;
+        user.reward += pending;
+
+        stakedTokens += _amount;
+        user.amount = user.amount + (_amount);
+        user.rewardDebt =
+            (user.amount * (pool.accRewardTokenPerShare)) /
+            (1e12);
+        pool.poolToken.transferFrom(
+            address(msg.sender),
+            address(this),
+            _tokenId
+        );
+        emit Deposit(msg.sender, _pid, _tokenId);
+    }
+
+    /// @notice get the tokens back from BardFarm
+    /// @dev withdraw or unstake pool tokens from BidFarm
+    /// @param _pid pool id
+    /// @param  _tokenId how many pool tokens you want to unstake
+    function withdraw(uint256 _pid, uint256 _tokenId) external {
+        uint256 _amount = 1;
+        require(
+            block.timestamp > usersCanUnstakeAtTime,
+            "Can not withdraw/unstake at this time."
+        );
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+        require(
+            nftOwnerOf[pool.poolToken][_tokenId] == msg.sender,
+            "you are not owner"
+        );
+
+        require(
+            user.amount >= _amount,
+            "You do not have enough pool tokens staked."
+        );
+        updatePool(_pid);
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
+            1e12 -
+            user.rewardDebt;
+
+        user.reward += pending;
+
+        stakedTokens -= _amount;
+        user.amount = user.amount - (_amount);
+        user.rewardDebt =
+            (user.amount * (pool.accRewardTokenPerShare)) /
+            (1e12);
+        pool.poolToken.transferFrom(
+            address(this),
+            address(msg.sender),
+            _tokenId
+        );
+        emit Withdraw(msg.sender, _pid, _tokenId);
+    }
+
+    /// @notice harvest reward tokens from BardFarm
+    /// @dev harvest reward tokens from BidFarm and update pool variables
+    /// @param _pid pool id
+    function harvest(uint256 _pid) external {
+        require(
+            block.timestamp > usersCanHarvestAtTime,
+            "Can not harvest at this time."
+        );
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+        updatePool(_pid);
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
+            1e12 -
+            user.rewardDebt;
+
+        user.reward += pending;
+        uint256 rewardToGiveNow = user.reward;
+        user.reward = 0;
+
+        user.rewardDebt =
+            (user.amount * (pool.accRewardTokenPerShare)) /
+            (1e12);
+
+        rewardToken.transfer(msg.sender, rewardToGiveNow);
+        emit Harvest(msg.sender, _pid, pending);
+    }
+
+    function configTheEndRewardBlock() internal {
+        endBlock =
+            block.number +
+            ((rewardToken.balanceOf(address(this)) / (rewardPerBlock)));
+    }
+
+    /// @notice owner puts reward tokens in contract
+    /// @dev owner can add reward token to contract so that it can be distributed to users
+    /// @param _amount amount of reward tokens
+    function addRewardTokensToContract(uint256 _amount) external onlyOwner {
+        uint256 rewardEndsInBlocks = _amount / (rewardPerBlock);
+
+        uint256 lastEndBlock = endBlock == 0 ? block.number : endBlock;
+        endBlock = lastEndBlock + rewardEndsInBlocks;
+
+        require(
+            rewardToken.transferFrom(msg.sender, address(this), _amount),
+            "Error in adding reward tokens in contract."
+        );
+        emit EndRewardBlockChanged(endBlock);
+    }
+
+    event AddedRewardTokensToContract(uint256 amount);
+
+    /// @notice owner takes out any tokens in contract
+    /// @dev owner can take out any locked tokens in contract
+    /// @param _token the token owner wants to take out from contract
+    /// @param _amount amount of tokens
+    function withdrawAnyTokenFromContract(IERC20 _token, uint256 _amount)
+        external
+        onlyOwner
+    {
+        _token.transfer(msg.sender, _amount);
+        emit OwnerWithdraw(_token, _amount);
+    }
+
+    event OwnerWithdraw(IERC20 token, uint256 amount);
+
+    /// @notice owner can change reward token
+    /// @dev owner can set reward token
+    /// @param _rewardToken the token in which rewards are given
+    function setRewardToken(IERC20 _rewardToken) external onlyOwner {
+        rewardToken = _rewardToken;
+        emit RewardTokenChanged(_rewardToken);
+    }
+
+    /// @dev When reward token changes
+    /// @param rewardToken the token in which rewards are given
+    event RewardTokenChanged(IERC20 rewardToken);
+
+    /// @notice owner can change unstake frozen time
+    /// @dev owner can set unstake frozen time
+    /// @param _usersCanUnstakeAtTime the block at which user can unstake
+    function setUnstakeFrozenTime(uint256 _usersCanUnstakeAtTime)
+        external
+        onlyOwner
+    {
+        usersCanUnstakeAtTime = _usersCanUnstakeAtTime;
+        emit UnstakeFrozenTimeChanged(_usersCanUnstakeAtTime);
+    }
+
+    /// @dev When Unstake Frozen Time Changed
+    /// @param usersCanUnstakeAtTime after this time users can unstake
+    event UnstakeFrozenTimeChanged(uint256 usersCanUnstakeAtTime);
+
+    /// @notice owner can change reward frozen time
+    /// @dev owner can set reward frozen time
+    /// @param _usersCanHarvestAtTime the block at which user can harvest reward
+    function setRewardFrozenTime(uint256 _usersCanHarvestAtTime)
+        external
+        onlyOwner
+    {
+        usersCanHarvestAtTime = _usersCanHarvestAtTime;
+        emit RewardFrozenTimeChanged(_usersCanHarvestAtTime);
+    }
+
+    /// @dev When Reward Frozen Time Changed
+    /// @param usersCanHarvestAtTime after this time users can harvest
+    event RewardFrozenTimeChanged(uint256 usersCanHarvestAtTime);
+
+    /// @notice owner can change reward token per block
+    /// @dev owner can set reward token per block
+    /// @param _rewardPerBlock rewards distributed per block to community or users
+    function setRewardTokenPerBlock(uint256 _rewardPerBlock)
+        external
+        onlyOwner
+    {
+        rewardPerBlock = _rewardPerBlock;
+        emit RewardTokenPerBlockChanged(_rewardPerBlock);
+    }
+
+    /// @dev When Reward Token Per Block is changed
+    /// @param rewardPerBlock reward tokens made in each block
+    event RewardTokenPerBlockChanged(uint256 rewardPerBlock);
+
+    /// @notice owner can change start reward block
+    /// @dev owner can set start reward block
+    /// @param _startBlock the block at which reward token distribution starts
+    function setStartRewardBlock(uint256 _startBlock) external onlyOwner {
+        require(
+            _startBlock <= endBlock,
+            "Start block must be less or equal to end reward block."
+        );
+        startBlock = _startBlock;
+        emit StartRewardBlockChanged(_startBlock);
+    }
+
+    /// @dev Start Reward Block Changed
+    /// @param startRewardBlock block when rewards are distributed per block to community or users
+    event StartRewardBlockChanged(uint256 startRewardBlock);
+
+    /// @notice owner can change end reward block
+    /// @dev owner can set end reward block
+    /// @param _endBlock the block at which reward token distribution ends
+    function setEndRewardBlock(uint256 _endBlock) external onlyOwner {
+        require(
+            startBlock <= _endBlock,
+            "End reward block must be greater or equal to start reward block."
+        );
+        endBlock = _endBlock;
+        emit EndRewardBlockChanged(_endBlock);
+    }
+
+    /// @dev End Reward Block Changed
+    /// @param endBlock block when rewards are ended to be distributed per block to community or users
+    event EndRewardBlockChanged(uint256 endBlock);
 
     function onERC721Received(
         address,
         address,
         uint256,
-        bytes calldata
-    ) external pure override returns (bytes4) {
-        // uint256 _tokenId,
-        // deposit([_tokenId]);
-        return IERC721Receiver.onERC721Received.selector;
-    }
-
-    function depositsOf(address account) public view returns (uint256[] memory) {
-        EnumerableSet.UintSet storage depositSet = _deposits[account];
-        uint256[] memory tokenIds = new uint256[](depositSet.length());
-
-        for (uint256 i; i < depositSet.length(); i++) {
-            tokenIds[i] = depositSet.at(i);
-        }
-
-        return tokenIds;
-    }
-
-    function findRate(uint256 tokenId) public view returns (uint256 rate) {
-        uint256 rarity = tokenRarity[tokenId];
-        uint256 perDay = rewardRate[rarity];
-
-        // 6000 blocks per day
-        // perDay / 6000 = reward per block
-
-        rate = (perDay * 1e18) / 6000;
-
-        return rate;
-    }
-
-    function calculateRewards(address account, uint256[] memory tokenIds) public view returns (uint256[] memory rewards) {
-        rewards = new uint256[](tokenIds.length);
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-            uint256 rate = findRate(tokenId);
-            rewards[i] =
-                rate *
-                (_deposits[account].contains(tokenId) ? 1 : 0) *
-                (Math.min(block.number, EXPIRATION) - depositBlocks[account][tokenId]);
-        }
-    }
-
-    function claimRewards(uint256[] calldata tokenIds) public {
-        uint256 reward;
-        uint256 curblock = Math.min(block.number, EXPIRATION);
-
-        uint256[] memory rewards = calculateRewards(msg.sender, tokenIds);
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            reward += rewards[i];
-            depositBlocks[msg.sender][tokenIds[i]] = curblock;
-        }
-
-        if (reward > 0) {
-            IERC20(ERC20_CONTRACT).transfer(msg.sender, reward);
-        }
-    }
-
-    function deposit(uint256[] calldata tokenIds) external {
-        require(started, "Staking contract not started yet");
-
-        claimRewards(tokenIds);
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            IERC721(ERC721_CONTRACT).safeTransferFrom(msg.sender, address(this), tokenIds[i], "");
-            _deposits[msg.sender].add(tokenIds[i]);
-        }
-    }
-
-    function admin_deposit(uint256[] calldata tokenIds) external onlyOwner {
-        claimRewards(tokenIds);
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            IERC721(ERC721_CONTRACT).safeTransferFrom(msg.sender, address(this), tokenIds[i], "");
-            _deposits[msg.sender].add(tokenIds[i]);
-        }
-    }
-
-    function withdraw(uint256[] calldata tokenIds) external {
-        claimRewards(tokenIds);
-
-        for (uint256 i; i < tokenIds.length; i++) {
-            require(_deposits[msg.sender].contains(tokenIds[i]), "Token not deposited");
-
-            _deposits[msg.sender].remove(tokenIds[i]);
-
-            IERC721(ERC721_CONTRACT).safeTransferFrom(address(this), msg.sender, tokenIds[i], "");
-        }
-    }
-
-    function calculateRewardsAggregate(address _owner) external view returns (uint256[] memory) {
-        return calculateRewards(_owner, depositsOf(_owner));
+        bytes memory
+    ) public virtual override returns (bytes4) {
+        return this.onERC721Received.selector;
     }
 }
