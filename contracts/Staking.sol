@@ -5,16 +5,9 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// BirdFarm is the master of RewardToken. He can make RewardToken and he is a fair guy.
-//
-// Note that it's ownable and the owner wields tremendous power. The ownership
-// will be transferred to a governance smart contract once REWARD_TOKEN is sufficiently
-// distributed and the community can show to govern itself.
-//
-// Have fun reading it. Hopefully it's bug-free. God bless.
 
 /// @title Farming service for pool tokens
-/// @author Bird Money
+/// @author Someone from metaverse
 /// @notice You can use this contract to deposit pool tokens and get rewards
 /// @dev Admin can add a new Pool, users can deposit pool tokens, harvestReward, withdraw pool tokens
 contract NftStaking is Ownable, IERC721Receiver {
@@ -45,17 +38,23 @@ contract NftStaking is Ownable, IERC721Receiver {
     }
 
     /// @dev The REWARD_TOKEN TOKEN!
-    IERC20 public rewardToken =
-        IERC20(0x1b3eD3dE93190E9E4D367d4c1801d8e1Ed1a4D6a);
+    IERC20 public rewardToken;
 
     /// @dev Block number when bonus REWARD_TOKEN period ends.
     uint256 public bonusEndBlock = 0;
 
     /// @notice REWARD_TOKEN tokens created per block.
     /// @dev its equal to approx 1000 reward tokens per day
-    uint256 public rewardPerBlock = 0.15 ether;
 
-    // Bonus muliplier for early rewardToken makers.
+    // 5 hr 38 min in last 10,000 blocks, block: avax mainnet: 15757659
+    // 6 hr 13 min in last 10,000 blocks, block: avax fuji testnet: 10508012
+    
+    // 500 days 20 000 000 blocks = 650 000 000 coins reward
+    // 32.5 coins per block
+
+    uint256 public rewardPerBlock = 32.5 * 1e18;
+
+    // Bonus multiplier for early rewardToken makers.
     uint256 private constant BONUS_MULTIPLIER = 10;
 
     /// @dev Info of each pool.
@@ -92,6 +91,11 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @dev when some one harvests reward tokens from contract
     event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
 
+    constructor(IERC20 _rewardToken, IERC721 _erc721){
+        rewardToken = _rewardToken;
+        add(10000, _erc721, true);
+    }
+
     /// @notice gets total number of pools
     /// @return total number of pools
     function poolLength() external view returns (uint256) {
@@ -107,7 +111,7 @@ contract NftStaking is Ownable, IERC721Receiver {
         uint256 _allocPoint,
         IERC721 _poolToken,
         bool _withUpdate
-    ) external onlyOwner {
+    ) public onlyOwner {
         require(!uniqueTokenInPool[_poolToken], "Token already added");
         uniqueTokenInPool[_poolToken] = true;
 
