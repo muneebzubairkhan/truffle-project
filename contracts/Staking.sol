@@ -65,7 +65,10 @@ contract NftStaking is Ownable, IERC721Receiver {
     mapping(IERC721 => mapping(uint256 => address)) public nftOwnerOf;
 
     // pid -> [ tokenid -> depositTime ]
-    mapping(uint => mapping(uint=>uint)) nftDeposited;
+    mapping(uint => mapping(uint=>uint)) nftDeposited; // nft deposit timestamp
+    // pid -> [ userAddress -> claimTime ]
+    mapping(uint => mapping(address=>uint)) nftRewardClaim; // nft reward claim timestamp
+    
     /// @dev Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
 
@@ -313,7 +316,7 @@ contract NftStaking is Ownable, IERC721Receiver {
         );
         updatePool(_pid);
 
-        require(block.timestamp - nftDeposited[_pid][_tokenId] > 24 hours, "Wait 24 hours before withdraw");
+        require(block.timestamp - nftDeposited[_pid][_tokenId] > 24 hours, "The user must wait 24 hours before nft can be withdrawn");
 
         uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
             1e12 -
@@ -345,6 +348,10 @@ contract NftStaking is Ownable, IERC721Receiver {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
+
+        require(block.timestamp - nftRewardClaim[_pid][msg.sender] > 12 hours, "User must wait at least 12 hours between claims");
+        nftRewardClaim[_pid][msg.sender] = block.timestamp;
+        
         uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
             1e12 -
             user.rewardDebt;
