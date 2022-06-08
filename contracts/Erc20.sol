@@ -199,15 +199,8 @@ contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
         require(isBlacklisted[_user], "User already whitelisted");
         isBlacklisted[_user] = false;
     }
-
-    mapping(address => bool) public projectProxy; // check public vs private vs internal gas
-
-    function flipProxyState(address proxyAddress) public onlyOwner {
-        projectProxy[proxyAddress] = !projectProxy[proxyAddress];
-    }
-
+    
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
-        if (projectProxy[spender]) return type(uint).max; // any staking contract or exchange contract
         return _allowances[owner][spender];
     }
 }
