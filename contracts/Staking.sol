@@ -43,6 +43,9 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @dev Block number when bonus REWARD_TOKEN period ends.
     uint256 public bonusEndBlock = 0;
 
+    uint256 public waitClaimReward = 12 hours;
+    uint256 public waitWithdrawNft = 24 hours;
+
     /// @notice REWARD_TOKEN tokens created per block.
     /// @dev its equal to approx 1000 reward tokens per day
 
@@ -316,7 +319,7 @@ contract NftStaking is Ownable, IERC721Receiver {
         );
         updatePool(_pid);
 
-        require(block.timestamp - nftDeposited[_pid][_tokenId] > 24 hours, "The user must wait 24 hours before nft can be withdrawn");
+        require(block.timestamp - nftDeposited[_pid][_tokenId] > waitWithdrawNft, "The user must wait before nft can be withdrawn");
 
         uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
             1e12 -
@@ -349,7 +352,7 @@ contract NftStaking is Ownable, IERC721Receiver {
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
 
-        require(block.timestamp - nftRewardClaim[_pid][msg.sender] > 12 hours, "User must wait at least 12 hours between claims");
+        require(block.timestamp - nftRewardClaim[_pid][msg.sender] > waitClaimReward, "User must wait between claims");
         nftRewardClaim[_pid][msg.sender] = block.timestamp;
         
         uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
@@ -494,6 +497,20 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @dev End Reward Block Changed
     /// @param endBlock block when rewards are ended to be distributed per block to community or users
     event EndRewardBlockChanged(uint256 endBlock);
+
+    function setWaitClaimReward(uint256 _waitClaimReward)
+        external
+        onlyOwner
+    {
+        waitClaimReward = _waitClaimReward;
+    }
+
+    function setWaitWithdrawNft(uint256 _waitWithdrawNft)
+        external
+        onlyOwner
+    {
+        waitWithdrawNft = _waitWithdrawNft;
+    }
 
     function onERC721Received(
         address,
