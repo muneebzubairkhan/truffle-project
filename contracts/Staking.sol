@@ -113,17 +113,17 @@ contract NftStaking is Ownable, IERC721Receiver {
         return poolInfo.length;
     }
 
-    function depositsOf(uint256 _pid, address _user) external view returns (uint256) {
+    function depositsOf(uint256 _pid, address _user) external view returns (uint256[] memory) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
 
         uint256 ii = 0; //counter selected token ids of this user
-        uint256[] memory tokenIdsStaking = PassivePandaNodeClub(pool.poolToken).walletOfOwner(address(this));
+        uint256[] memory tokenIdsStaking = PassivePandaNodeClub(address(pool.poolToken)).walletOfOwner(address(this));
 
         uint256[] memory tokenIds = new uint256[](user.amount);
         for (uint256 i; i < tokenIdsStaking.length; i++) {
-            tokenId = tokenIdsStaking[i];
-            if (nftOwnerOf[pool.poolToken][_tokenId] == _user) tokenIds[ii++] = tokenId;
+            uint256 _tokenId = tokenIdsStaking[i];
+            if (nftOwnerOf[pool.poolToken][_tokenId] == _user) tokenIds[ii++] = _tokenId;
         }
         return tokenIds;
     }
