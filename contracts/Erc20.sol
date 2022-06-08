@@ -106,7 +106,6 @@ contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
         return true;
     }
 
-
     mapping(address => bool) public feeExclude;
 
     function addFeeExcludeAddress(address _address) external onlyOwner {
@@ -214,7 +213,7 @@ contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
         require(isBlacklisted[_user], "User already whitelisted");
         isBlacklisted[_user] = false;
     }
-    
+
     function allowance(address owner, address spender) public view virtual override returns (uint256) {
         return _allowances[owner][spender];
     }
