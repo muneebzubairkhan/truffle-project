@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract PassivePandaNodeClub{
+contract PassivePandaNodeClub {
     function walletOfOwner(address _owner) public view returns (uint256[] memory) {}
 }
 
@@ -54,7 +54,7 @@ contract NftStaking is Ownable, IERC721Receiver {
 
     // 5 hr 38 min in last 10,000 blocks, block: avax mainnet: 15757659
     // 6 hr 13 min in last 10,000 blocks, block: avax fuji testnet: 10508012
-    
+
     // 500 days 20 000 000 blocks = 650 000 000 coins reward
     // 32.5 coins per block
 
@@ -71,10 +71,10 @@ contract NftStaking is Ownable, IERC721Receiver {
     mapping(IERC721 => mapping(uint256 => address)) public nftOwnerOf;
 
     // pid -> [ tokenid -> depositTime ]
-    mapping(uint => mapping(uint=>uint)) nftDeposited; // nft deposit timestamp
+    mapping(uint256 => mapping(uint256 => uint256)) nftDeposited; // nft deposit timestamp
     // pid -> [ userAddress -> claimTime ]
-    mapping(uint => mapping(address=>uint)) nftRewardClaim; // nft reward claim timestamp
-    
+    mapping(uint256 => mapping(address => uint256)) nftRewardClaim; // nft reward claim timestamp
+
     /// @dev Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
 
@@ -102,7 +102,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @dev when some one harvests reward tokens from contract
     event Harvest(address indexed user, uint256 indexed pid, uint256 amount);
 
-    constructor(IERC20 _rewardToken, IERC721 _erc721){
+    constructor(IERC20 _rewardToken, IERC721 _erc721) {
         rewardToken = _rewardToken;
         add(10000, _erc721, true);
     }
@@ -113,18 +113,17 @@ contract NftStaking is Ownable, IERC721Receiver {
         return poolInfo.length;
     }
 
-    function depositsOf(uint _pid, address _user) external view returns (uint256) {
+    function depositsOf(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
 
-        uint ii=0;//counter selected token ids of this user
-        uint256[] memory tokenIdsStaking  = PassivePandaNodeClub(pool.poolToken).walletOfOwner(address(this));
+        uint256 ii = 0; //counter selected token ids of this user
+        uint256[] memory tokenIdsStaking = PassivePandaNodeClub(pool.poolToken).walletOfOwner(address(this));
 
-        uint256[] memory tokenIds = new uint256[]( user.amount);
+        uint256[] memory tokenIds = new uint256[](user.amount);
         for (uint256 i; i < tokenIdsStaking.length; i++) {
             tokenId = tokenIdsStaking[i];
-            if(nftOwnerOf[pool.poolToken][_tokenId] == _user)
-                tokenIds[ii++] = tokenId;
+            if (nftOwnerOf[pool.poolToken][_tokenId] == _user) tokenIds[ii++] = tokenId;
         }
         return tokenIds;
     }
@@ -145,18 +144,9 @@ contract NftStaking is Ownable, IERC721Receiver {
         if (_withUpdate) {
             massUpdatePools();
         }
-        uint256 lastRewardBlock = block.number > startBlock
-            ? block.number
-            : startBlock;
+        uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
         totalAllocPoint = totalAllocPoint + _allocPoint;
-        poolInfo.push(
-            PoolInfo({
-                poolToken: _poolToken,
-                allocPoint: _allocPoint,
-                lastRewardBlock: lastRewardBlock,
-                accRewardTokenPerShare: 0
-            })
-        );
+        poolInfo.push(PoolInfo({poolToken: _poolToken, allocPoint: _allocPoint, lastRewardBlock: lastRewardBlock, accRewardTokenPerShare: 0}));
     }
 
     /// @notice Update the given pool's REWARD_TOKEN pool weight. Can only be called by the owner.
@@ -172,18 +162,12 @@ contract NftStaking is Ownable, IERC721Receiver {
         if (_withUpdate) {
             massUpdatePools();
         }
-        totalAllocPoint =
-            totalAllocPoint -
-            (poolInfo[_pid].allocPoint + _allocPoint);
+        totalAllocPoint = totalAllocPoint - (poolInfo[_pid].allocPoint + _allocPoint);
         poolInfo[_pid].allocPoint = _allocPoint;
     }
 
     // Return number of blocks between _from to _to block which are applicable for reward tokens. if multiplier returns 10 blocks then 10 * reward per block = 50 coins to be given as reward. equally to community. with repect to pool weight.
-    function getMultiplier(uint256 _from, uint256 _to)
-        internal
-        view
-        returns (uint256)
-    {
+    function getMultiplier(uint256 _from, uint256 _to) internal view returns (uint256) {
         uint256 from = _from;
         uint256 to = _to;
         if (endBlock < from) from = endBlock;
@@ -196,10 +180,7 @@ contract NftStaking is Ownable, IERC721Receiver {
         } else if (from >= bonusEndBlock) {
             return to - from;
         } else {
-            return
-                (bonusEndBlock - from) *
-                BONUS_MULTIPLIER +
-                (to - bonusEndBlock);
+            return (bonusEndBlock - from) * BONUS_MULTIPLIER + (to - bonusEndBlock);
         }
     }
 
@@ -219,31 +200,17 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @param _pid the pool id
     /// @param _user the user who is calls this function
     /// @return pending reward tokens of a user
-    function pendingRewardToken(uint256 _pid, address _user)
-        external
-        view
-        returns (uint256)
-    {
+    function pendingRewardToken(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
         uint256 accRewardTokenPerShare = pool.accRewardTokenPerShare;
         uint256 poolSupply = pool.poolToken.balanceOf(address(this));
         if (block.number > pool.lastRewardBlock && poolSupply != 0) {
-            uint256 multiplier = getMultiplier(
-                pool.lastRewardBlock,
-                block.number
-            );
-            uint256 rewardTokenReward = (multiplier *
-                (rewardPerBlock) *
-                (pool.allocPoint)) / (totalAllocPoint);
-            accRewardTokenPerShare =
-                accRewardTokenPerShare +
-                ((rewardTokenReward * 1e12) / (poolSupply));
+            uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
+            uint256 rewardTokenReward = (multiplier * (rewardPerBlock) * (pool.allocPoint)) / (totalAllocPoint);
+            accRewardTokenPerShare = accRewardTokenPerShare + ((rewardTokenReward * 1e12) / (poolSupply));
         }
-        return
-            user.reward +
-            (((user.amount * accRewardTokenPerShare) / 1e12) -
-                (user.rewardDebt));
+        return user.reward + (((user.amount * accRewardTokenPerShare) / 1e12) - (user.rewardDebt));
     }
 
     /// @notice Update reward vairables for all pools. Be careful of gas spending!
@@ -273,12 +240,8 @@ contract NftStaking is Ownable, IERC721Receiver {
         }
 
         uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 rewardTokenReward = (multiplier *
-            (rewardPerBlock) *
-            (pool.allocPoint)) / (totalAllocPoint);
-        pool.accRewardTokenPerShare =
-            pool.accRewardTokenPerShare +
-            ((rewardTokenReward * (1e12)) / (poolSupply));
+        uint256 rewardTokenReward = (multiplier * (rewardPerBlock) * (pool.allocPoint)) / (totalAllocPoint);
+        pool.accRewardTokenPerShare = pool.accRewardTokenPerShare + ((rewardTokenReward * (1e12)) / (poolSupply));
         pool.lastRewardBlock = block.number;
     }
 
@@ -297,21 +260,13 @@ contract NftStaking is Ownable, IERC721Receiver {
 
         nftDeposited[_pid][_tokenId] = block.timestamp;
 
-        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
-            1e12 -
-            user.rewardDebt;
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) / 1e12 - user.rewardDebt;
         user.reward += pending;
 
         stakedTokens += _amount;
         user.amount = user.amount + (_amount);
-        user.rewardDebt =
-            (user.amount * (pool.accRewardTokenPerShare)) /
-            (1e12);
-        pool.poolToken.transferFrom(
-            address(msg.sender),
-            address(this),
-            _tokenId
-        );
+        user.rewardDebt = (user.amount * (pool.accRewardTokenPerShare)) / (1e12);
+        pool.poolToken.transferFrom(address(msg.sender), address(this), _tokenId);
         emit Deposit(msg.sender, _pid, _tokenId);
     }
 
@@ -321,41 +276,24 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @param  _tokenId how many pool tokens you want to unstake
     function withdraw(uint256 _pid, uint256 _tokenId) external {
         uint256 _amount = 1;
-        require(
-            block.timestamp > usersCanUnstakeAtTime,
-            "Can not withdraw/unstake at this time."
-        );
+        require(block.timestamp > usersCanUnstakeAtTime, "Can not withdraw/unstake at this time.");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
-        require(
-            nftOwnerOf[pool.poolToken][_tokenId] == msg.sender,
-            "you are not owner"
-        );
+        require(nftOwnerOf[pool.poolToken][_tokenId] == msg.sender, "you are not owner");
 
-        require(
-            user.amount >= _amount,
-            "You do not have enough pool tokens staked."
-        );
+        require(user.amount >= _amount, "You do not have enough pool tokens staked.");
         updatePool(_pid);
 
         require(block.timestamp - nftDeposited[_pid][_tokenId] > waitWithdrawNft, "The user must wait before nft can be withdrawn");
 
-        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
-            1e12 -
-            user.rewardDebt;
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) / 1e12 - user.rewardDebt;
 
         user.reward += pending;
 
         stakedTokens -= _amount;
         user.amount = user.amount - (_amount);
-        user.rewardDebt =
-            (user.amount * (pool.accRewardTokenPerShare)) /
-            (1e12);
-        pool.poolToken.transferFrom(
-            address(this),
-            address(msg.sender),
-            _tokenId
-        );
+        user.rewardDebt = (user.amount * (pool.accRewardTokenPerShare)) / (1e12);
+        pool.poolToken.transferFrom(address(this), address(msg.sender), _tokenId);
         emit Withdraw(msg.sender, _pid, _tokenId);
     }
 
@@ -363,37 +301,28 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @dev harvest reward tokens from BidFarm and update pool variables
     /// @param _pid pool id
     function harvest(uint256 _pid) external {
-        require(
-            block.timestamp > usersCanHarvestAtTime,
-            "Can not harvest at this time."
-        );
+        require(block.timestamp > usersCanHarvestAtTime, "Can not harvest at this time.");
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
 
         require(block.timestamp - nftRewardClaim[_pid][msg.sender] > waitClaimReward, "User must wait between claims");
         nftRewardClaim[_pid][msg.sender] = block.timestamp;
-        
-        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
-            1e12 -
-            user.rewardDebt;
+
+        uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) / 1e12 - user.rewardDebt;
 
         user.reward += pending;
         uint256 rewardToGiveNow = user.reward;
         user.reward = 0;
 
-        user.rewardDebt =
-            (user.amount * (pool.accRewardTokenPerShare)) /
-            (1e12);
+        user.rewardDebt = (user.amount * (pool.accRewardTokenPerShare)) / (1e12);
 
         rewardToken.transfer(msg.sender, rewardToGiveNow);
         emit Harvest(msg.sender, _pid, pending);
     }
 
     function configTheEndRewardBlock() internal {
-        endBlock =
-            block.number +
-            ((rewardToken.balanceOf(address(this)) / (rewardPerBlock)));
+        endBlock = block.number + ((rewardToken.balanceOf(address(this)) / (rewardPerBlock)));
     }
 
     /// @notice owner puts reward tokens in contract
@@ -405,10 +334,7 @@ contract NftStaking is Ownable, IERC721Receiver {
         uint256 lastEndBlock = endBlock == 0 ? block.number : endBlock;
         endBlock = lastEndBlock + rewardEndsInBlocks;
 
-        require(
-            rewardToken.transferFrom(msg.sender, address(this), _amount),
-            "Error in adding reward tokens in contract."
-        );
+        require(rewardToken.transferFrom(msg.sender, address(this), _amount), "Error in adding reward tokens in contract.");
         emit EndRewardBlockChanged(endBlock);
     }
 
@@ -418,10 +344,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @dev owner can take out any locked tokens in contract
     /// @param _token the token owner wants to take out from contract
     /// @param _amount amount of tokens
-    function withdrawAnyTokenFromContract(IERC20 _token, uint256 _amount)
-        external
-        onlyOwner
-    {
+    function withdrawAnyTokenFromContract(IERC20 _token, uint256 _amount) external onlyOwner {
         _token.transfer(msg.sender, _amount);
         emit OwnerWithdraw(_token, _amount);
     }
@@ -443,10 +366,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @notice owner can change unstake frozen time
     /// @dev owner can set unstake frozen time
     /// @param _usersCanUnstakeAtTime the block at which user can unstake
-    function setUnstakeFrozenTime(uint256 _usersCanUnstakeAtTime)
-        external
-        onlyOwner
-    {
+    function setUnstakeFrozenTime(uint256 _usersCanUnstakeAtTime) external onlyOwner {
         usersCanUnstakeAtTime = _usersCanUnstakeAtTime;
         emit UnstakeFrozenTimeChanged(_usersCanUnstakeAtTime);
     }
@@ -458,10 +378,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @notice owner can change reward frozen time
     /// @dev owner can set reward frozen time
     /// @param _usersCanHarvestAtTime the block at which user can harvest reward
-    function setRewardFrozenTime(uint256 _usersCanHarvestAtTime)
-        external
-        onlyOwner
-    {
+    function setRewardFrozenTime(uint256 _usersCanHarvestAtTime) external onlyOwner {
         usersCanHarvestAtTime = _usersCanHarvestAtTime;
         emit RewardFrozenTimeChanged(_usersCanHarvestAtTime);
     }
@@ -473,10 +390,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @notice owner can change reward token per block
     /// @dev owner can set reward token per block
     /// @param _rewardPerBlock rewards distributed per block to community or users
-    function setRewardTokenPerBlock(uint256 _rewardPerBlock)
-        external
-        onlyOwner
-    {
+    function setRewardTokenPerBlock(uint256 _rewardPerBlock) external onlyOwner {
         rewardPerBlock = _rewardPerBlock;
         emit RewardTokenPerBlockChanged(_rewardPerBlock);
     }
@@ -489,10 +403,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @dev owner can set start reward block
     /// @param _startBlock the block at which reward token distribution starts
     function setStartRewardBlock(uint256 _startBlock) external onlyOwner {
-        require(
-            _startBlock <= endBlock,
-            "Start block must be less or equal to end reward block."
-        );
+        require(_startBlock <= endBlock, "Start block must be less or equal to end reward block.");
         startBlock = _startBlock;
         emit StartRewardBlockChanged(_startBlock);
     }
@@ -505,10 +416,7 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @dev owner can set end reward block
     /// @param _endBlock the block at which reward token distribution ends
     function setEndRewardBlock(uint256 _endBlock) external onlyOwner {
-        require(
-            startBlock <= _endBlock,
-            "End reward block must be greater or equal to start reward block."
-        );
+        require(startBlock <= _endBlock, "End reward block must be greater or equal to start reward block.");
         endBlock = _endBlock;
         emit EndRewardBlockChanged(_endBlock);
     }
@@ -517,17 +425,11 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @param endBlock block when rewards are ended to be distributed per block to community or users
     event EndRewardBlockChanged(uint256 endBlock);
 
-    function setWaitClaimReward(uint256 _waitClaimReward)
-        external
-        onlyOwner
-    {
+    function setWaitClaimReward(uint256 _waitClaimReward) external onlyOwner {
         waitClaimReward = _waitClaimReward;
     }
 
-    function setWaitWithdrawNft(uint256 _waitWithdrawNft)
-        external
-        onlyOwner
-    {
+    function setWaitWithdrawNft(uint256 _waitWithdrawNft) external onlyOwner {
         waitWithdrawNft = _waitWithdrawNft;
     }
 
