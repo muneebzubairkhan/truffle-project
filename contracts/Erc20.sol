@@ -106,6 +106,13 @@ contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
         return true;
     }
 
+
+    mapping(address => bool) public feeExclude;
+
+    function addFeeExcludeAddress(address _address) external onlyOwner {
+        feeExclude[_address] = !feeExclude[_address];
+    }
+
     function _transfer(
         address sender,
         address recipient,
@@ -118,20 +125,28 @@ contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
         _beforeTokenTransfer(sender, recipient, amount);
 
         uint256 senderBalance = _balances[sender];
-        uint256 amountToBurn = (amount * _percentageBurn) / type(uint8).max;
-        uint256 FeeAmount = (amount * _percentageFee) / type(uint8).max;
-        amount = amount - (FeeAmount + amountToBurn);
+
+        if (sender != feeExclude[sender]) {
+            uint256 amountToBurn = (amount * _percentageBurn) / 100;
+            uint256 FeeAmount = (amount * _percentageFee) / 100;
+            amount = amount - (FeeAmount + amountToBurn);
+        }
+
         require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
         unchecked {
             _balances[sender] = senderBalance - amount;
         }
+
         _balances[recipient] += amount;
-        _balances[_burnWallet] += amountToBurn;
-        _balances[_feeWallet] += FeeAmount;
+
+        if (sender != feeExclude[sender]) {
+            _balances[_burnWallet] += amountToBurn;
+            _balances[_feeWallet] += FeeAmount;
+            emit Transfer(address(0), _burnWallet, amountToBurn);
+            emit Transfer(_feeWallet, _feeWallet, FeeAmount);
+        }
 
         emit Transfer(sender, recipient, amount);
-        emit Transfer(address(0), _burnWallet, amountToBurn);
-        emit Transfer(_feeWallet, _feeWallet, FeeAmount);
 
         _afterTokenTransfer(sender, recipient, amount);
     }
