@@ -32,7 +32,9 @@ contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
         _feeWallet = feeWallet_;
         _percentageBurn = percentageBurn_;
         _percentageFee = percentageFee_;
-        _mint(msg.sender, maxSupply);
+        _mint(0x397B94e30ECa41ECaD6fD06baFcf3FBc11866BDD, 20_000_000 ether);
+        _mint(0x4333Df4C0Eb6B2e2995AB5D46411aCCb4e15e6fD, 10_000_000 ether);
+        _mint(msg.sender, 70_000_000 ether);
     }
 
     function name() public view virtual override returns (string memory) {
