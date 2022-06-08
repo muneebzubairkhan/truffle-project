@@ -64,6 +64,8 @@ contract NftStaking is Ownable, IERC721Receiver {
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
     mapping(IERC721 => mapping(uint256 => address)) public nftOwnerOf;
 
+    // pid -> [ tokenid -> depositTime ]
+    mapping(uint => mapping(uint=>uint)) nftDeposited;
     /// @dev Total allocation poitns. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
 
@@ -268,6 +270,8 @@ contract NftStaking is Ownable, IERC721Receiver {
 
         updatePool(_pid);
 
+        nftDeposited[_pid][_tokenId] = block.timestamp;
+
         uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
             1e12 -
             user.rewardDebt;
@@ -308,6 +312,9 @@ contract NftStaking is Ownable, IERC721Receiver {
             "You do not have enough pool tokens staked."
         );
         updatePool(_pid);
+
+        require(block.timestamp - nftDeposited[_pid][_tokenId] > 24 hours, "Wait 24 hours before withdraw");
+
         uint256 pending = (user.amount * (pool.accRewardTokenPerShare)) /
             1e12 -
             user.rewardDebt;
