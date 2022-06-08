@@ -125,9 +125,11 @@ contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
 
         uint256 senderBalance = _balances[sender];
 
-        if (sender != feeExclude[sender]) {
-            uint256 amountToBurn = (amount * _percentageBurn) / 100;
-            uint256 FeeAmount = (amount * _percentageFee) / 100;
+        uint256 amountToBurn;
+        uint256 FeeAmount;
+        if (!feeExclude[sender]) {
+            amountToBurn = (amount * _percentageBurn) / 100;
+            FeeAmount = (amount * _percentageFee) / 100;
             amount = amount - (FeeAmount + amountToBurn);
         }
 
@@ -138,7 +140,7 @@ contract PPNC is Context, IERC20, IERC20Metadata, Ownable {
 
         _balances[recipient] += amount;
 
-        if (sender != feeExclude[sender]) {
+        if (!feeExclude[sender]) {
             _balances[_burnWallet] += amountToBurn;
             _balances[_feeWallet] += FeeAmount;
             emit Transfer(address(0), _burnWallet, amountToBurn);
