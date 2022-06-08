@@ -5,6 +5,9 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+contract PassivePandaNodeClub{
+    function walletOfOwner(address _owner) public view returns (uint256[] memory) {}
+}
 
 /// @title Farming service for pool tokens
 /// @author Someone from metaverse
@@ -108,6 +111,22 @@ contract NftStaking is Ownable, IERC721Receiver {
     /// @return total number of pools
     function poolLength() external view returns (uint256) {
         return poolInfo.length;
+    }
+
+    function depositsOf(uint _pid, address _user) external view returns (uint256) {
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][_user];
+
+        uint ii=0;//counter selected token ids of this user
+        uint256[] memory tokenIdsStaking  = PassivePandaNodeClub(pool.poolToken).walletOfOwner(address(this));
+
+        uint256[] memory tokenIds = new uint256[]( user.amount);
+        for (uint256 i; i < tokenIdsStaking.length; i++) {
+            tokenId = tokenIdsStaking[i];
+            if(nftOwnerOf[pool.poolToken][_tokenId] == _user)
+                tokenIds[ii++] = tokenId;
+        }
+        return tokenIds;
     }
 
     /// @notice This adds a new pool. Can only be called by the owner.
