@@ -280,7 +280,8 @@ contract NftStaking is Ownable, IERC721Receiver {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(nftOwnerOf[pool.poolToken][_tokenId] == msg.sender, "you are not owner");
-
+        nftOwnerOf[pool.poolToken][_tokenId] == address(0);
+        
         require(user.amount >= _amount, "You do not have enough pool tokens staked.");
         updatePool(_pid);
 
