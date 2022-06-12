@@ -12,7 +12,7 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract WitchTownSale is ERC721A("Witch Town", "GF"), Ownable, ERC721AQueryable, ERC2981 {
+contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable, ERC2981 {
     uint256 public txMaxMint = 2;
     uint256 public freeMint = 0; // first X tokens can be minted for free
     uint256 public maxPerWallet = 2;
