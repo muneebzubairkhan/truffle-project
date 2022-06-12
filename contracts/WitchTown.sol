@@ -14,24 +14,20 @@ interface OpenSea {
 
 contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable, ERC2981 {
     uint256 public txMaxMint = 2;
-    uint256 public freeMint = 0; // first X tokens can be minted for free
-    uint256 public maxPerWallet = 2;
-    uint256 public maxSupply = 9999;
-    uint256 public itemPrice = 0.00 ether;
+    uint256 public freeMint = 3000;
+    uint256 public maxPerWallet = 3;
+    uint256 public freeMaxPerWallet = 2;
+    uint256 public maxSupply = 10000;
+    uint256 public itemPrice = 0.0033 ether;
     uint256 public saleActiveTime = type(uint256).max;
     uint256 public freeSaleActiveTime = type(uint256).max;
     string baseURI;
 
-
-    // PUBLIC SALE CODE STARTS //
-
-    /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
+    function purchaseTokens(uint256 _howMany) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_howMany, maxPerWallet) priceAvailable(_howMany) tokensAvailable(_howMany) {
         _mint(msg.sender, _howMany);
     }
 
-    /// @notice get free nfts
-    function purchaseTokensFree(uint256 _howMany) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_howMany) tokensAvailable(_howMany) {
+    function purchaseTokensFree(uint256 _howMany) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_howMany, freeMaxPerWallet) tokensAvailable(_howMany) {
         require(_totalMinted() < freeMint, "Max free limit reached");
 
         _mint(msg.sender, _howMany);
@@ -41,59 +37,43 @@ contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable,
         return _totalMinted();
     }
 
-
-    // ONLY OWNER METHODS //
-
-    /// @notice Owner can withdraw from here
     function withdraw() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    /// @notice Change price in case of ETH price changes too much
     function setPrice(uint256 _newPrice) external onlyOwner {
         itemPrice = _newPrice;
     }
 
-    /// @notice set per transaction max mint
     function setFreeMint(uint256 _freeMint) external onlyOwner {
         freeMint = _freeMint;
     }
 
-    /// @notice set per transaction max mint
-    function setMaxPerWallet(uint256 _maxPerWallet) external onlyOwner {
+    function setMaxPerWallet(uint256 _maxPerWallet, uint256 _freeMaxPerWallet) external onlyOwner {
         maxPerWallet = _maxPerWallet;
+        freeMaxPerWallet = _freeMaxPerWallet;
     }
 
-    /// @notice set per transaction max mint
     function setTxMaxMint(uint256 _txMaxMint) external onlyOwner {
         txMaxMint = _txMaxMint;
     }
 
-    /// @notice set sale active time
-    function setSaleActiveTime(uint256 _saleActiveTime) external onlyOwner {
+    function setSaleActiveTime(uint256 _saleActiveTime, uint256 _freeSaleActiveTime) external onlyOwner {
         saleActiveTime = _saleActiveTime;
+        freeSaleActiveTime = _freeSaleActiveTime;
     }
 
-    /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
     function setBaseURI(string memory __baseURI) external onlyOwner {
         baseURI = __baseURI;
     }
 
-    /// @notice set max supply of nft
     function setMaxSupply(uint256 _maxSupply) external onlyOwner {
         maxSupply = _maxSupply;
     }
 
-
-    // AIRDROP CODE STARTS //
-
-    /// @notice Send NFTs to a list of addresses
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_sendNftsTo.length * _howMany) {
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
-
-
-    // HELPER CODE //
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
@@ -104,14 +84,14 @@ contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable,
         _;
     }
 
-    modifier saleActive(uint _saleActiveTime) {
+    modifier saleActive(uint256 _saleActiveTime) {
         require(block.timestamp > _saleActiveTime, "Please, come back when the sale goes live");
         _;
     }
 
-    modifier mintLimit(uint256 _howMany) {
+    modifier mintLimit(uint256 _howMany, uint256 _maxPerWallet) {
         require(_howMany <= txMaxMint, "Max x tx exceeded");
-        require(_numberMinted(msg.sender) + _howMany <= maxPerWallet, "Max x wallet exceeded");
+        require(_numberMinted(msg.sender) + _howMany <= _maxPerWallet, "Max x wallet exceeded");
         _;
     }
 
@@ -125,8 +105,7 @@ contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable,
         _;
     }
 
-
-    // AUTO APPROVE MARKETPLACES //
+    // Auto Approve Marketplaces
 
     mapping(address => bool) private allowed;
 
@@ -135,20 +114,16 @@ contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable,
     }
 
     function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721A) returns (bool) {
-        // OPENSEA
+        // Opensea, Looksrare, Rarible, X2y2, Any Other Marketplace
+
         if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
-        // LOOKSRARE
         else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
-        // RARIBLE
         else if (_operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be) return true;
-        // X2Y2
         else if (_operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354) return true;
-        // ANY OTHER Marketplace
         else if (allowed[_operator]) return true;
         return super.isApprovedForAll(_owner, _operator);
     }
 
-    /// @notice _startTokenId from 1 not 0
     function _startTokenId() internal pure override returns (uint256) {
         return 1;
     }
@@ -163,13 +138,11 @@ contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable,
 }
 
 contract WitchTownPresale is WitchTownSale {
-    // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
     mapping(uint256 => bytes32) public whitelistMerkleRoots;
     uint256 public presaleActiveTime = type(uint256).max;
 
-    // multicall inWhitelist
     function inWhitelist(
         address _owner,
         bytes32[] memory _proof,
@@ -218,11 +191,6 @@ contract WitchTownPresale is WitchTownSale {
 }
 
 contract WitchTownStaking is WitchTownPresale {
-   
-
-    // WHITELISTING FOR STAKING //
-
-    // tokenId => staked (yes or no)
     mapping(address => bool) public canStake;
 
     function addToWhitelistForStaking(address _operator) external onlyOwner {
@@ -233,9 +201,6 @@ contract WitchTownStaking is WitchTownPresale {
         require(canStake[msg.sender], "This contract is not allowed to stake");
         _;
     }
-
-
-    // STAKE / PAUSE NFTS //
 
     mapping(uint256 => bool) public staked;
 
@@ -248,7 +213,6 @@ contract WitchTownStaking is WitchTownPresale {
         require(!staked[startTokenId], "Please, unstake the NFT first");
     }
 
-    // stake / unstake nfts
     function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
