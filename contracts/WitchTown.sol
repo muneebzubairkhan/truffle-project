@@ -105,7 +105,7 @@ contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable,
         allowed[_spender] = !allowed[_spender];
     }
 
-    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721A) returns (bool) {
+    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721) returns (bool) {
         // Opensea, Looksrare, Rarible, X2y2, Any Other Marketplace
 
         if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
@@ -120,7 +120,7 @@ contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable,
         return 1;
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC721A, ERC2981) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC165, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
