@@ -12,25 +12,26 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract WitchTown is ERC721A("Witch Town", "GF"), Ownable, ERC721AQueryable, ERC2981 {
+contract WitchTownSale is ERC721A("Witch Town", "GF"), Ownable, ERC721AQueryable, ERC2981 {
     uint256 public txMaxMint = 2;
     uint256 public freeMint = 0; // first X tokens can be minted for free
     uint256 public maxPerWallet = 2;
     uint256 public maxSupply = 9999;
     uint256 public itemPrice = 0.00 ether;
     uint256 public saleActiveTime = type(uint256).max;
+    uint256 public freeSaleActiveTime = type(uint256).max;
     string baseURI;
 
 
     // PUBLIC SALE CODE STARTS //
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable saleActive callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
+    function purchaseTokens(uint256 _howMany) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_howMany) priceAvailable(_howMany) tokensAvailable(_howMany) {
         _mint(msg.sender, _howMany);
     }
 
     /// @notice get free nfts
-    function purchaseTokensFree(uint256 _howMany) external saleActive callerIsUser mintLimit(_howMany) tokensAvailable(_howMany) {
+    function purchaseTokensFree(uint256 _howMany) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_howMany) tokensAvailable(_howMany) {
         require(_totalMinted() < freeMint, "Max free limit reached");
 
         _mint(msg.sender, _howMany);
@@ -103,8 +104,8 @@ contract WitchTown is ERC721A("Witch Town", "GF"), Ownable, ERC721AQueryable, ER
         _;
     }
 
-    modifier saleActive() {
-        require(block.timestamp > saleActiveTime, "Please, come back when the sale goes live");
+    modifier saleActive(uint _saleActiveTime) {
+        require(block.timestamp > _saleActiveTime, "Please, come back when the sale goes live");
         _;
     }
 
@@ -161,7 +162,7 @@ contract WitchTown is ERC721A("Witch Town", "GF"), Ownable, ERC721AQueryable, ER
     }
 }
 
-contract GandalfTownPresale is GandalfTownSale {
+contract WitchTownPresale is WitchTownSale {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -216,7 +217,7 @@ contract GandalfTownPresale is GandalfTownSale {
     }
 }
 
-contract GandalfTownStaking is GandalfTownPresale {
+contract WitchTownStaking is WitchTownPresale {
    
 
     // WHITELISTING FOR STAKING //
@@ -253,4 +254,4 @@ contract GandalfTownStaking is GandalfTownPresale {
     }
 }
 
-contract GandalfTown is GandalfTownStaking {}
+contract WitchTown is WitchTownStaking {}
