@@ -12,7 +12,7 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract WWWSale is ERC721A("WWW", "W"), Ownable, ERC721AQueryable, ERC2981 {
+contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable, ERC2981 {
     uint256 public txMaxMint = 2;
     uint256 public freeMint = 0; // first X tokens can be minted for free
     uint256 public maxPerWallet = 2;
@@ -162,7 +162,7 @@ contract WWWSale is ERC721A("WWW", "W"), Ownable, ERC721AQueryable, ERC2981 {
     }
 }
 
-contract WWWPresale is WWWSale {
+contract WitchTownPresale is WitchTownSale {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -217,7 +217,7 @@ contract WWWPresale is WWWSale {
     }
 }
 
-contract WWWStaking is WWWPresale {
+contract WitchTownStaking is WitchTownPresale {
    
 
     // WHITELISTING FOR STAKING //
@@ -254,4 +254,4 @@ contract WWWStaking is WWWPresale {
     }
 }
 
-contract WWW is WWWStaking {}
+contract WitchTown is WitchTownStaking {}
