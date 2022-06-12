@@ -14,27 +14,23 @@ interface OpenSea {
 
 contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable, ERC2981 {
     uint256 public txMaxMint = 2;
-    uint256 public freeMint = 3000;
+    uint256 public freeMint = 4000;
     uint256 public maxPerWallet = 3;
     uint256 public freeMaxPerWallet = 2;
     uint256 public maxSupply = 10000;
     uint256 public itemPrice = 0.0033 ether;
     uint256 public saleActiveTime = type(uint256).max;
     uint256 public freeSaleActiveTime = type(uint256).max;
-    string baseURI;
+    string witchesURI;
 
-    function purchaseTokens(uint256 _howMany) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_howMany, maxPerWallet) priceAvailable(_howMany) tokensAvailable(_howMany) {
+    function buyWitches(uint256 _howMany) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_howMany, maxPerWallet) priceAvailable(_howMany) witchesAvailable(_howMany) {
         _mint(msg.sender, _howMany);
     }
 
-    function purchaseTokensFree(uint256 _howMany) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_howMany, freeMaxPerWallet) tokensAvailable(_howMany) {
+    function buyWitchesFree(uint256 _howMany) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_howMany, freeMaxPerWallet) witchesAvailable(_howMany) {
         require(_totalMinted() < freeMint, "Max free limit reached");
 
         _mint(msg.sender, _howMany);
-    }
-
-    function totalMinted() external view returns (uint256) {
-        return _totalMinted();
     }
 
     function withdraw() external onlyOwner {
@@ -63,20 +59,16 @@ contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable,
         freeSaleActiveTime = _freeSaleActiveTime;
     }
 
-    function setBaseURI(string memory __baseURI) external onlyOwner {
-        baseURI = __baseURI;
+    function setWitchesURI(string memory __witchesURI) external onlyOwner {
+        witchesURI = __witchesURI;
     }
 
-    function setMaxSupply(uint256 _maxSupply) external onlyOwner {
-        maxSupply = _maxSupply;
-    }
-
-    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner tokensAvailable(_sendNftsTo.length * _howMany) {
+    function giftWitches(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner witchesAvailable(_sendNftsTo.length * _howMany) {
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
 
     function _baseURI() internal view override returns (string memory) {
-        return baseURI;
+        return witchesURI;
     }
 
     modifier callerIsUser() {
@@ -95,7 +87,7 @@ contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable,
         _;
     }
 
-    modifier tokensAvailable(uint256 _howMany) {
+    modifier witchesAvailable(uint256 _howMany) {
         require(_howMany <= maxSupply - totalSupply(), "Sorry, we are sold out");
         _;
     }
@@ -132,7 +124,7 @@ contract WitchTownSale is ERC721A("WitchTown", "WT"), Ownable, ERC721AQueryable,
         return super.supportsInterface(interfaceId);
     }
 
-    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
+    function setRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
 }
@@ -161,11 +153,11 @@ contract WitchTownPresale is WitchTownSale {
         return MerkleProof.verify(_proof, whitelistMerkleRoots[_rootNumber], keccak256(abi.encodePacked(_owner)));
     }
 
-    function purchaseTokensWhitelist(
+    function buyWitchesWhitelist(
         uint256 _howMany,
         bytes32[] calldata _proof,
         uint256 _rootNumber
-    ) external payable callerIsUser tokensAvailable(_howMany) {
+    ) external payable callerIsUser witchesAvailable(_howMany) {
         require(block.timestamp > presaleActiveTime, "Please, come back when the presale goes live");
         require(_inWhitelist(msg.sender, _proof, _rootNumber), "Sorry, you are not allowed");
         require(msg.value == _howMany * itemPricePresales[_rootNumber], "Please, send the exact amount of ETH");
