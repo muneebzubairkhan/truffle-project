@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.13;
 
-import "erc721a@3.3.0/contracts/ERC721A.sol";
+import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
+import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable, ERC2981 {
+contract WWWSale is ERC721A("WWW", "W"), Ownable, ERC721AQueryable, ERC2981 {
     uint256 public txMaxMint = 2;
     uint256 public freeMint = 0; // first X tokens can be minted for free
     uint256 public maxPerWallet = 2;
@@ -134,7 +134,7 @@ contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable
         allowed[_spender] = !allowed[_spender];
     }
 
-    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721) returns (bool) {
+    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721A) returns (bool) {
         // OPENSEA
         if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
         // LOOKSRARE
@@ -153,7 +153,7 @@ contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable
         return 1;
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, ERC2981, IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC721A, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -162,7 +162,7 @@ contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable
     }
 }
 
-contract WitchTownPresale is WitchTownSale {
+contract WWWPresale is WWWSale {
     // multiple presale configs
     mapping(uint256 => uint256) public maxMintPresales;
     mapping(uint256 => uint256) public itemPricePresales;
@@ -217,7 +217,7 @@ contract WitchTownPresale is WitchTownSale {
     }
 }
 
-contract WitchTownStaking is WitchTownPresale {
+contract WWWStaking is WWWPresale {
    
 
     // WHITELISTING FOR STAKING //
@@ -254,4 +254,4 @@ contract WitchTownStaking is WitchTownPresale {
     }
 }
 
-contract WitchTown is WitchTownStaking {}
+contract WWW is WWWStaking {}

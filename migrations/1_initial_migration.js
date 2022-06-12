@@ -1,5 +1,5 @@
 const Migrations = artifacts.require("Migrations");
-const Nft = artifacts.require("AlphaAliensStaking");
+const Nft = artifacts.require("WWW");
 // const _Contract_1_ = artifacts.require("_Contract_1_");
 
 module.exports = async (deployer, network, accounts) => {

@@ -1,5 +1,4 @@
 var HDWalletProvider = require("@truffle/hdwallet-provider");
-var ethGasReporter = require("eth-gas-reporter");
 const { toWei } = require("web3-utils");
 require("dotenv").config();
 const MNEMONIC = process.env.MNEMONIC;
@@ -125,7 +124,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.8.12",
+      version: "0.8.13",
       settings: {
         optimizer: {
           enabled: true,
