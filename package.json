@@ -6,9 +6,6 @@
   "directories": {
     "test": "test"
   },
-  "selectedContracts": "NftStaking",
-  "selectedNetwork": "fuji",
-  "allContracts": "Migrations NftStaking",
   "scripts": {
     "start": "truffle migrate --reset --network development",
     "____": "_____",
@@ -18,12 +15,11 @@
     "deployRegular": "sudo nodemon --watch contracts --exec \"truffle migrate --reset\" --ext .sol",
     "runLocalBlockchain": "ganache-cli",
     "_____": "_____",
-    "verify": "truffle run verify NftStaking --network %npm_package_selectedNetwork%",
-    "startBscTestnet": "truffle migrate --network bscTestnet --all --reset && truffle run verify NftStaking --network bscTestnet",
-    "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify NftStaking --network bscMainnet",
-    "startRinkeby": "sudo truffle migrate --network rinkeby --reset && truffle run verify NftStaking --network rinkeby",
-    "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify NftStaking --network mainnet",
-    "startInnovate": "truffle migrate --network %(grep DEPLOY_NETWORK .env)% --reset && truffle run verify NftStaking --network $(grep DEPLOY_NETWORK .env)",
+    "startBscTestnet": "truffle migrate --network bscTestnet --all --reset",
+    "startBscMainnet": "truffle migrate --network bscMainnet --reset && truffle run verify SomeSmartContract --network bscMainnet",
+    "startRinkeby": "sudo truffle migrate --network rinkeby --reset",
+    "startEthMainnet": "truffle migrate --network mainnet --reset && truffle run verify SomeSmartContract --network mainnet",
+    "startInnovate": "truffle migrate --network %(grep DEPLOY_NETWORK .env)% --reset && truffle run verify SomeSmartContract --network $(grep DEPLOY_NETWORK .env)",
     "___": "_____",
     "beep1": "python -c \"import winsound; winsound.PlaySound('SystemExit', winsound.SND_ALIAS);\"",
     "beep2": "start wmplayer \"C:\\Windows\\Media\\Alarm10.wav\" && timeout 5 && taskkill /im wmplayer.exe"
@@ -35,7 +31,7 @@
     "@openzeppelin/contracts": "^4.4.1",
     "@truffle/hdwallet-provider": "^2.0.0",
     "dotenv": "^10.0.0",
-    "erc721a": "latest",
+    "erc721a": "3.3.0",
     "keccak256": "^1.0.6",
     "merkletreejs": "^0.2.31",
     "nodemon": "^2.0.13",
@@ -43,7 +39,7 @@
     "web3-utils": "^1.5.3"
   },
   "devDependencies": {
-    "eth-gas-reporter": "^0.2.24",
+    "eth-gas-reporter": "^0.2.25",
     "prettier": "^2.5.1",
     "prettier-plugin-solidity": "^1.0.0-beta.19"
   }
