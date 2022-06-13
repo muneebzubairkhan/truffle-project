@@ -1,17 +1,20 @@
-const Nft = artifacts.require("WWW");
+const Nft = artifacts.require("WitchTown");
 
 const testBuyNft = async ([owner]) => {
   console.log("Assalamo Alaikum");
 
-  let nft = await Nft.at("0x106722D96c72B8d2899d6c20A38C181B2Ffa6A46");
+  let nft = await Nft.deployed();
   console.log(owner === (await nft.owner()));
-  
-  await nft.setSaleActiveTime(0);
-  await nft.purchaseTokens(1, {
+
+  await nft.setSaleActiveTime(0, 0);
+  await nft.buyWitches(1, {
     value: await nft.itemPrice(),
     from: owner,
   });
-  
+  await nft.buyWitchesFree(1, {
+    value: 0,
+    from: owner,
+  });
   // test nft viewable on opensea
 };
 
