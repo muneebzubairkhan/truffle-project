@@ -1,7 +1,15 @@
 ### Store Room
 
-  // let nft = await Nft.deployed('');
+let nft = await Nft.deployed('');
 
+### outputs
+Contract: Nft
+
+Assalamo Alaikum
+0xC6c6Bb9cEf49bd1f1fD361f6E252a68dbdeb942e
+true
+totalSupply 1
+    ✓ deploy smart contract (170ms)
 
 ### Deployed to ETH Mainnet
 Presale https://etherscan.io/address/0x7b58c75cb67030221720e0b92c8b658164079add#code

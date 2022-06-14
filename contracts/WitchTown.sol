@@ -8,47 +8,45 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-interface OpenSea {
-    function proxies(address) external view returns (address);
-}
-
-contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable, ERC2981 {
-    uint256 public freeMint = 4000;
-    uint256 public freeMaxPerWallet = 2;
+contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQueryable, ERC2981 {
+    uint256 public freeApes = 4000;
+    uint256 public freeMaxApesPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
-    uint256 public maxPerWallet = 3;
-    uint256 public maxSupply = 10000;
-    uint256 public itemPrice = 0.0033 ether;
+    uint256 public maxApesPerWallet = 3;
+    uint256 public constant maxSupply = 10000;
+    uint256 public apePrice = 0.0033 ether;
     uint256 public saleActiveTime = type(uint256).max;
 
-    string witchesURI;
+    string apeMetadataURI;
 
-    function buyWitches(uint256 _howMany) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_howMany, maxPerWallet) priceAvailable(_howMany) witchesAvailable(_howMany) {
-        _mint(msg.sender, _howMany);
+    function buyApes(uint256 _apesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_apesQty, maxApesPerWallet) priceAvailable(_apesQty) apesAvailable(_apesQty) {
+        require(_totalMinted() > freeApes, "Why pay for Apes when you can get them for free.");
+
+        _mint(msg.sender, _apesQty);
     }
 
-    function buyWitchesFree(uint256 _howMany) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_howMany, freeMaxPerWallet) witchesAvailable(_howMany) {
-        require(_totalMinted() < freeMint, "Max free limit reached");
+    function buyApesFree(uint256 _apesQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_apesQty, freeMaxApesPerWallet) apesAvailable(_apesQty) {
+        require(_totalMinted() < freeApes, "Max free limit reached");
 
-        _mint(msg.sender, _howMany);
+        _mint(msg.sender, _apesQty);
     }
 
     function withdraw() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function setPrice(uint256 _newPrice) external onlyOwner {
-        itemPrice = _newPrice;
+    function setApePrice(uint256 _newPrice) external onlyOwner {
+        apePrice = _newPrice;
     }
 
-    function setFreeMint(uint256 _freeMint) external onlyOwner {
-        freeMint = _freeMint;
+    function setFreeApes(uint256 _freeApes) external onlyOwner {
+        freeApes = _freeApes;
     }
 
-    function setMaxPerWallet(uint256 _maxPerWallet, uint256 _freeMaxPerWallet) external onlyOwner {
-        maxPerWallet = _maxPerWallet;
-        freeMaxPerWallet = _freeMaxPerWallet;
+    function setMaxApesPerWallet(uint256 _maxApesPerWallet, uint256 _freeMaxApesPerWallet) external onlyOwner {
+        maxApesPerWallet = _maxApesPerWallet;
+        freeMaxApesPerWallet = _freeMaxApesPerWallet;
     }
 
     function setSaleActiveTime(uint256 _saleActiveTime, uint256 _freeSaleActiveTime) external onlyOwner {
@@ -56,16 +54,16 @@ contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable
         freeSaleActiveTime = _freeSaleActiveTime;
     }
 
-    function setWitchesURI(string memory __witchesURI) external onlyOwner {
-        witchesURI = __witchesURI;
+    function setApeMetadataURI(string memory _apeMetadataURI) external onlyOwner {
+        apeMetadataURI = _apeMetadataURI;
     }
 
-    function giftWitches(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner witchesAvailable(_sendNftsTo.length * _howMany) {
-        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
+    function giftApes(address[] calldata _sendNftsTo, uint256 _apesQty) external onlyOwner apesAvailable(_sendNftsTo.length * _apesQty) {
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _apesQty);
     }
 
     function _baseURI() internal view override returns (string memory) {
-        return witchesURI;
+        return apeMetadataURI;
     }
 
     modifier callerIsUser() {
@@ -78,18 +76,18 @@ contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable
         _;
     }
 
-    modifier mintLimit(uint256 _howMany, uint256 _maxPerWallet) {
-        require(_numberMinted(msg.sender) + _howMany <= _maxPerWallet, "Max x wallet exceeded");
+    modifier mintLimit(uint256 _apesQty, uint256 _maxApesPerWallet) {
+        require(_numberMinted(msg.sender) + _apesQty <= _maxApesPerWallet, "Max x wallet exceeded");
         _;
     }
 
-    modifier witchesAvailable(uint256 _howMany) {
-        require(_howMany <= maxSupply - totalSupply(), "Sorry, we are sold out");
+    modifier apesAvailable(uint256 _apesQty) {
+        require(_apesQty + totalSupply() <= maxSupply, "Sorry, we are sold out");
         _;
     }
 
-    modifier priceAvailable(uint256 _howMany) {
-        require(msg.value == _howMany * itemPrice, "Please, send the exact amount of ETH");
+    modifier priceAvailable(uint256 _apesQty) {
+        require(msg.value == _apesQty * apePrice, "Please, send the exact amount of ETH");
         _;
     }
 
@@ -102,7 +100,7 @@ contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable
     }
 
     function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721) returns (bool) {
-        // Opensea, Looksrare, Rarible, X2y2, Any Other Marketplace
+        // Opensea, LooksRare, Rarible, X2y2, Any Other Marketplace
 
         if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
         else if (_operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e) return true;
@@ -125,9 +123,9 @@ contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable
     }
 }
 
-contract WitchTownPresale is WitchTownSale {
+contract FastFoodApesPresale is FastFoodApesSale {
     mapping(uint256 => uint256) public maxMintPresales;
-    mapping(uint256 => uint256) public itemPricePresales;
+    mapping(uint256 => uint256) public apePricePresales;
     mapping(uint256 => bytes32) public whitelistMerkleRoots;
     uint256 public presaleActiveTime = type(uint256).max;
 
@@ -149,27 +147,27 @@ contract WitchTownPresale is WitchTownSale {
         return MerkleProof.verify(_proof, whitelistMerkleRoots[_rootNumber], keccak256(abi.encodePacked(_owner)));
     }
 
-    function buyWitchesWhitelist(
-        uint256 _howMany,
+    function buyApesWhitelist(
+        uint256 _apesQty,
         bytes32[] calldata _proof,
         uint256 _rootNumber
-    ) external payable callerIsUser witchesAvailable(_howMany) {
+    ) external payable callerIsUser apesAvailable(_apesQty) {
         require(block.timestamp > presaleActiveTime, "Please, come back when the presale goes live");
         require(_inWhitelist(msg.sender, _proof, _rootNumber), "Sorry, you are not allowed");
-        require(msg.value == _howMany * itemPricePresales[_rootNumber], "Please, send the exact amount of ETH");
-        require(_numberMinted(msg.sender) + _howMany <= maxMintPresales[_rootNumber], "Max x wallet exceeded");
+        require(msg.value == _apesQty * apePricePresales[_rootNumber], "Please, send the exact amount of ETH");
+        require(_numberMinted(msg.sender) + _apesQty <= maxMintPresales[_rootNumber], "Max x wallet exceeded");
 
-        _mint(msg.sender, _howMany);
+        _mint(msg.sender, _apesQty);
     }
 
     function setPresale(
         uint256 _rootNumber,
         bytes32 _whitelistMerkleRoot,
         uint256 _maxMintPresales,
-        uint256 _itemPricePresale
+        uint256 _apePricePresale
     ) external onlyOwner {
         maxMintPresales[_rootNumber] = _maxMintPresales;
-        itemPricePresales[_rootNumber] = _itemPricePresale;
+        apePricePresales[_rootNumber] = _apePricePresale;
         whitelistMerkleRoots[_rootNumber] = _whitelistMerkleRoot;
     }
 
@@ -178,7 +176,7 @@ contract WitchTownPresale is WitchTownSale {
     }
 }
 
-contract WitchTownStaking is WitchTownPresale {
+contract FastFoodApesStaking is FastFoodApesPresale {
     mapping(address => bool) public canStake;
 
     function addToWhitelistForStaking(address _operator) external onlyOwner {
@@ -201,9 +199,13 @@ contract WitchTownStaking is WitchTownPresale {
         require(!staked[startTokenId], "Please, unstake the NFT first");
     }
 
-    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
+    function stakeApes(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 }
 
-contract WitchTown is WitchTownStaking {}
+interface OpenSea {
+    function proxies(address) external view returns (address);
+}
+
+contract FastFoodApes is FastFoodApesStaking {}
