@@ -10,7 +10,7 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQueryable, ERC2981 {
-    uint256 public freeApes = 2000;
+    uint256 public freeApes = 6;
     uint256 public freeMaxApesPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
@@ -25,13 +25,13 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
     string apeMetadataURI;
 
     function buyApes(uint256 _apesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_apesQty, maxApesPerWallet) priceAvailable(_apesQty) apesAvailable(_apesQty) {
-        require(_totalMinted() > freeApes, "Why pay for Apes when you can get them for free.");
+        require(_totalMinted() >= freeApes, "Why pay for Apes when you can get them for free.");
 
         _mint(msg.sender, _apesQty);
     }
 
     function buyApesFree(uint256 _apesQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_apesQty, freeMaxApesPerWallet) apesAvailable(_apesQty) {
-        require(_totalMinted() <= freeApes, "Max free limit reached");
+        require(_totalMinted() < freeApes, "Max free limit reached");
 
         _mint(msg.sender, _apesQty);
     }

@@ -17,12 +17,12 @@ const testBuyNft = async ([owner, alice, bob, carol, dora]) => {
     value: 0,
     from: bob,
   });
-  await nft.buyApesFree(3, {
+  await nft.buyApesFree(2, {
     value: 0,
     from: carol,
   });
   await nft.buyApes(3, {
-    value: await nft.apePrice(),
+    value: 3 * (await nft.apePrice()),
     from: dora,
   });
   console.log("totalSupply " + (await nft.totalSupply()));
