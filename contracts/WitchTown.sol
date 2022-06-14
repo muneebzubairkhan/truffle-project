@@ -25,6 +25,8 @@ contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable
     string witchesURI;
 
     function buyWitches(uint256 _howMany) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_howMany, maxPerWallet) priceAvailable(_howMany) witchesAvailable(_howMany) {
+        require(_totalMinted() >= freeMint, "You can get witches for free.");
+        
         _mint(msg.sender, _howMany);
     }
 
