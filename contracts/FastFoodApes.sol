@@ -10,7 +10,7 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQueryable, ERC2981 {
-    uint256 public freeApes = 6;
+    uint256 public freeApes = 2000;
     uint256 public freeMaxApesPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
