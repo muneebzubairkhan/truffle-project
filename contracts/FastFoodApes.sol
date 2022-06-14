@@ -6,17 +6,21 @@ import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQueryable, ERC2981 {
-    uint256 public freeApes = 4000;
+    uint256 public freeApes = 2000;
     uint256 public freeMaxApesPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
-    uint256 public maxApesPerWallet = 3;
-    uint256 public constant maxSupply = 10000;
-    uint256 public apePrice = 0.0033 ether;
+    uint256 public maxApesPerWallet = 10;
+    uint256 public apePrice = 0.0069 ether;
     uint256 public saleActiveTime = type(uint256).max;
+
+    uint256 public constant maxSupply = 8888;
+
+    uint256 public reservedApes = 888;
 
     string apeMetadataURI;
 
@@ -27,7 +31,7 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
     }
 
     function buyApesFree(uint256 _apesQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_apesQty, freeMaxApesPerWallet) apesAvailable(_apesQty) {
-        require(_totalMinted() < freeApes, "Max free limit reached");
+        require(_totalMinted() <= freeApes, "Max free limit reached");
 
         _mint(msg.sender, _apesQty);
     }
@@ -42,6 +46,10 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
 
     function setFreeApes(uint256 _freeApes) external onlyOwner {
         freeApes = _freeApes;
+    }
+
+    function setReservedApes(uint256 _reservedApes) external onlyOwner {
+        reservedApes = _reservedApes;
     }
 
     function setMaxApesPerWallet(uint256 _maxApesPerWallet, uint256 _freeMaxApesPerWallet) external onlyOwner {
@@ -59,6 +67,7 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
     }
 
     function giftApes(address[] calldata _sendNftsTo, uint256 _apesQty) external onlyOwner apesAvailable(_sendNftsTo.length * _apesQty) {
+        reservedApes -= _sendNftsTo.length * _apesQty;
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _apesQty);
     }
 
@@ -82,7 +91,7 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
     }
 
     modifier apesAvailable(uint256 _apesQty) {
-        require(_apesQty + totalSupply() <= maxSupply, "Sorry, we are sold out");
+        require(_apesQty + totalSupply() + reservedApes <= maxSupply, "Sorry, we are sold out");
         _;
     }
 

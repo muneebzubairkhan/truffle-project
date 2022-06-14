@@ -1,3 +1,10 @@
+### notes
+Total supply: 8,888
+Free mint: 2,000 (max 2x wallet)
+Public mint: 6000 at 0.0069 eth (max 10x wallet)
+Reserved 4 the team: 888
+$10.000 raffle: just 4 one lucky ape!
+
 ### Store Room
 
 let nft = await Nft.deployed('');
