@@ -5,6 +5,7 @@ pragma solidity 0.8.14;
 import "erc721a@3.3.0/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "erc721aa@3.3.0/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
@@ -12,7 +13,7 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable, ERC2981 {
+contract WitchTownSale is ERC721A("Witch Town", "WT"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public freeMint = 4000;
     uint256 public freeMaxPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
