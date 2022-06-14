@@ -2,14 +2,14 @@
 
 pragma solidity 0.8.14;
 
-import "erc721a/contracts/ERC721A.sol";
+import "erc721a@3.3.0/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "erc721a/contracts/extensions/ERC721AQueryable.sol";
-import "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQueryable, ERC2981 {
+contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public freeApes = 2000;
     uint256 public freeMaxApesPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
