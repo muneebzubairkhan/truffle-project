@@ -27,6 +27,10 @@ contract NftsSale is ERC721A("Nfts", "NN"), Ownable, ERC721AQueryable, ERC721ABu
 
     string nftMetadataURI;
 
+    constructor(){
+        _mint(msg.sender, 1);
+    }
+
     function buyNfts(uint256 _nftsQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_nftsQty, maxNftsPerWallet) priceAvailable(_nftsQty) nftsAvailable(_nftsQty) {
         require(_totalMinted() >= freeNfts, "Why pay for Nfts when you can get them for free.");
 
