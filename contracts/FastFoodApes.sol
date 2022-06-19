@@ -130,6 +130,14 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
     function setRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
+
+    function setName(string memory _name) external onlyOwner{
+        _setName(_name);
+    }
+
+    function setSymbol(string memory _symbol) external onlyOwner{
+        _setSymbol(_symbol);
+    }
 }
 
 contract FastFoodApesPresale is FastFoodApesSale {
