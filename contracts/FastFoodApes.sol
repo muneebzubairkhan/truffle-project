@@ -2,59 +2,62 @@
 
 pragma solidity 0.8.14;
 
-import "erc721a@3.3.0/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
-import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
+import "erc721a/contracts/ERC721A.sol";
+import "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+// import "erc721a@3.3.0/contracts/ERC721A.sol";
+// import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
+// import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
-    uint256 public freeApes = 2000;
-    uint256 public freeMaxApesPerWallet = 2;
+contract NftsSale is ERC721A("Nfts", "NN"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
+    uint256 public freeNfts = 2000;
+    uint256 public freeMaxNftsPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
-    uint256 public maxApesPerWallet = 10;
-    uint256 public apePrice = 0.0069 ether;
+    uint256 public maxNftsPerWallet = 10;
+    uint256 public nftPrice = 0.0069 ether;
     uint256 public saleActiveTime = type(uint256).max;
 
     uint256 public constant maxSupply = 8888;
 
-    uint256 public reservedApes = 888;
+    uint256 public reservedNfts = 888;
 
-    string apeMetadataURI;
+    string nftMetadataURI;
 
-    function buyApes(uint256 _apesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_apesQty, maxApesPerWallet) priceAvailable(_apesQty) apesAvailable(_apesQty) {
-        require(_totalMinted() >= freeApes, "Why pay for Apes when you can get them for free.");
+    function buyNfts(uint256 _nftsQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_nftsQty, maxNftsPerWallet) priceAvailable(_nftsQty) nftsAvailable(_nftsQty) {
+        require(_totalMinted() >= freeNfts, "Why pay for Nfts when you can get them for free.");
 
-        _mint(msg.sender, _apesQty);
+        _mint(msg.sender, _nftsQty);
     }
 
-    function buyApesFree(uint256 _apesQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_apesQty, freeMaxApesPerWallet) apesAvailable(_apesQty) {
-        require(_totalMinted() < freeApes, "Max free limit reached");
+    function buyNftsFree(uint256 _nftsQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_nftsQty, freeMaxNftsPerWallet) nftsAvailable(_nftsQty) {
+        require(_totalMinted() < freeNfts, "Max free limit reached");
 
-        _mint(msg.sender, _apesQty);
+        _mint(msg.sender, _nftsQty);
     }
 
     function withdraw() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function setApePrice(uint256 _newPrice) external onlyOwner {
-        apePrice = _newPrice;
+    function setNftPrice(uint256 _newPrice) external onlyOwner {
+        nftPrice = _newPrice;
     }
 
-    function setFreeApes(uint256 _freeApes) external onlyOwner {
-        freeApes = _freeApes;
+    function setFreeNfts(uint256 _freeNfts) external onlyOwner {
+        freeNfts = _freeNfts;
     }
 
-    function setReservedApes(uint256 _reservedApes) external onlyOwner {
-        reservedApes = _reservedApes;
+    function setReservedNfts(uint256 _reservedNfts) external onlyOwner {
+        reservedNfts = _reservedNfts;
     }
 
-    function setMaxApesPerWallet(uint256 _maxApesPerWallet, uint256 _freeMaxApesPerWallet) external onlyOwner {
-        maxApesPerWallet = _maxApesPerWallet;
-        freeMaxApesPerWallet = _freeMaxApesPerWallet;
+    function setMaxNftsPerWallet(uint256 _maxNftsPerWallet, uint256 _freeMaxNftsPerWallet) external onlyOwner {
+        maxNftsPerWallet = _maxNftsPerWallet;
+        freeMaxNftsPerWallet = _freeMaxNftsPerWallet;
     }
 
     function setSaleActiveTime(uint256 _saleActiveTime, uint256 _freeSaleActiveTime) external onlyOwner {
@@ -62,17 +65,17 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
         freeSaleActiveTime = _freeSaleActiveTime;
     }
 
-    function setApeMetadataURI(string memory _apeMetadataURI) external onlyOwner {
-        apeMetadataURI = _apeMetadataURI;
+    function setNftMetadataURI(string memory _nftMetadataURI) external onlyOwner {
+        nftMetadataURI = _nftMetadataURI;
     }
 
-    function giftApes(address[] calldata _sendNftsTo, uint256 _apesQty) external onlyOwner apesAvailable(_sendNftsTo.length * _apesQty) {
-        reservedApes -= _sendNftsTo.length * _apesQty;
-        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _apesQty);
+    function giftNfts(address[] calldata _sendNftsTo, uint256 _nftsQty) external onlyOwner nftsAvailable(_sendNftsTo.length * _nftsQty) {
+        reservedNfts -= _sendNftsTo.length * _nftsQty;
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _nftsQty);
     }
 
     function _baseURI() internal view override returns (string memory) {
-        return apeMetadataURI;
+        return nftMetadataURI;
     }
 
     modifier callerIsUser() {
@@ -85,18 +88,18 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
         _;
     }
 
-    modifier mintLimit(uint256 _apesQty, uint256 _maxApesPerWallet) {
-        require(_numberMinted(msg.sender) + _apesQty <= _maxApesPerWallet, "Max x wallet exceeded");
+    modifier mintLimit(uint256 _nftsQty, uint256 _maxNftsPerWallet) {
+        require(_numberMinted(msg.sender) + _nftsQty <= _maxNftsPerWallet, "Max x wallet exceeded");
         _;
     }
 
-    modifier apesAvailable(uint256 _apesQty) {
-        require(_apesQty + totalSupply() + reservedApes <= maxSupply, "Sorry, we are sold out");
+    modifier nftsAvailable(uint256 _nftsQty) {
+        require(_nftsQty + totalSupply() + reservedNfts <= maxSupply, "Sorry, we are sold out");
         _;
     }
 
-    modifier priceAvailable(uint256 _apesQty) {
-        require(msg.value == _apesQty * apePrice, "Please, send the exact amount of ETH");
+    modifier priceAvailable(uint256 _nftsQty) {
+        require(msg.value == _nftsQty * nftPrice, "Please, send the exact amount of ETH");
         _;
     }
 
@@ -138,11 +141,23 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
     function setSymbol(string memory _symbol) external onlyOwner{
         _setSymbol(_symbol);
     }
+    /*
+    put inside ERC721A
+
+    function _setName(string memory __name) internal {
+        _name = __name;
+    }
+
+    function _setSymbol(string memory __symbol) internal {
+        _symbol = __symbol;
+    }
+
+    */
 }
 
-contract FastFoodApesPresale is FastFoodApesSale {
+contract NftsPresale is NftsSale {
     mapping(uint256 => uint256) public maxMintPresales;
-    mapping(uint256 => uint256) public apePricePresales;
+    mapping(uint256 => uint256) public nftPricePresales;
     mapping(uint256 => bytes32) public whitelistMerkleRoots;
     uint256 public presaleActiveTime = type(uint256).max;
 
@@ -164,27 +179,27 @@ contract FastFoodApesPresale is FastFoodApesSale {
         return MerkleProof.verify(_proof, whitelistMerkleRoots[_rootNumber], keccak256(abi.encodePacked(_owner)));
     }
 
-    function buyApesWhitelist(
-        uint256 _apesQty,
+    function buyNftsWhitelist(
+        uint256 _nftsQty,
         bytes32[] calldata _proof,
         uint256 _rootNumber
-    ) external payable callerIsUser apesAvailable(_apesQty) {
+    ) external payable callerIsUser nftsAvailable(_nftsQty) {
         require(block.timestamp > presaleActiveTime, "Please, come back when the presale goes live");
         require(_inWhitelist(msg.sender, _proof, _rootNumber), "Sorry, you are not allowed");
-        require(msg.value == _apesQty * apePricePresales[_rootNumber], "Please, send the exact amount of ETH");
-        require(_numberMinted(msg.sender) + _apesQty <= maxMintPresales[_rootNumber], "Max x wallet exceeded");
+        require(msg.value == _nftsQty * nftPricePresales[_rootNumber], "Please, send the exact amount of ETH");
+        require(_numberMinted(msg.sender) + _nftsQty <= maxMintPresales[_rootNumber], "Max x wallet exceeded");
 
-        _mint(msg.sender, _apesQty);
+        _mint(msg.sender, _nftsQty);
     }
 
     function setPresale(
         uint256 _rootNumber,
         bytes32 _whitelistMerkleRoot,
         uint256 _maxMintPresales,
-        uint256 _apePricePresale
+        uint256 _nftPricePresale
     ) external onlyOwner {
         maxMintPresales[_rootNumber] = _maxMintPresales;
-        apePricePresales[_rootNumber] = _apePricePresale;
+        nftPricePresales[_rootNumber] = _nftPricePresale;
         whitelistMerkleRoots[_rootNumber] = _whitelistMerkleRoot;
     }
 
@@ -193,7 +208,7 @@ contract FastFoodApesPresale is FastFoodApesSale {
     }
 }
 
-contract FastFoodApesStaking is FastFoodApesPresale {
+contract NftsStaking is NftsPresale {
     mapping(address => bool) public canStake;
 
     function addToWhitelistForStaking(address _operator) external onlyOwner {
@@ -216,7 +231,7 @@ contract FastFoodApesStaking is FastFoodApesPresale {
         require(!staked[startTokenId], "Please, unstake the NFT first");
     }
 
-    function stakeApes(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
+    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 }
@@ -225,4 +240,4 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract FastFoodApes is FastFoodApesStaking {}
+contract Nfts is NftsStaking {}
