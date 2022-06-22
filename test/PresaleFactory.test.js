@@ -5,6 +5,8 @@ contract("Nft", async ([owner, client, parentCompany]) => {
     //
     let smartContract = await SmartContract.new({ from: owner });
     console.log(owner === (await smartContract.owner()));
+    console.log("" + (await smartContract.getFromToBlock())[0]);
+    console.log("" + (await smartContract.getFromToBlock())[1]);
     // await smartContract.purchaseTokens(1, { value: toWei("0.025"), from: client });
   });
 });
