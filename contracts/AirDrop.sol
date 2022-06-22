@@ -11,7 +11,7 @@ interface IERC20 {
 }
 
 contract AirDrop {
-    address owner = msg.sender;
+    address public owner = msg.sender;
 
     function airdropERC20(
         IERC20 _token,
