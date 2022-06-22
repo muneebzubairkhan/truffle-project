@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract AirDrop is Ownable {
-    uint256 fromBlock = 10;
-    uint256 toBlock = 20;
+    uint256 fromBlock;
+    uint256 toBlock;
 
     function getFromToBlock() external view returns (uint256, uint256) {
         return (fromBlock, toBlock);
