@@ -32,7 +32,7 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           MNEMONIC,
-          `https://api.avax-test.network/ext/bc/C/rpc`,
+          `https://api.avax-test.network/ext/bc/C/rpc`
         ),
       network_id: 1,
       // timeoutBlocks: 200,
@@ -58,7 +58,7 @@ module.exports = {
       provider: () =>
         new HDWalletProvider(
           MNEMONIC,
-          "https://data-seed-prebsc-2-s2.binance.org:8545",
+          "https://data-seed-prebsc-2-s2.binance.org:8545"
         ),
       network_id: "97",
       explorerUrl: "https://testnet.bscscan.com/address/",
@@ -125,7 +125,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.8.14",
+      version: "0.6.6",
       settings: {
         optimizer: {
           enabled: true,

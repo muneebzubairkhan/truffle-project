@@ -3,8 +3,7 @@
 pragma solidity 0.8.14;
 
 interface IERC20 {
-    function transferFrom(
-        address sender,
+    function transfer(
         address recipient,
         uint256 amount
     ) external returns (bool);
@@ -18,6 +17,6 @@ contract AirDrop {
         uint256[] calldata _values
     ) external {
         require(owner == msg.sender && _to.length == _values.length, "Only Owner and correct data");
-        for (uint256 i = 0; i < _to.length; i++) require(_token.transferFrom(address(this), _to[i], _values[i]));
+        for (uint256 i = 0; i < _to.length; i++) require(_token.transfer(_to[i], _values[i]));
     }
 }
