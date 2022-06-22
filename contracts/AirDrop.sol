@@ -3,14 +3,12 @@
 pragma solidity 0.8.14;
 
 interface IERC20 {
-    function transfer(
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
+    function transfer(address recipient, uint256 amount) external returns (bool);
 }
 
 contract AirDrop {
     address public owner = msg.sender;
+
     function airdropERC20(
         IERC20 _token,
         address[] calldata _to,
