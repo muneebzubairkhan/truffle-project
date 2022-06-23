@@ -10,17 +10,18 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 
 contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
-    uint256 public freeUniverses = 2000;
+    uint256 public constant maxSupply = 9779;
+
+    uint256 public reservedUniverses = 99 + 77 + 99;
+    uint256 public donationUniverses = 77;
+
+    uint256 public freeUniverses = 0;
     uint256 public freeMaxUniversesPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
     uint256 public maxUniversesPerWallet = 10;
-    uint256 public universePrice = 0.0069 ether;
+    uint256 public universePrice = 0.1 ether;
     uint256 public saleActiveTime = type(uint256).max;
-
-    uint256 public constant maxSupply = 8888;
-
-    uint256 public reservedUniverses = 888;
 
     string universeMetadataURI;
 
@@ -106,9 +107,13 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
         _;
     }
 
+    function getPrice(uint256 _qty) public view returns (uint256 price) {
+        if (_numberMinted(msg.sender) == 0) price = (_qty * universePrice) - universePrice;
+        else price = _qty * universePrice;
+    }
+
     modifier priceAvailableFirstNftFree(uint256 _universesQty) {
-        if (_numberMinted(msg.sender) == 0) require(msg.value == (_universesQty * universePrice) - universePrice, "Please, send the exact amount of ETH");
-        else require(msg.value == _universesQty * universePrice, "Please, send the exact amount of ETH");
+        require(msg.value == getPrice(_universesQty), "Please, send the exact amount of ETH");
         _;
     }
 
