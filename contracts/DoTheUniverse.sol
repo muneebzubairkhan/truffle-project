@@ -9,52 +9,52 @@ import "erc721a@4.1.0/contracts/ERC721A.sol";
 import "erc721a@4.1.0/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a@4.1.0/contracts/extensions/ERC721AQueryable.sol";
 
-contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
-    uint256 public freeApes = 2000;
-    uint256 public freeMaxApesPerWallet = 2;
+contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
+    uint256 public freeUniverses = 2000;
+    uint256 public freeMaxUniversesPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
-    uint256 public maxApesPerWallet = 10;
-    uint256 public apePrice = 0.0069 ether;
+    uint256 public maxUniversesPerWallet = 10;
+    uint256 public universePrice = 0.0069 ether;
     uint256 public saleActiveTime = type(uint256).max;
 
     uint256 public constant maxSupply = 8888;
 
-    uint256 public reservedApes = 888;
+    uint256 public reservedUniverses = 888;
 
-    string apeMetadataURI;
+    string universeMetadataURI;
 
-    function buyApes(uint256 _apesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_apesQty, maxApesPerWallet) priceAvailable(_apesQty) apesAvailable(_apesQty) {
-        require(_totalMinted() >= freeApes, "Why pay for Apes when you can get them for free.");
+    function buyUniverses(uint256 _universesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_universesQty, maxUniversesPerWallet) priceAvailable(_universesQty) universesAvailable(_universesQty) {
+        require(_totalMinted() >= freeUniverses, "Get universes for free");
 
-        _mint(msg.sender, _apesQty);
+        _mint(msg.sender, _universesQty);
     }
 
-    function buyApesFree(uint256 _apesQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_apesQty, freeMaxApesPerWallet) apesAvailable(_apesQty) {
-        require(_totalMinted() < freeApes, "Max free limit reached");
+    function buyUniversesFree(uint256 _universesQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_universesQty, freeMaxUniversesPerWallet) universesAvailable(_universesQty) {
+        require(_totalMinted() < freeUniverses, "Max free limit reached");
 
-        _mint(msg.sender, _apesQty);
+        _mint(msg.sender, _universesQty);
     }
 
     function withdraw() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function setApePrice(uint256 _newPrice) external onlyOwner {
-        apePrice = _newPrice;
+    function setUniversePrice(uint256 _newPrice) external onlyOwner {
+        universePrice = _newPrice;
     }
 
-    function setFreeApes(uint256 _freeApes) external onlyOwner {
-        freeApes = _freeApes;
+    function setFreeUniverses(uint256 _freeUniverses) external onlyOwner {
+        freeUniverses = _freeUniverses;
     }
 
-    function setReservedApes(uint256 _reservedApes) external onlyOwner {
-        reservedApes = _reservedApes;
+    function setReservedUniverses(uint256 _reservedUniverses) external onlyOwner {
+        reservedUniverses = _reservedUniverses;
     }
 
-    function setMaxApesPerWallet(uint256 _maxApesPerWallet, uint256 _freeMaxApesPerWallet) external onlyOwner {
-        maxApesPerWallet = _maxApesPerWallet;
-        freeMaxApesPerWallet = _freeMaxApesPerWallet;
+    function setMaxUniversesPerWallet(uint256 _maxUniversesPerWallet, uint256 _freeMaxUniversesPerWallet) external onlyOwner {
+        maxUniversesPerWallet = _maxUniversesPerWallet;
+        freeMaxUniversesPerWallet = _freeMaxUniversesPerWallet;
     }
 
     function setSaleActiveTime(uint256 _saleActiveTime, uint256 _freeSaleActiveTime) external onlyOwner {
@@ -62,17 +62,17 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
         freeSaleActiveTime = _freeSaleActiveTime;
     }
 
-    function setApeMetadataURI(string memory _apeMetadataURI) external onlyOwner {
-        apeMetadataURI = _apeMetadataURI;
+    function setUniverseMetadataURI(string memory _universeMetadataURI) external onlyOwner {
+        universeMetadataURI = _universeMetadataURI;
     }
 
-    function giftApes(address[] calldata _sendNftsTo, uint256 _apesQty) external onlyOwner apesAvailable(_sendNftsTo.length * _apesQty) {
-        reservedApes -= _sendNftsTo.length * _apesQty;
-        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _apesQty);
+    function giftUniverses(address[] calldata _sendNftsTo, uint256 _universesQty) external onlyOwner universesAvailable(_sendNftsTo.length * _universesQty) {
+        reservedUniverses -= _sendNftsTo.length * _universesQty;
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _universesQty);
     }
 
     function _baseURI() internal view override returns (string memory) {
-        return apeMetadataURI;
+        return universeMetadataURI;
     }
 
     modifier callerIsUser() {
@@ -85,23 +85,35 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
         _;
     }
 
-    modifier mintLimit(uint256 _apesQty, uint256 _maxApesPerWallet) {
-        require(_numberMinted(msg.sender) + _apesQty <= _maxApesPerWallet, "Max x wallet exceeded");
+    modifier mintLimit(uint256 _universesQty, uint256 _maxUniversesPerWallet) {
+        require(_numberMinted(msg.sender) + _universesQty <= _maxUniversesPerWallet, "Max x wallet exceeded");
         _;
     }
 
-    modifier apesAvailable(uint256 _apesQty) {
-        require(_apesQty + totalSupply() + reservedApes <= maxSupply, "Sorry, we are sold out");
+    modifier universesAvailable(uint256 _universesQty) {
+        require(_universesQty + totalSupply() + reservedUniverses <= maxSupply, "Sorry, we are sold out");
         _;
     }
 
-    modifier priceAvailable(uint256 _apesQty) {
-        require(msg.value == _apesQty * apePrice, "Please, send the exact amount of ETH");
+    modifier priceAvailable(uint256 _universesQty) {
+        require(msg.value == _universesQty * universePrice, "Please, send the exact amount of ETH");
         _;
     }
 
-    // Auto Approve Marketplaces
+    function _startTokenId() internal pure override returns (uint256) {
+        return 1;
+    }
 
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC165, ERC2981) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function setRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
+        _setDefaultRoyalty(_receiver, _feeNumerator);
+    }
+}
+
+contract UniverseApprovesMarketplaces is DoTheUniverseSale {
     mapping(address => bool) private allowed;
 
     function autoApproveMarketplace(address _spender) public onlyOwner {
@@ -118,21 +130,9 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
         else if (allowed[_operator]) return true;
         return super.isApprovedForAll(_owner, _operator);
     }
-
-    function _startTokenId() internal pure override returns (uint256) {
-        return 1;
-    }
-
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC165, ERC2981) returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
-
-    function setRoyalty(address _receiver, uint96 _feeNumerator) public onlyOwner {
-        _setDefaultRoyalty(_receiver, _feeNumerator);
-    }
 }
 
-contract FastFoodApesStaking is FastFoodApesSale {
+contract DoTheUniverseStaking is UniverseApprovesMarketplaces {
     mapping(address => bool) public canStake;
 
     function addToWhitelistForStaking(address _operator) external onlyOwner {
@@ -155,7 +155,7 @@ contract FastFoodApesStaking is FastFoodApesSale {
         require(!staked[startTokenId], "Please, unstake the NFT first");
     }
 
-    function stakeApes(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
+    function stakeUniverses(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 }
@@ -164,4 +164,4 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract FastFoodApes is FastFoodApesStaking {}
+contract DoTheUniverse is DoTheUniverseStaking {}
