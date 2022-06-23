@@ -5,9 +5,9 @@ pragma solidity 0.8.14;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
-import "erc721a@4.1.0/contracts/ERC721A.sol";
-import "erc721a@4.1.0/contracts/extensions/ERC721ABurnable.sol";
-import "erc721a@4.1.0/contracts/extensions/ERC721AQueryable.sol";
+import "erc721a/contracts/ERC721A.sol";
+import "erc721a/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 
 contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public freeUniverses = 2000;
@@ -24,7 +24,13 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
 
     string universeMetadataURI;
 
-    function buyUniverses(uint256 _universesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_universesQty, maxUniversesPerWallet) priceAvailable(_universesQty) universesAvailable(_universesQty) {
+    // function buyUniverses(uint256 _universesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_universesQty, maxUniversesPerWallet) priceAvailable(_universesQty) universesAvailable(_universesQty) {
+    //     require(_totalMinted() >= freeUniverses, "Get universes for free");
+
+    //     _mint(msg.sender, _universesQty);
+    // }
+
+    function buyUniverses(uint256 _universesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_universesQty, maxUniversesPerWallet) priceAvailableFirstNftFree(_universesQty) universesAvailable(_universesQty) {
         require(_totalMinted() >= freeUniverses, "Get universes for free");
 
         _mint(msg.sender, _universesQty);
@@ -97,6 +103,12 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
 
     modifier priceAvailable(uint256 _universesQty) {
         require(msg.value == _universesQty * universePrice, "Please, send the exact amount of ETH");
+        _;
+    }
+
+    modifier priceAvailableFirstNftFree(uint256 _universesQty) {
+        if (_numberMinted(msg.sender) == 0) require(msg.value == (_universesQty * universePrice) - universePrice, "Please, send the exact amount of ETH");
+        else require(msg.value == _universesQty * universePrice, "Please, send the exact amount of ETH");
         _;
     }
 
