@@ -56,6 +56,7 @@ i need it fast within 24 hours can u do it?
 ### todo
     * test for participants
 
+
 ### Client Requirements
 
 The Vault:
@@ -82,3 +83,27 @@ The size of the ICO which needs to be reached before the token launch, should ma
 
 Security:
 Design contracts to be safe and secure, backend would also need to be safe from attack as well.
+
+
+# store:
+
+
+const _Contract_1_ = artifacts.require("_Contract_1_");
+only run migrations on development network for seeing gas fee on mainnet
+telegram @thinkmuneeb
+
+if (network !== "development") return;
+
+await deployer.deploy(Migrations);
+try {
+  // await deployer.deploy(_Contract_1_);
+
+  // const _2 = artifacts.require("_2");
+  // const __2 = await deployer.deploy(_2);
+
+  // const _3 = artifacts.require("_3");
+  // const __3 = await deployer.deploy(_3);
+} catch (e) {
+  e && console.log(e.message);
+}
+console.log(JSON.stringify({ contracts }, null, 4));
