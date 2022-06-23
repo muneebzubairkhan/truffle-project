@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.14;
 
-import "erc721a@3.3.0/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
-import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+
+import "erc721a@4.1.0/contracts/ERC721A.sol";
+import "erc721a@4.1.0/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a@4.1.0/contracts/extensions/ERC721AQueryable.sol";
 
 contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public freeApes = 2000;
@@ -132,60 +132,7 @@ contract FastFoodApesSale is ERC721A("Fast Food Apes", "FFA"), Ownable, ERC721AQ
     }
 }
 
-contract FastFoodApesPresale is FastFoodApesSale {
-    mapping(uint256 => uint256) public maxMintPresales;
-    mapping(uint256 => uint256) public apePricePresales;
-    mapping(uint256 => bytes32) public whitelistMerkleRoots;
-    uint256 public presaleActiveTime = type(uint256).max;
-
-    function inWhitelist(
-        address _owner,
-        bytes32[] memory _proof,
-        uint256 _from,
-        uint256 _to
-    ) external view returns (uint256) {
-        for (uint256 i = _from; i < _to; i++) if (_inWhitelist(_owner, _proof, i)) return i;
-        return type(uint256).max;
-    }
-
-    function _inWhitelist(
-        address _owner,
-        bytes32[] memory _proof,
-        uint256 _rootNumber
-    ) private view returns (bool) {
-        return MerkleProof.verify(_proof, whitelistMerkleRoots[_rootNumber], keccak256(abi.encodePacked(_owner)));
-    }
-
-    function buyApesWhitelist(
-        uint256 _apesQty,
-        bytes32[] calldata _proof,
-        uint256 _rootNumber
-    ) external payable callerIsUser apesAvailable(_apesQty) {
-        require(block.timestamp > presaleActiveTime, "Please, come back when the presale goes live");
-        require(_inWhitelist(msg.sender, _proof, _rootNumber), "Sorry, you are not allowed");
-        require(msg.value == _apesQty * apePricePresales[_rootNumber], "Please, send the exact amount of ETH");
-        require(_numberMinted(msg.sender) + _apesQty <= maxMintPresales[_rootNumber], "Max x wallet exceeded");
-
-        _mint(msg.sender, _apesQty);
-    }
-
-    function setPresale(
-        uint256 _rootNumber,
-        bytes32 _whitelistMerkleRoot,
-        uint256 _maxMintPresales,
-        uint256 _apePricePresale
-    ) external onlyOwner {
-        maxMintPresales[_rootNumber] = _maxMintPresales;
-        apePricePresales[_rootNumber] = _apePricePresale;
-        whitelistMerkleRoots[_rootNumber] = _whitelistMerkleRoot;
-    }
-
-    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
-        presaleActiveTime = _presaleActiveTime;
-    }
-}
-
-contract FastFoodApesStaking is FastFoodApesPresale {
+contract FastFoodApesStaking is FastFoodApesSale {
     mapping(address => bool) public canStake;
 
     function addToWhitelistForStaking(address _operator) external onlyOwner {
