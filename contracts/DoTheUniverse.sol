@@ -2,66 +2,66 @@
 
 pragma solidity 0.8.14;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/common/ERC2981.sol";
-
 import "erc721a/contracts/ERC721A.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 
-contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/common/ERC2981.sol";
+
+contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public constant maxSupply = 9779;
 
-    uint256 public reservedUniverses = 99 + 77 + 99;
-    uint256 public donationUniverses = 77;
+    uint256 public reservedHodlerz = 99 + 77 + 99;
+    uint256 public donationHodlerz = 77;
 
-    uint256 public freeUniverses = 0;
-    uint256 public freeMaxUniversesPerWallet = 2;
+    uint256 public freeHodlerz = 0;
+    uint256 public freeMaxHodlerzPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
-    uint256 public maxUniversesPerWallet = 10;
-    uint256 public universePrice = 0.1 ether;
+    uint256 public maxHodlerzPerWallet = 10;
+    uint256 public hodlerPrice = 0.1 ether;
     uint256 public saleActiveTime = type(uint256).max;
 
-    string universeMetadataURI;
+    string hodlerMetadataURI;
 
-    // function buyUniverses(uint256 _universesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_universesQty, maxUniversesPerWallet) priceAvailable(_universesQty) universesAvailable(_universesQty) {
-    //     require(_totalMinted() >= freeUniverses, "Get universes for free");
+    // function buyHodlerz(uint256 _hodlerzQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_hodlerzQty, maxHodlerzPerWallet) priceAvailable(_hodlerzQty) hodlerzAvailable(_hodlerzQty) {
+    //     require(_totalMinted() >= freeHodlerz, "Get hodlerz for free");
 
-    //     _mint(msg.sender, _universesQty);
+    //     _mint(msg.sender, _hodlerzQty);
     // }
 
-    function buyUniverses(uint256 _universesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_universesQty, maxUniversesPerWallet) priceAvailableFirstNftFree(_universesQty) universesAvailable(_universesQty) {
-        require(_totalMinted() >= freeUniverses, "Get universes for free");
+    function buyHodlerz(uint256 _hodlerzQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_hodlerzQty, maxHodlerzPerWallet) priceAvailableFirstNftFree(_hodlerzQty) hodlerzAvailable(_hodlerzQty) {
+        require(_totalMinted() >= freeHodlerz, "Get hodlerz for free");
 
-        _mint(msg.sender, _universesQty);
+        _mint(msg.sender, _hodlerzQty);
     }
 
-    function buyUniversesFree(uint256 _universesQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_universesQty, freeMaxUniversesPerWallet) universesAvailable(_universesQty) {
-        require(_totalMinted() < freeUniverses, "Max free limit reached");
+    function buyHodlerzFree(uint256 _hodlerzQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_hodlerzQty, freeMaxHodlerzPerWallet) hodlerzAvailable(_hodlerzQty) {
+        require(_totalMinted() < freeHodlerz, "Max free limit reached");
 
-        _mint(msg.sender, _universesQty);
+        _mint(msg.sender, _hodlerzQty);
     }
 
     function withdraw() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function setUniversePrice(uint256 _newPrice) external onlyOwner {
-        universePrice = _newPrice;
+    function setHodlerPrice(uint256 _newPrice) external onlyOwner {
+        hodlerPrice = _newPrice;
     }
 
-    function setFreeUniverses(uint256 _freeUniverses) external onlyOwner {
-        freeUniverses = _freeUniverses;
+    function setFreeHodlerz(uint256 _freeHodlerz) external onlyOwner {
+        freeHodlerz = _freeHodlerz;
     }
 
-    function setReservedUniverses(uint256 _reservedUniverses) external onlyOwner {
-        reservedUniverses = _reservedUniverses;
+    function setReservedHodlerz(uint256 _reservedHodlerz) external onlyOwner {
+        reservedHodlerz = _reservedHodlerz;
     }
 
-    function setMaxUniversesPerWallet(uint256 _maxUniversesPerWallet, uint256 _freeMaxUniversesPerWallet) external onlyOwner {
-        maxUniversesPerWallet = _maxUniversesPerWallet;
-        freeMaxUniversesPerWallet = _freeMaxUniversesPerWallet;
+    function setMaxHodlerzPerWallet(uint256 _maxHodlerzPerWallet, uint256 _freeMaxHodlerzPerWallet) external onlyOwner {
+        maxHodlerzPerWallet = _maxHodlerzPerWallet;
+        freeMaxHodlerzPerWallet = _freeMaxHodlerzPerWallet;
     }
 
     function setSaleActiveTime(uint256 _saleActiveTime, uint256 _freeSaleActiveTime) external onlyOwner {
@@ -69,17 +69,17 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
         freeSaleActiveTime = _freeSaleActiveTime;
     }
 
-    function setUniverseMetadataURI(string memory _universeMetadataURI) external onlyOwner {
-        universeMetadataURI = _universeMetadataURI;
+    function setHodlerMetadataURI(string memory _hodlerMetadataURI) external onlyOwner {
+        hodlerMetadataURI = _hodlerMetadataURI;
     }
 
-    function giftUniverses(address[] calldata _sendNftsTo, uint256 _universesQty) external onlyOwner universesAvailable(_sendNftsTo.length * _universesQty) {
-        reservedUniverses -= _sendNftsTo.length * _universesQty;
-        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _universesQty);
+    function giftHodlerz(address[] calldata _sendNftsTo, uint256 _hodlerzQty) external onlyOwner hodlerzAvailable(_sendNftsTo.length * _hodlerzQty) {
+        reservedHodlerz -= _sendNftsTo.length * _hodlerzQty;
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _hodlerzQty);
     }
 
     function _baseURI() internal view override returns (string memory) {
-        return universeMetadataURI;
+        return hodlerMetadataURI;
     }
 
     modifier callerIsUser() {
@@ -88,32 +88,32 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
     }
 
     modifier saleActive(uint256 _saleActiveTime) {
-        require(block.timestamp > _saleActiveTime, "Please, come back when the sale goes live");
+        require(block.timestamp > _saleActiveTime, "Hodler please, come back when the sale goes live");
         _;
     }
 
-    modifier mintLimit(uint256 _universesQty, uint256 _maxUniversesPerWallet) {
-        require(_numberMinted(msg.sender) + _universesQty <= _maxUniversesPerWallet, "Max x wallet exceeded");
+    modifier mintLimit(uint256 _hodlerzQty, uint256 _maxHodlerzPerWallet) {
+        require(_numberMinted(msg.sender) + _hodlerzQty <= _maxHodlerzPerWallet, "Max x wallet exceeded");
         _;
     }
 
-    modifier universesAvailable(uint256 _universesQty) {
-        require(_universesQty + totalSupply() + reservedUniverses <= maxSupply, "Sorry, we are sold out");
+    modifier hodlerzAvailable(uint256 _hodlerzQty) {
+        require(_hodlerzQty + totalSupply() + reservedHodlerz <= maxSupply, "Sorry, we are sold out");
         _;
     }
 
-    modifier priceAvailable(uint256 _universesQty) {
-        require(msg.value == _universesQty * universePrice, "Please, send the exact amount of ETH");
+    modifier priceAvailable(uint256 _hodlerzQty) {
+        require(msg.value == _hodlerzQty * hodlerPrice, "Please, send the exact amount of ETH");
         _;
     }
 
     function getPrice(uint256 _qty) public view returns (uint256 price) {
-        if (_numberMinted(msg.sender) == 0) price = (_qty * universePrice) - universePrice;
-        else price = _qty * universePrice;
+        if (_numberMinted(msg.sender) == 0) price = (_qty * hodlerPrice) - hodlerPrice;
+        else price = _qty * hodlerPrice;
     }
 
-    modifier priceAvailableFirstNftFree(uint256 _universesQty) {
-        require(msg.value == getPrice(_universesQty), "Please, send the exact amount of ETH");
+    modifier priceAvailableFirstNftFree(uint256 _hodlerzQty) {
+        require(msg.value == getPrice(_hodlerzQty), "Please, send the exact amount of ETH");
         _;
     }
 
@@ -130,7 +130,7 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
     }
 }
 
-contract UniverseApprovesMarketplaces is DoTheUniverseSale {
+contract HodlerApprovesMarketplaces is TheHodlerzSale {
     mapping(address => bool) private allowed;
 
     function autoApproveMarketplace(address _spender) public onlyOwner {
@@ -149,7 +149,7 @@ contract UniverseApprovesMarketplaces is DoTheUniverseSale {
     }
 }
 
-contract DoTheUniverseStaking is UniverseApprovesMarketplaces {
+contract TheHodlerzStaking is HodlerApprovesMarketplaces {
     mapping(address => bool) public canStake;
 
     function addToWhitelistForStaking(address _operator) external onlyOwner {
@@ -172,7 +172,7 @@ contract DoTheUniverseStaking is UniverseApprovesMarketplaces {
         require(!staked[startTokenId], "Please, unstake the NFT first");
     }
 
-    function stakeUniverses(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
+    function stakeHodlerz(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 }
@@ -181,4 +181,4 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract DoTheUniverse is DoTheUniverseStaking {}
+contract TheHodlerz is TheHodlerzStaking {}
