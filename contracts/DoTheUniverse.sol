@@ -10,28 +10,28 @@ import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 
 contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
-    uint256 public constant maxSupply = 9779;
+    uint256 public constant maxSupply = 7777;
+    uint256 public reservedUniverses = 777;
+    uint256 public maxUniversesPerWallet = 10;
 
-    uint256 public reservedUniverses = 99 + 77 + 99;
-    uint256 public donationUniverses = 77;
-
-    uint256 public freeUniverses = 0;
+    uint256 public freeUniverses = 2777;
     uint256 public freeMaxUniversesPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
-    uint256 public maxUniversesPerWallet = 10;
-    uint256 public universePrice = 0.1 ether;
+    uint256 public universePrice = 0.01 ether;
     uint256 public saleActiveTime = type(uint256).max;
+
+    uint256 public firstFreeSaleActiveTime = type(uint256).max;
 
     string universeMetadataURI;
 
-    // function buyUniverses(uint256 _universesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_universesQty, maxUniversesPerWallet) priceAvailable(_universesQty) universesAvailable(_universesQty) {
-    //     require(_totalMinted() >= freeUniverses, "Get universes for free");
+    function buyUniversesPaid(uint256 _universesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_universesQty, maxUniversesPerWallet) priceAvailable(_universesQty) universesAvailable(_universesQty) {
+        require(_totalMinted() >= freeUniverses, "Get universes for free");
 
-    //     _mint(msg.sender, _universesQty);
-    // }
+        _mint(msg.sender, _universesQty);
+    }
 
-    function buyUniverses(uint256 _universesQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_universesQty, maxUniversesPerWallet) priceAvailableFirstNftFree(_universesQty) universesAvailable(_universesQty) {
+    function buyUniversesFirstFreeRestPaid(uint256 _universesQty) external payable saleActive(firstFreeSaleActiveTime) callerIsUser mintLimit(_universesQty, maxUniversesPerWallet) priceAvailableFirstNftFree(_universesQty) universesAvailable(_universesQty) {
         require(_totalMinted() >= freeUniverses, "Get universes for free");
 
         _mint(msg.sender, _universesQty);
@@ -64,9 +64,14 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
         freeMaxUniversesPerWallet = _freeMaxUniversesPerWallet;
     }
 
-    function setSaleActiveTime(uint256 _saleActiveTime, uint256 _freeSaleActiveTime) external onlyOwner {
+    function setSaleActiveTime(
+        uint256 _saleActiveTime,
+        uint256 _freeSaleActiveTime,
+        uint256 _firstFreeSaleActiveTime
+    ) external onlyOwner {
         saleActiveTime = _saleActiveTime;
         freeSaleActiveTime = _freeSaleActiveTime;
+        firstFreeSaleActiveTime = _firstFreeSaleActiveTime;
     }
 
     function setUniverseMetadataURI(string memory _universeMetadataURI) external onlyOwner {
