@@ -4,15 +4,14 @@ pragma solidity 0.8.14;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-
 import "erc721a/contracts/ERC721A.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 
 contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public constant maxSupply = 7777;
-    uint256 public reservedUniverses = 777;
-    uint256 public maxUniversesPerWallet = 10;
+    uint256 public reservedUniverses = 77;
+    uint256 public maxUniversesPerWallet = 5;
 
     uint256 public freeUniverses = 2777;
     uint256 public freeMaxUniversesPerWallet = 2;
@@ -126,7 +125,7 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
         return 1;
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC721A, ERC2981) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC165, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -142,7 +141,7 @@ contract UniverseApprovesMarketplaces is DoTheUniverseSale {
         allowed[_spender] = !allowed[_spender];
     }
 
-    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721A) returns (bool) {
+    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721) returns (bool) {
         // Opensea, LooksRare, Rarible, X2y2, Any Other Marketplace
 
         if (_operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner)) return true;
