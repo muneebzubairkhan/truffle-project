@@ -12,8 +12,7 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
     uint256 public constant maxSupply = 9779;
 
-    uint256 public reservedHodlerz = 99 + 77 + 99;
-    uint256 public donationHodlerz = 77;
+    uint256 public reservedHodlerz = 779;
 
     uint256 public freeHodlerz = 0;
     uint256 public freeMaxHodlerzPerWallet = 2;
