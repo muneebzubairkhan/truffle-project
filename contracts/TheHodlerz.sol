@@ -17,7 +17,8 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
     uint256 public freeMaxHodlerzPerWallet = 0;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
-    uint256 public maxHodlerzPerWallet = 3;
+    uint256 public firstFreeMints = 2;
+    uint256 public maxHodlerzPerWallet = 5;
     uint256 public hodlerPrice = 0.03 ether;
     uint256 public saleActiveTime = type(uint256).max;
 
@@ -51,6 +52,10 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
 
     function setFreeHodlerz(uint256 _freeHodlerz) external onlyOwner {
         freeHodlerz = _freeHodlerz;
+    }
+    
+    function setFirstFreeMints(uint256 _firstFreeMints) external onlyOwner {
+        firstFreeMints = _firstFreeMints;
     }
 
     function setReservedHodlerz(uint256 _reservedHodlerz) external onlyOwner {
@@ -105,41 +110,40 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
         _;
     }
 
-    uint256 freeMint; // setter onlyOwner
 
     function getPrice(uint256 _qty) public view returns (uint256 price) {
         // uint256 totalPrice = _qty * hodlerPrice;
-        // uint256 discount = freeMint * hodlerPrice;
+        // uint256 discount = firstFreeMints * hodlerPrice;
         // price = totalPrice - discount;
 
         // uint256 totalPrice = _qty * hodlerPrice;
-        // uint discountQty = freeMint - _numberMinted(msg.sender);
+        // uint discountQty = firstFreeMints - _numberMinted(msg.sender);
         // uint256 discount = discountQty * hodlerPrice;
         // price = totalPrice - discount;
 
         // uint256 totalPrice = _qty * hodlerPrice;
         // uint numberMinted = _numberMinted(msg.sender);
-        // uint discountQty = freeMint >  numberMinted ? freeMint - numberMinted: 0;
+        // uint discountQty = firstFreeMints >  numberMinted ? firstFreeMints - numberMinted: 0;
         // uint256 discount = discountQty * hodlerPrice;
         // price = totalPrice - discount;
 
         uint256 totalPrice = _qty * hodlerPrice;
         uint numberMinted = _numberMinted(msg.sender);
-        uint discountQty = freeMint >  numberMinted ? freeMint - numberMinted: 0;
+        uint discountQty = firstFreeMints >  numberMinted ? firstFreeMints - numberMinted: 0;
         uint256 discount = discountQty * hodlerPrice;
         price = totalPrice > discount ? totalPrice - discount: 0;
 
         // uint256 totalPrice = _qty * hodlerPrice;
-        // uint256 discount = freeMint * hodlerPrice;
+        // uint256 discount = firstFreeMints * hodlerPrice;
         // price = totalPrice - discount;
         
-        // uint discountQty = freeMint - 
+        // uint discountQty = firstFreeMints - 
 
         // price = totalPrice <= discount ? 0 : totalPrice - discount;
         
-        //      if (freeMint == 1 && _numberMinted(msg.sender) == 0) price = (_qty * hodlerPrice) - 1 * hodlerPrice;
-        // else if (freeMint == 2 && _numberMinted(msg.sender) == 1) price = (_qty * hodlerPrice) - 2 * hodlerPrice;
-        // else if (freeMint == 3 && _numberMinted(msg.sender) == 1) price = (_qty * hodlerPrice) - 3 * hodlerPrice;
+        //      if (firstFreeMints == 1 && _numberMinted(msg.sender) == 0) price = (_qty * hodlerPrice) - 1 * hodlerPrice;
+        // else if (firstFreeMints == 2 && _numberMinted(msg.sender) == 1) price = (_qty * hodlerPrice) - 2 * hodlerPrice;
+        // else if (firstFreeMints == 3 && _numberMinted(msg.sender) == 1) price = (_qty * hodlerPrice) - 3 * hodlerPrice;
         // else price = _qty * hodlerPrice;
     }
 
