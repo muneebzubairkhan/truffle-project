@@ -53,7 +53,7 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
     function setFreeHodlerz(uint256 _freeHodlerz) external onlyOwner {
         freeHodlerz = _freeHodlerz;
     }
-    
+
     function setFirstFreeMints(uint256 _firstFreeMints) external onlyOwner {
         firstFreeMints = _firstFreeMints;
     }
@@ -110,41 +110,12 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
         _;
     }
 
-
     function getPrice(uint256 _qty) public view returns (uint256 price) {
-        // uint256 totalPrice = _qty * hodlerPrice;
-        // uint256 discount = firstFreeMints * hodlerPrice;
-        // price = totalPrice - discount;
-
-        // uint256 totalPrice = _qty * hodlerPrice;
-        // uint discountQty = firstFreeMints - _numberMinted(msg.sender);
-        // uint256 discount = discountQty * hodlerPrice;
-        // price = totalPrice - discount;
-
-        // uint256 totalPrice = _qty * hodlerPrice;
-        // uint numberMinted = _numberMinted(msg.sender);
-        // uint discountQty = firstFreeMints >  numberMinted ? firstFreeMints - numberMinted: 0;
-        // uint256 discount = discountQty * hodlerPrice;
-        // price = totalPrice - discount;
-
         uint256 totalPrice = _qty * hodlerPrice;
-        uint numberMinted = _numberMinted(msg.sender);
-        uint discountQty = firstFreeMints >  numberMinted ? firstFreeMints - numberMinted: 0;
+        uint256 numberMinted = _numberMinted(msg.sender);
+        uint256 discountQty = firstFreeMints > numberMinted ? firstFreeMints - numberMinted : 0;
         uint256 discount = discountQty * hodlerPrice;
-        price = totalPrice > discount ? totalPrice - discount: 0;
-
-        // uint256 totalPrice = _qty * hodlerPrice;
-        // uint256 discount = firstFreeMints * hodlerPrice;
-        // price = totalPrice - discount;
-        
-        // uint discountQty = firstFreeMints - 
-
-        // price = totalPrice <= discount ? 0 : totalPrice - discount;
-        
-        //      if (firstFreeMints == 1 && _numberMinted(msg.sender) == 0) price = (_qty * hodlerPrice) - 1 * hodlerPrice;
-        // else if (firstFreeMints == 2 && _numberMinted(msg.sender) == 1) price = (_qty * hodlerPrice) - 2 * hodlerPrice;
-        // else if (firstFreeMints == 3 && _numberMinted(msg.sender) == 1) price = (_qty * hodlerPrice) - 3 * hodlerPrice;
-        // else price = _qty * hodlerPrice;
+        price = totalPrice > discount ? totalPrice - discount : 0;
     }
 
     modifier priceAvailableFirstNftFree(uint256 _hodlerzQty) {
