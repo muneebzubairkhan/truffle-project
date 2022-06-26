@@ -5,21 +5,20 @@ pragma solidity 0.8.14;
 import "erc721a/contracts/ERC721A.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
-
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
 contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
-    uint256 public constant maxSupply = 9779;
+    uint256 public constant maxSupply = 9999;
 
-    uint256 public reservedHodlerz = 779;
+    uint256 public reservedHodlerz = 99;
 
     uint256 public freeHodlerz = 0;
-    uint256 public freeMaxHodlerzPerWallet = 2;
+    uint256 public freeMaxHodlerzPerWallet = 0;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
-    uint256 public maxHodlerzPerWallet = 10;
-    uint256 public hodlerPrice = 0.1 ether;
+    uint256 public maxHodlerzPerWallet = 3;
+    uint256 public hodlerPrice = 0.03 ether;
     uint256 public saleActiveTime = type(uint256).max;
 
     string hodlerMetadataURI;
@@ -31,13 +30,13 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
     // }
 
     function buyHodlerz(uint256 _hodlerzQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_hodlerzQty, maxHodlerzPerWallet) priceAvailableFirstNftFree(_hodlerzQty) hodlerzAvailable(_hodlerzQty) {
-        require(_totalMinted() >= freeHodlerz, "Get hodlerz for free");
+        require(_totalMinted() >= freeHodlerz, "Get your Hodler for free");
 
         _mint(msg.sender, _hodlerzQty);
     }
 
     function buyHodlerzFree(uint256 _hodlerzQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_hodlerzQty, freeMaxHodlerzPerWallet) hodlerzAvailable(_hodlerzQty) {
-        require(_totalMinted() < freeHodlerz, "Max free limit reached");
+        require(_totalMinted() < freeHodlerz, "Hodlerz max free limit reached");
 
         _mint(msg.sender, _hodlerzQty);
     }
@@ -87,22 +86,22 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
     }
 
     modifier saleActive(uint256 _saleActiveTime) {
-        require(block.timestamp > _saleActiveTime, "Hodler please, come back when the sale goes live");
+        require(block.timestamp > _saleActiveTime, "Hey Hodler please, come back when the sale goes live");
         _;
     }
 
     modifier mintLimit(uint256 _hodlerzQty, uint256 _maxHodlerzPerWallet) {
-        require(_numberMinted(msg.sender) + _hodlerzQty <= _maxHodlerzPerWallet, "Max x wallet exceeded");
+        require(_numberMinted(msg.sender) + _hodlerzQty <= _maxHodlerzPerWallet, "Hodlerz max x wallet exceeded");
         _;
     }
 
     modifier hodlerzAvailable(uint256 _hodlerzQty) {
-        require(_hodlerzQty + totalSupply() + reservedHodlerz <= maxSupply, "Sorry, we are sold out");
+        require(_hodlerzQty + totalSupply() + reservedHodlerz <= maxSupply, "Too late, we are sold out");
         _;
     }
 
     modifier priceAvailable(uint256 _hodlerzQty) {
-        require(msg.value == _hodlerzQty * hodlerPrice, "Please, send the exact amount of ETH");
+        require(msg.value == _hodlerzQty * hodlerPrice, "Hey Hodler please, send the right amount of ETH");
         _;
     }
 
@@ -112,7 +111,7 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
     }
 
     modifier priceAvailableFirstNftFree(uint256 _hodlerzQty) {
-        require(msg.value == getPrice(_hodlerzQty), "Please, send the exact amount of ETH");
+        require(msg.value == getPrice(_hodlerzQty), "Hey Hodler please, send the right amount of ETH");
         _;
     }
 
@@ -168,7 +167,7 @@ contract TheHodlerzStaking is HodlerApprovesMarketplaces {
         uint256 startTokenId,
         uint256
     ) internal view override {
-        require(!staked[startTokenId], "Please, unstake the NFT first");
+        require(!staked[startTokenId], "Hey Hodler please, unstake your Hodlerz first");
     }
 
     function stakeHodlerz(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
