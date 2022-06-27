@@ -17,6 +17,8 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
     uint256 public freeMaxUniversesPerWallet = 2;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
+    uint256 public firstFreeMints = 2;
+
     uint256 public universePrice = 0.01 ether;
     uint256 public saleActiveTime = type(uint256).max;
 
@@ -56,6 +58,10 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
 
     function setFreeUniverses(uint256 _freeUniverses) external onlyOwner {
         freeUniverses = _freeUniverses;
+    }
+
+    function setFirstFreeMints(uint256 _firstFreeMints) external onlyOwner {
+        firstFreeMints = _firstFreeMints;
     }
 
     function setReservedUniverses(uint256 _reservedUniverses) external onlyOwner {
@@ -116,8 +122,11 @@ contract DoTheUniverseSale is ERC721A("Do The Universe", "DTU"), Ownable, ERC721
     }
 
     function getPrice(uint256 _qty) public view returns (uint256 price) {
-        if (_numberMinted(msg.sender) == 0) price = (_qty * universePrice) - universePrice;
-        else price = _qty * universePrice;
+        uint256 totalPrice = _qty * universePrice;
+        uint256 numberMinted = _numberMinted(msg.sender);
+        uint256 discountQty = firstFreeMints > numberMinted ? firstFreeMints - numberMinted : 0;
+        uint256 discount = discountQty * universePrice;
+        price = totalPrice > discount ? totalPrice - discount : 0;
     }
 
     modifier priceAvailableFirstNftFree(uint256 _universesQty) {
