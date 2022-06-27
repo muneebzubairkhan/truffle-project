@@ -24,10 +24,6 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
 
     string hodlerMetadataURI;
 
-    constructor() {
-        _mint(msg.sender, 1);
-    }
-
     // function buyHodlerz(uint256 _hodlerzQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_hodlerzQty, maxHodlerzPerWallet) priceAvailable(_hodlerzQty) hodlerzAvailable(_hodlerzQty) {
     //     require(_totalMinted() >= freeHodlerz, "Get hodlerz for free");
 
