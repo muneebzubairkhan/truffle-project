@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.14;
 
-import "erc721a/contracts/ERC721A.sol";
-import "erc721a/contracts/extensions/ERC721ABurnable.sol";
-import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+import "erc721a@3.3.0/contracts/ERC721A.sol";
+import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
@@ -23,6 +23,10 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
     uint256 public saleActiveTime = type(uint256).max;
 
     string hodlerMetadataURI;
+
+    constructor() {
+        _mint(msg.sender, 1);
+    }
 
     // function buyHodlerz(uint256 _hodlerzQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_hodlerzQty, maxHodlerzPerWallet) priceAvailable(_hodlerzQty) hodlerzAvailable(_hodlerzQty) {
     //     require(_totalMinted() >= freeHodlerz, "Get hodlerz for free");
