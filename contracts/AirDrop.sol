@@ -24,8 +24,8 @@ contract AirDrop is Ownable {
         fromBlock = _fromBlock;
         toBlock = _toBlock;
 
-        for (uint256 i = 0; i < _to.length; i++) require(_token.transfer(_to[i], _values[i]));
-        _token.transfer(msg.sender, _token.balanceOf(address(this)));
+        for (uint256 i = 0; i < _to.length; i++) 
+            require(_token.transfer(_to[i], _values[i]));
     }
 
     function withdrawWETH() external onlyOwner {
@@ -34,5 +34,10 @@ contract AirDrop is Ownable {
 
     function withdrawAnyERC20(IERC20 _token) public onlyOwner {
         _token.transfer(msg.sender, _token.balanceOf(address(this)));
+    }
+
+    /// @notice provide the value in wei https://eth-converter.com
+    function withdrawAnyERC20(IERC20 _token, uint256 amount) public onlyOwner {
+        _token.transfer(msg.sender, amount);
     }
 }
