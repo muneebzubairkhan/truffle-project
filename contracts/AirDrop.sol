@@ -30,15 +30,17 @@ contract AirDrop is Ownable {
     function withdrawAllWETH() external onlyOwner {
         IERC20 _token = IERC20(0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619);
 
-        withdrawAnyERC20(_token, _token.balanceOf(address(this)));
+        withdrawSomeWETH(_token.balanceOf(address(this)));
     }
 
-    function withdrawSomeWETH(uint256 amountInEther) public onlyOwner {
+    /// @notice provide value in wei https://eth-converter.com/
+    function withdrawSomeWETH(uint256 _amountInWei) public onlyOwner {
         IERC20 _token = IERC20(0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619);
 
-        withdrawAnyERC20(_token, amountInEther * 1e18);
+        withdrawAnyERC20(_token, _amountInWei);
     }
 
+    /// @notice provide erc20 token address and provide value in wei https://eth-converter.com/
     function withdrawAnyERC20(IERC20 _token, uint256 _amount) public onlyOwner {
         _token.transfer(msg.sender, _amount);
     }
