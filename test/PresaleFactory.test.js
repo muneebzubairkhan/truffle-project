@@ -8,11 +8,17 @@ contract("Nft", async ([owner, client, parentCompany]) => {
     let nft = await Nft.new({ from: owner });
     console.log(owner === (await nft.owner()));
 
+    await nft.revealFlip();
+
     await nft.setSale1ActiveTime(0);
     await nft.sale1PurchaseTokens(1, { value: toWei("0.02"), from: client });
 
     await nft.setSale4ActiveTime(0);
-    await nft.sale4PurchaseTokens(1, { value: toWei("0.02"), from: client });
+    await nft.sale4PurchaseTokens(2, { value: toWei("0.04"), from: client });
+
+    console.log("token 1 from sale 1", await nft.tokenURI(1));
+    console.log("token 2 from sale 4", await nft.tokenURI(2));
+    console.log("token 3 from sale 4", await nft.tokenURI(3));
 
     console.log("before", fromWei(await web3.eth.getBalance(owner)));
     await nft.withdraw({ from: owner });
@@ -27,19 +33,22 @@ contract("Nft", async ([owner, client, parentCompany]) => {
       "0x989b691745F7B0139a429d2B36364668a01A39Cf",
     ];
 
-    await nft.setWhitelist1ActiveTime(0);
-    await nft.setWhitelist1(whitelist1, { from: owner });
-    await nft.purchaseTokensWhitelist1(1, {
+    await nft.setWhitelist2ActiveTime(0);
+    await nft.setWhitelist2(whitelist1, { from: owner });
+    await nft.purchaseTokensWhitelist2(1, {
       value: toWei("0.01"),
       from: client,
     });
 
-    await nft.setWhitelist4ActiveTime(0);
-    await nft.setWhitelist4(whitelist1, { from: owner });
-    await nft.purchaseTokensWhitelist4(1, {
+    await nft.setWhitelist3ActiveTime(0);
+    await nft.setWhitelist3(whitelist1, { from: owner });
+    await nft.purchaseTokensWhitelist3(1, {
       value: toWei("0.01"),
       from: client,
     });
+
+     console.log("token 4 from sale 2", await nft.tokenURI(4));
+     console.log("token 5 from sale 3", await nft.tokenURI(5));
 
     console.log("before", fromWei(await web3.eth.getBalance(owner)));
     await nft.withdraw({ from: owner });

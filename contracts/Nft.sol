@@ -17,10 +17,16 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
 
     bool public revealed = false;
     string public notRevealedMetadataFolderIpfsLink;
-    uint256 public maxSupply = 10_000;
-    uint256 public nftsForOwner = 250;
-    string public metadataFolderIpfsLink;
-    string constant baseExtension = ".json";
+    uint256 public maxSupply = 4000;
+    uint256 public nftsForOwner = 100;
+
+    string public metadataIpfsLink1 = "https://ipfs.io/ipfs/1.json";
+    string public metadataIpfsLink2 = "https://ipfs.io/ipfs/2.json";
+    string public metadataIpfsLink3 = "https://ipfs.io/ipfs/3.json";
+    string public metadataIpfsLink4 = "https://ipfs.io/ipfs/4.json";
+
+    // id minted => meta data id
+    mapping(uint256 => uint256) public metadataId;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
@@ -38,17 +44,17 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         return 1;
     }
 
-    function _baseURI() internal view virtual override returns (string memory) {
-        return metadataFolderIpfsLink;
-    }
-
     function tokenURI(uint256 tokenId) public view virtual override(ERC721A, IERC721Metadata) returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
 
         if (revealed == false) return notRevealedMetadataFolderIpfsLink;
 
-        string memory currentBaseURI = _baseURI();
-        return bytes(currentBaseURI).length > 0 ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension)) : "";
+        if (metadataId[tokenId] == 1) return metadataIpfsLink1;
+        else if (metadataId[tokenId] == 2) return metadataIpfsLink2;
+        else if (metadataId[tokenId] == 3) return metadataIpfsLink3;
+        else if (metadataId[tokenId] == 4) return metadataIpfsLink4;
+        
+        return "not found";
     }
 
     //////////////////
@@ -81,8 +87,16 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         revealed = !revealed;
     }
 
-    function setMetadataFolderIpfsLink(string memory _newMetadataFolderIpfsLink) public onlyOwner {
-        metadataFolderIpfsLink = _newMetadataFolderIpfsLink;
+    function setMetadataFolderIpfsLink(
+        string memory _metadata1,
+        string memory _metadata2,
+        string memory _metadata3,
+        string memory _metadata4
+    ) public onlyOwner {
+        metadataIpfsLink1 = _metadata1;
+        metadataIpfsLink2 = _metadata2;
+        metadataIpfsLink3 = _metadata3;
+        metadataIpfsLink4 = _metadata4;
     }
 
     function setNotRevealedMetadataFolderIpfsLink(string memory _notRevealedMetadataFolderIpfsLink) public onlyOwner {
@@ -107,6 +121,8 @@ contract NftPublicSale1 is NftPublicSale {
         require(_mintAmount <= sale1MaxMintAmount, "Max mint amount per session exceeded");
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
         require(msg.value == sale1CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
+
+        for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 1;
 
         _safeMint(msg.sender, _mintAmount);
     }
@@ -142,6 +158,8 @@ contract NftPublicSale2 is NftPublicSale1 {
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
         require(msg.value == sale2CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
+        for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 2;
+        
         _safeMint(msg.sender, _mintAmount);
     }
 
@@ -176,6 +194,8 @@ contract NftPublicSale3 is NftPublicSale2 {
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
         require(msg.value == sale3CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
+        for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 3;
+        
         _safeMint(msg.sender, _mintAmount);
     }
 
@@ -210,6 +230,8 @@ contract NftPublicSale4 is NftPublicSale3 {
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
         require(msg.value == sale4CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
+        for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 4;
+        
         _safeMint(msg.sender, _mintAmount);
     }
 
@@ -262,6 +284,8 @@ contract NftWhitelist1Sale is NftPublicSale4 {
 
         require(whitelist1ClaimedBy[msg.sender] <= whitelist1MaxMint, "Purchase exceeds max allowed");
 
+        for (uint256 i = 0; i < _howMany; i++) metadataId[_currentIndex + i] = 1;
+        
         _safeMint(msg.sender, _howMany);
     }
 
@@ -310,6 +334,8 @@ contract NftWhitelist2Sale is NftWhitelist1Sale {
 
         require(whitelist2ClaimedBy[msg.sender] <= whitelist2MaxMint, "Purchase exceeds max allowed");
 
+        for (uint256 i = 0; i < _howMany; i++) metadataId[_currentIndex + i] = 2;
+        
         _safeMint(msg.sender, _howMany);
     }
 
@@ -358,6 +384,8 @@ contract NftWhitelist3Sale is NftWhitelist2Sale {
 
         require(whitelist3ClaimedBy[msg.sender] <= whitelist3MaxMint, "Purchase exceeds max allowed");
 
+        for (uint256 i = 0; i < _howMany; i++) metadataId[_currentIndex + i] = 3;
+        
         _safeMint(msg.sender, _howMany);
     }
 
@@ -406,6 +434,8 @@ contract NftWhitelist4Sale is NftWhitelist3Sale {
 
         require(whitelist4ClaimedBy[msg.sender] <= whitelist4MaxMint, "Purchase exceeds max allowed");
 
+        for (uint256 i = 0; i < _howMany; i++) metadataId[_currentIndex + i] = 4;
+        
         _safeMint(msg.sender, _howMany);
     }
 
