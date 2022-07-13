@@ -15,8 +15,6 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable, Ownable, ERC2981 {
     using Strings for uint256;
 
-    bool public revealed = false;
-    string public notRevealedMetadataFolderIpfsLink;
     uint256 public maxSupply = 4000;
     uint256 public nftsForOwner = 100;
 
@@ -46,8 +44,6 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
 
     function tokenURI(uint256 tokenId) public view virtual override(ERC721A, IERC721Metadata) returns (string memory) {
         require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
-
-        if (revealed == false) return notRevealedMetadataFolderIpfsLink;
 
         if (metadataId[tokenId] == 1) return metadataIpfsLink1;
         else if (metadataId[tokenId] == 2) return metadataIpfsLink2;
@@ -83,10 +79,6 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
 
-    function revealFlip() public onlyOwner {
-        revealed = !revealed;
-    }
-
     function setMetadataFolderIpfsLink(
         string memory _metadata1,
         string memory _metadata2,
@@ -97,10 +89,6 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         metadataIpfsLink2 = _metadata2;
         metadataIpfsLink3 = _metadata3;
         metadataIpfsLink4 = _metadata4;
-    }
-
-    function setNotRevealedMetadataFolderIpfsLink(string memory _notRevealedMetadataFolderIpfsLink) public onlyOwner {
-        notRevealedMetadataFolderIpfsLink = _notRevealedMetadataFolderIpfsLink;
     }
 
     function getToken() external payable {}

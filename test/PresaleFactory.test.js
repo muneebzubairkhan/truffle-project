@@ -8,8 +8,6 @@ contract("Nft", async ([owner, client, parentCompany]) => {
     let nft = await Nft.new({ from: owner });
     console.log(owner === (await nft.owner()));
 
-    await nft.revealFlip();
-
     await nft.setSale1ActiveTime(0);
     await nft.sale1PurchaseTokens(1, { value: toWei("0.02"), from: client });
 
@@ -47,8 +45,8 @@ contract("Nft", async ([owner, client, parentCompany]) => {
       from: client,
     });
 
-     console.log("token 4 from sale 2", await nft.tokenURI(4));
-     console.log("token 5 from sale 3", await nft.tokenURI(5));
+    console.log("token 4 from sale 2", await nft.tokenURI(4));
+    console.log("token 5 from sale 3", await nft.tokenURI(5));
 
     console.log("before", fromWei(await web3.eth.getBalance(owner)));
     await nft.withdraw({ from: owner });
