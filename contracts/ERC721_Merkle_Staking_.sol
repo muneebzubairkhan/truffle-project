@@ -115,7 +115,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     }
 }
 
-contract NftWhitelistSaleMerkle is NftPublicSale {
+contract NftWhitelistSale is NftPublicSale {
     ///////////////////////////////
     //    PRESALE CODE STARTS    //
     ///////////////////////////////
@@ -164,49 +164,7 @@ contract NftWhitelistSaleMerkle is NftPublicSale {
     }
 }
 
-contract NftStaking is NftWhitelistSaleMerkle {
-    //////////////////////////////
-    // WHITELISTING FOR STAKING //
-    //////////////////////////////
-
-    // tokenId => staked (yes or no)
-    mapping(address => bool) public whitelistedForStaking;
-
-    function addToWhitelistForStaking(address _address, bool _add) external onlyOwner {
-        whitelistedForStaking[_address] = _add;
-    }
-
-    modifier onlyWhitelistedForStaking() {
-        require(whitelistedForStaking[msg.sender], "Caller is not whitelisted for staking");
-        _;
-    }
-
-    /////////////////////
-    // STAKING METHOD  //
-    /////////////////////
-
-    mapping(uint256 => bool) public staked;
-
-    function _beforeTokenTransfers(
-        address,
-        address,
-        uint256 startTokenId,
-        uint256
-    ) internal view override {
-        require(!staked[startTokenId], "Unstake tokenId it to transfer");
-    }
-
-    // stake / unstake nfts
-    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
-        for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
-    }
-
-    function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
-        return _ownershipOf(tokenId).startTimestamp;
-    }
-}
-
-contract NftAutoApproveMarketPlaces is NftStaking {
+contract NftAutoApproveMarketPlaces is NftWhitelistSale {
     mapping(address => bool) public projectProxy;
 
     function flipProxyState(address proxyAddress) public onlyOwner {
