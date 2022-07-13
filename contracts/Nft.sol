@@ -117,7 +117,7 @@ contract NftPublicSale1 is NftPublicSale {
     function sale1PurchaseTokens(uint256 _mintAmount) public payable {
         require(block.timestamp > sale1PublicMintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
-        require(_mintAmount > 0, "need to mint at least 1 NFT");
+
         require(_mintAmount <= sale1MaxMintAmount, "Max mint amount per session exceeded");
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
         require(msg.value == sale1CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
@@ -153,7 +153,7 @@ contract NftPublicSale2 is NftPublicSale1 {
     function sale2PurchaseTokens(uint256 _mintAmount) public payable {
         require(block.timestamp > sale2PublicMintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
-        require(_mintAmount > 0, "need to mint at least 1 NFT");
+
         require(_mintAmount <= sale2MaxMintAmount, "Max mint amount per session exceeded");
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
         require(msg.value == sale2CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
@@ -189,7 +189,7 @@ contract NftPublicSale3 is NftPublicSale2 {
     function sale3PurchaseTokens(uint256 _mintAmount) public payable {
         require(block.timestamp > sale3PublicMintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
-        require(_mintAmount > 0, "need to mint at least 1 NFT");
+
         require(_mintAmount <= sale3MaxMintAmount, "Max mint amount per session exceeded");
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
         require(msg.value == sale3CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
@@ -225,7 +225,7 @@ contract NftPublicSale4 is NftPublicSale3 {
     function sale4PurchaseTokens(uint256 _mintAmount) public payable {
         require(block.timestamp > sale4PublicMintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
-        require(_mintAmount > 0, "need to mint at least 1 NFT");
+
         require(_mintAmount <= sale4MaxMintAmount, "Max mint amount per session exceeded");
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
         require(msg.value == sale4CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
