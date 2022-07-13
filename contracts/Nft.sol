@@ -101,36 +101,36 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
 }
 
 contract NftPublicSale1 is NftPublicSale {
-    uint256 public maxMintAmount = 20;
-    uint256 public costPerNft = 0.02 * 1e18;
-    uint256 public nftPerAddressLimit = 3;
-    uint256 public publicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
+    uint256 public sale1MaxMintAmount = 20;
+    uint256 public sale1CostPerNft = 0.02 * 1e18;
+    uint256 public sale1NftPerAddressLimit = 3;
+    uint256 public sale1PublicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
 
-    function purchaseTokens(uint256 _mintAmount) public payable {
-        require(block.timestamp > publicMintActiveTime, "the contract is paused");
+    function sale1PurchaseTokens(uint256 _mintAmount) public payable {
+        require(block.timestamp > sale1PublicMintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
         require(_mintAmount > 0, "need to mint at least 1 NFT");
-        require(_mintAmount <= maxMintAmount, "Max mint amount per session exceeded");
+        require(_mintAmount <= sale1MaxMintAmount, "Max mint amount per session exceeded");
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
-        require(msg.value == costPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
+        require(msg.value == sale1CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
         _safeMint(msg.sender, _mintAmount);
     }
 
-    function setNftPerAddressLimit(uint256 _limit) public onlyOwner {
-        nftPerAddressLimit = _limit;
+    function setSale1NftPerAddressLimit(uint256 _limit) public onlyOwner {
+        sale1NftPerAddressLimit = _limit;
     }
 
-    function setCostPerNft(uint256 _newCostPerNft) public onlyOwner {
-        costPerNft = _newCostPerNft;
+    function setSale1CostPerNft(uint256 _newSale1CostPerNft) public onlyOwner {
+        sale1CostPerNft = _newSale1CostPerNft;
     }
 
-    function setMaxMintAmount(uint256 _newMaxMintAmount) public onlyOwner {
-        maxMintAmount = _newMaxMintAmount;
+    function setSale1MaxMintAmount(uint256 _newSale1MaxMintAmount) public onlyOwner {
+        sale1MaxMintAmount = _newSale1MaxMintAmount;
     }
 
-    function setSaleActiveTime(uint256 _publicMintActiveTime) public onlyOwner {
-        publicMintActiveTime = _publicMintActiveTime;
+    function setSale1ActiveTime(uint256 _sale1PublicMintActiveTime) public onlyOwner {
+        sale1PublicMintActiveTime = _sale1PublicMintActiveTime;
     }
 }
 
