@@ -18,7 +18,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     string public notRevealedMetadataFolderIpfsLink;
     uint256 public maxMintAmount = 20;
     uint256 public maxSupply = 10_000;
-    uint256 public costPerNft = 0.075 * 1e18;
+    uint256 public costPerNft = 0.02 * 1e18;
     uint256 public nftsForOwner = 250;
     string public metadataFolderIpfsLink;
     uint256 public nftPerAddressLimit = 3;
@@ -36,7 +36,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         require(_mintAmount > 0, "need to mint at least 1 NFT");
         require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "max NFT limit exceeded");
-        require(msg.value >= costPerNft * _mintAmount, "insufficient funds");
+        require(msg.value == costPerNft * _mintAmount, "you are sending either low funds or more funds than needed");
 
         _safeMint(msg.sender, _mintAmount);
     }
@@ -139,7 +139,7 @@ contract NftWhitelist1Sale is NftPublicSale {
 
         require(onWhitelist1[msg.sender], "You are not in whitelist1");
         require(block.timestamp > whitelist1ActiveTime, "Whitelist1 is not active");
-        require(msg.value >= _howMany * itemPriceWhitelist1, "Try to send more ETH");
+        require(msg.value == _howMany * itemPriceWhitelist1, "you are sending either low funds or more funds than needed");
 
         whitelist1Minted += _howMany;
         whitelist1ClaimedBy[msg.sender] += _howMany;
@@ -161,7 +161,54 @@ contract NftWhitelist1Sale is NftPublicSale {
     }
 }
 
-contract NftAutoApproveMarketPlaces is NftWhitelist1Sale {
+contract NftWhitelist2Sale is NftWhitelist1Sale {
+    uint256 public whitelist2Supply = 400;
+    uint256 public whitelist2Minted = 0;
+
+    uint256 public whitelist2ActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
+    uint256 public whitelist2MaxMint = 3;
+    uint256 public itemPriceWhitelist2 = 0.01 * 1e18;
+    
+    mapping(address => uint256) public whitelist2ClaimedBy;
+    mapping(address => bool) public onWhitelist2;
+
+    function setWhitelist2(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onWhitelist2[addresses[i]] = true;
+    }
+
+    function removeFromWhitelist2(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onWhitelist2[addresses[i]] = false;
+    }
+
+    function purchaseTokensWhitelist2(uint256 _howMany) external payable {
+        require(whitelist2Minted + _howMany <= whitelist2Supply, "whitelist2 limit reached");
+        require(_totalMinted() + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
+
+        require(onWhitelist2[msg.sender], "You are not in whitelist2");
+        require(block.timestamp > whitelist2ActiveTime, "Whitelist2 is not active");
+        require(msg.value == _howMany * itemPriceWhitelist2, "you are sending either low funds or more funds than needed");
+
+        whitelist2Minted += _howMany;
+        whitelist2ClaimedBy[msg.sender] += _howMany;
+
+        require(whitelist2ClaimedBy[msg.sender] <= whitelist2MaxMint, "Purchase exceeds max allowed");
+
+        _safeMint(msg.sender, _howMany);
+    }
+
+    function setWhitelist2MaxMint(uint256 _whitelist2MaxMint) external onlyOwner {
+        whitelist2MaxMint = _whitelist2MaxMint;
+    }
+    function setPriceWhitelist2(uint256 _itemPriceWhitelist2) external onlyOwner {
+        itemPriceWhitelist2 = _itemPriceWhitelist2;
+    }
+
+    function setWhitelist2ActiveTime(uint256 _whitelist2ActiveTime) external onlyOwner {
+        whitelist2ActiveTime = _whitelist2ActiveTime;
+    }
+}
+
+contract NftAutoApproveMarketPlaces is NftWhitelist2Sale {
     mapping(address => bool) public projectProxy;
 
     function flipProxyState(address proxyAddress) public onlyOwner {

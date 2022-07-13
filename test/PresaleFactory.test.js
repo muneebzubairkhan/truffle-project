@@ -9,9 +9,9 @@ contract("Nft", async ([owner, client, parentCompany]) => {
     console.log(owner === (await nft.owner()));
 
     await nft.setSaleActiveTime(0);
-    await nft.purchaseTokens(1, { value: toWei("0.075"), from: client });
+    await nft.purchaseTokens(1, { value: toWei("0.02"), from: client });
 
-    console.log("before",fromWei(await web3.eth.getBalance(owner)));
+    console.log("before", fromWei(await web3.eth.getBalance(owner)));
     await nft.withdraw({ from: owner });
     console.log("after", fromWei(await web3.eth.getBalance(owner)));
 
@@ -27,7 +27,7 @@ contract("Nft", async ([owner, client, parentCompany]) => {
     await nft.setWhitelist1ActiveTime(0);
     await nft.setWhitelist1(whitelist1, { from: owner });
     await nft.purchaseTokensWhitelist1(1, {
-      value: toWei("0.03"),
+      value: toWei("0.01"),
       from: client,
     });
   
