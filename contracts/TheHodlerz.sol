@@ -5,66 +5,64 @@ pragma solidity 0.8.14;
 import "erc721a@3.3.0/contracts/ERC721A.sol";
 import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
-contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
-    uint256 public constant maxSupply = 9999;
+contract JohnSale is ERC721A("John", "J"), Ownable, ERC721AQueryable, ERC721ABurnable, ERC2981 {
+    uint256 public constant maxSupply = 1000;
+    uint256 public reservedJohn = 10;
 
-    uint256 public reservedHodlerz = 99;
-
-    uint256 public freeHodlerz = 0;
-    uint256 public freeMaxHodlerzPerWallet = 0;
+    uint256 public freeJohn = 0;
+    uint256 public freeMaxJohnPerWallet = 0;
     uint256 public freeSaleActiveTime = type(uint256).max;
 
-    uint256 public firstFreeMints = 2;
-    uint256 public maxHodlerzPerWallet = 5;
-    uint256 public hodlerPrice = 0.03 ether;
+    uint256 public firstFreeMints = 11;
+    uint256 public maxJohnPerWallet = 22;
+    uint256 public johnPrice = 0.0001 ether;
     uint256 public saleActiveTime = type(uint256).max;
 
-    string hodlerMetadataURI;
+    string johnMetadataURI;
 
-    // function buyHodlerz(uint256 _hodlerzQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_hodlerzQty, maxHodlerzPerWallet) priceAvailable(_hodlerzQty) hodlerzAvailable(_hodlerzQty) {
-    //     require(_totalMinted() >= freeHodlerz, "Get hodlerz for free");
-
-    //     _mint(msg.sender, _hodlerzQty);
-    // }
-
-    function buyHodlerz(uint256 _hodlerzQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_hodlerzQty, maxHodlerzPerWallet) priceAvailableFirstNftFree(_hodlerzQty) hodlerzAvailable(_hodlerzQty) {
-        require(_totalMinted() >= freeHodlerz, "Get your Hodler for free");
-
-        _mint(msg.sender, _hodlerzQty);
+    constructor() {
+        _mint(msg.sender, 3);
     }
 
-    function buyHodlerzFree(uint256 _hodlerzQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_hodlerzQty, freeMaxHodlerzPerWallet) hodlerzAvailable(_hodlerzQty) {
-        require(_totalMinted() < freeHodlerz, "Hodlerz max free limit reached");
+    function buyJohn(uint256 _johnQty) external payable saleActive(saleActiveTime) callerIsUser mintLimit(_johnQty, maxJohnPerWallet) priceAvailableFirstNftFree(_johnQty) johnAvailable(_johnQty) {
+        require(_totalMinted() >= freeJohn, "Get your John for free");
 
-        _mint(msg.sender, _hodlerzQty);
+        _mint(msg.sender, _johnQty);
+    }
+
+    function buyJohnFree(uint256 _johnQty) external saleActive(freeSaleActiveTime) callerIsUser mintLimit(_johnQty, freeMaxJohnPerWallet) johnAvailable(_johnQty) {
+        require(_totalMinted() < freeJohn, "John max free limit reached");
+
+        _mint(msg.sender, _johnQty);
     }
 
     function withdraw() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
     }
 
-    function setHodlerPrice(uint256 _newPrice) external onlyOwner {
-        hodlerPrice = _newPrice;
+    function setJohnPrice(uint256 _newPrice) external onlyOwner {
+        johnPrice = _newPrice;
     }
 
-    function setFreeHodlerz(uint256 _freeHodlerz) external onlyOwner {
-        freeHodlerz = _freeHodlerz;
+    function setFreeJohn(uint256 _freeJohn) external onlyOwner {
+        freeJohn = _freeJohn;
     }
 
     function setFirstFreeMints(uint256 _firstFreeMints) external onlyOwner {
         firstFreeMints = _firstFreeMints;
     }
 
-    function setReservedHodlerz(uint256 _reservedHodlerz) external onlyOwner {
-        reservedHodlerz = _reservedHodlerz;
+    function setReservedJohn(uint256 _reservedJohn) external onlyOwner {
+        reservedJohn = _reservedJohn;
     }
 
-    function setMaxHodlerzPerWallet(uint256 _maxHodlerzPerWallet, uint256 _freeMaxHodlerzPerWallet) external onlyOwner {
-        maxHodlerzPerWallet = _maxHodlerzPerWallet;
-        freeMaxHodlerzPerWallet = _freeMaxHodlerzPerWallet;
+    function setMaxJohnPerWallet(uint256 _maxJohnPerWallet, uint256 _freeMaxJohnPerWallet) external onlyOwner {
+        maxJohnPerWallet = _maxJohnPerWallet;
+        freeMaxJohnPerWallet = _freeMaxJohnPerWallet;
     }
 
     function setSaleActiveTime(uint256 _saleActiveTime, uint256 _freeSaleActiveTime) external onlyOwner {
@@ -72,17 +70,17 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
         freeSaleActiveTime = _freeSaleActiveTime;
     }
 
-    function setHodlerMetadataURI(string memory _hodlerMetadataURI) external onlyOwner {
-        hodlerMetadataURI = _hodlerMetadataURI;
+    function setJohnMetadataURI(string memory _johnMetadataURI) external onlyOwner {
+        johnMetadataURI = _johnMetadataURI;
     }
 
-    function giftHodlerz(address[] calldata _sendNftsTo, uint256 _hodlerzQty) external onlyOwner hodlerzAvailable(_sendNftsTo.length * _hodlerzQty) {
-        reservedHodlerz -= _sendNftsTo.length * _hodlerzQty;
-        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _hodlerzQty);
+    function giftJohn(address[] calldata _sendNftsTo, uint256 _johnQty) external onlyOwner johnAvailable(_sendNftsTo.length * _johnQty) {
+        reservedJohn -= _sendNftsTo.length * _johnQty;
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _johnQty);
     }
 
     function _baseURI() internal view override returns (string memory) {
-        return hodlerMetadataURI;
+        return johnMetadataURI;
     }
 
     modifier callerIsUser() {
@@ -91,35 +89,35 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
     }
 
     modifier saleActive(uint256 _saleActiveTime) {
-        require(block.timestamp > _saleActiveTime, "Hey Hodler please, come back when the sale goes live");
+        require(block.timestamp > _saleActiveTime, "Sorry but sale is not open");
         _;
     }
 
-    modifier mintLimit(uint256 _hodlerzQty, uint256 _maxHodlerzPerWallet) {
-        require(_numberMinted(msg.sender) + _hodlerzQty <= _maxHodlerzPerWallet, "Hodlerz max x wallet exceeded");
+    modifier mintLimit(uint256 _johnQty, uint256 _maxJohnPerWallet) {
+        require(_numberMinted(msg.sender) + _johnQty <= _maxJohnPerWallet, "John max x wallet exceeded");
         _;
     }
 
-    modifier hodlerzAvailable(uint256 _hodlerzQty) {
-        require(_hodlerzQty + totalSupply() + reservedHodlerz <= maxSupply, "Too late, we are sold out");
+    modifier johnAvailable(uint256 _johnQty) {
+        require(_johnQty + totalSupply() + reservedJohn <= maxSupply, "Currently are sold out");
         _;
     }
 
-    modifier priceAvailable(uint256 _hodlerzQty) {
-        require(msg.value == _hodlerzQty * hodlerPrice, "Hey Hodler please, send the right amount of ETH");
+    modifier priceAvailable(uint256 _johnQty) {
+        require(msg.value == _johnQty * johnPrice, "Hey hey, send the right amount of ETH");
         _;
     }
 
     function getPrice(uint256 _qty) public view returns (uint256 price) {
-        uint256 totalPrice = _qty * hodlerPrice;
+        uint256 totalPrice = _qty * johnPrice;
         uint256 numberMinted = _numberMinted(msg.sender);
         uint256 discountQty = firstFreeMints > numberMinted ? firstFreeMints - numberMinted : 0;
-        uint256 discount = discountQty * hodlerPrice;
+        uint256 discount = discountQty * johnPrice;
         price = totalPrice > discount ? totalPrice - discount : 0;
     }
 
-    modifier priceAvailableFirstNftFree(uint256 _hodlerzQty) {
-        require(msg.value == getPrice(_hodlerzQty), "Hey Hodler please, send the right amount of ETH");
+    modifier priceAvailableFirstNftFree(uint256 _johnQty) {
+        require(msg.value == getPrice(_johnQty), "Hey hey, send the right amount of ETH");
         _;
     }
 
@@ -136,7 +134,7 @@ contract TheHodlerzSale is ERC721A("THE HODLERZ", "HODL"), Ownable, ERC721AQuery
     }
 }
 
-contract HodlerApprovesMarketplaces is TheHodlerzSale {
+contract JohnApprovesMarketplaces is JohnSale {
     mapping(address => bool) private allowed;
 
     function autoApproveMarketplace(address _spender) public onlyOwner {
@@ -155,7 +153,7 @@ contract HodlerApprovesMarketplaces is TheHodlerzSale {
     }
 }
 
-contract TheHodlerzStaking is HodlerApprovesMarketplaces {
+contract JohnStaking is JohnApprovesMarketplaces {
     mapping(address => bool) public canStake;
 
     function addToWhitelistForStaking(address _operator) external onlyOwner {
@@ -175,10 +173,10 @@ contract TheHodlerzStaking is HodlerApprovesMarketplaces {
         uint256 startTokenId,
         uint256
     ) internal view override {
-        require(!staked[startTokenId], "Hey Hodler please, unstake your Hodlerz first");
+        require(!staked[startTokenId], "Nope, unstake your John first");
     }
 
-    function stakeHodlerz(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
+    function stakeJohn(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
         for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
     }
 }
@@ -187,4 +185,4 @@ interface OpenSea {
     function proxies(address) external view returns (address);
 }
 
-contract TheHodlerz is TheHodlerzStaking {}
+contract John is JohnStaking {}
