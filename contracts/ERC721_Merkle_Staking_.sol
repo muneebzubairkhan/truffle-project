@@ -114,54 +114,54 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     }
 }
 
-contract NftWhitelistSale is NftPublicSale {
-    uint256 public whitelistSupply = 400;
-    uint256 public whitelistMinted = 0;
+contract NftWhitelist1Sale is NftPublicSale {
+    uint256 public whitelist1Supply = 400;
+    uint256 public whitelist1Minted = 0;
 
-    uint256 public whitelistActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
-    uint256 public whitelistMaxMint = 3;
-    uint256 public itemPriceWhitelist = 0.03 * 1e18;
+    uint256 public whitelist1ActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
+    uint256 public whitelist1MaxMint = 3;
+    uint256 public itemPriceWhitelist1 = 0.01 * 1e18;
     
-    mapping(address => uint256) public whitelistClaimedBy;
-    mapping(address => bool) public onWhitelist;
+    mapping(address => uint256) public whitelist1ClaimedBy;
+    mapping(address => bool) public onWhitelist1;
 
-    function addToWhitelist(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++) onWhitelist[addresses[i]] = true;
+    function setWhitelist1(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onWhitelist1[addresses[i]] = true;
     }
 
-    function removeFromWhitelist(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++) onWhitelist[addresses[i]] = false;
+    function removeFromWhitelist1(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onWhitelist1[addresses[i]] = false;
     }
 
-    function purchaseTokensWhitelist(uint256 _howMany) external payable {
-        require(whitelistMinted + _howMany <= whitelistSupply, "whitelist limit reached");
+    function purchaseTokensWhitelist1(uint256 _howMany) external payable {
+        require(whitelist1Minted + _howMany <= whitelist1Supply, "whitelist1 limit reached");
         require(_totalMinted() + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
 
-        require(onWhitelist[msg.sender], "You are not in whitelist");
-        require(block.timestamp > whitelistActiveTime, "Whitelist is not active");
-        require(msg.value >= _howMany * itemPriceWhitelist, "Try to send more ETH");
+        require(onWhitelist1[msg.sender], "You are not in whitelist1");
+        require(block.timestamp > whitelist1ActiveTime, "Whitelist1 is not active");
+        require(msg.value >= _howMany * itemPriceWhitelist1, "Try to send more ETH");
 
-        whitelistMinted += _howMany;
-        whitelistClaimedBy[msg.sender] += _howMany;
+        whitelist1Minted += _howMany;
+        whitelist1ClaimedBy[msg.sender] += _howMany;
 
-        require(whitelistClaimedBy[msg.sender] <= whitelistMaxMint, "Purchase exceeds max allowed");
+        require(whitelist1ClaimedBy[msg.sender] <= whitelist1MaxMint, "Purchase exceeds max allowed");
 
         _safeMint(msg.sender, _howMany);
     }
 
-    function setWhitelistMaxMint(uint256 _whitelistMaxMint) external onlyOwner {
-        whitelistMaxMint = _whitelistMaxMint;
+    function setWhitelist1MaxMint(uint256 _whitelist1MaxMint) external onlyOwner {
+        whitelist1MaxMint = _whitelist1MaxMint;
     }
-    function setPriceWhitelist(uint256 _itemPriceWhitelist) external onlyOwner {
-        itemPriceWhitelist = _itemPriceWhitelist;
+    function setPriceWhitelist1(uint256 _itemPriceWhitelist1) external onlyOwner {
+        itemPriceWhitelist1 = _itemPriceWhitelist1;
     }
 
-    function setWhitelistActiveTime(uint256 _whitelistActiveTime) external onlyOwner {
-        whitelistActiveTime = _whitelistActiveTime;
+    function setWhitelist1ActiveTime(uint256 _whitelist1ActiveTime) external onlyOwner {
+        whitelist1ActiveTime = _whitelist1ActiveTime;
     }
 }
 
-contract NftAutoApproveMarketPlaces is NftWhitelistSale {
+contract NftAutoApproveMarketPlaces is NftWhitelist1Sale {
     mapping(address => bool) public projectProxy;
 
     function flipProxyState(address proxyAddress) public onlyOwner {
