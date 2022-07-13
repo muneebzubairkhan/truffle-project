@@ -114,6 +114,9 @@ contract NftPublicSale1 is NftPublicSale {
     uint256 public sale1NftPerAddressLimit = 3;
     uint256 public sale1PublicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
 
+    uint256 public publicSale1Supply = 1000;
+    uint256 public publicSale1Minted;
+
     function sale1PurchaseTokens(uint256 _mintAmount) public payable {
         require(block.timestamp > sale1PublicMintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
@@ -123,6 +126,9 @@ contract NftPublicSale1 is NftPublicSale {
         require(msg.value == sale1CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
         for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 1;
+
+        publicSale1Minted += _mintAmount;
+        require(publicSale1Minted <= publicSale1Supply, "Public sale limit reached");
 
         _safeMint(msg.sender, _mintAmount);
     }
@@ -150,6 +156,9 @@ contract NftPublicSale2 is NftPublicSale1 {
     uint256 public sale2NftPerAddressLimit = 3;
     uint256 public sale2PublicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
 
+    uint256 public publicSale2Supply = 1000;
+    uint256 public publicSale2Minted;
+
     function sale2PurchaseTokens(uint256 _mintAmount) public payable {
         require(block.timestamp > sale2PublicMintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
@@ -159,6 +168,9 @@ contract NftPublicSale2 is NftPublicSale1 {
         require(msg.value == sale2CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
         for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 2;
+
+        publicSale2Minted += _mintAmount;
+        require(publicSale2Minted <= publicSale2Supply, "Public sale limit reached");
 
         _safeMint(msg.sender, _mintAmount);
     }
@@ -186,6 +198,9 @@ contract NftPublicSale3 is NftPublicSale2 {
     uint256 public sale3NftPerAddressLimit = 3;
     uint256 public sale3PublicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
 
+    uint256 public publicSale3Supply = 1000;
+    uint256 public publicSale3Minted;
+
     function sale3PurchaseTokens(uint256 _mintAmount) public payable {
         require(block.timestamp > sale3PublicMintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
@@ -195,6 +210,9 @@ contract NftPublicSale3 is NftPublicSale2 {
         require(msg.value == sale3CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
         for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 3;
+
+        publicSale3Minted += _mintAmount;
+        require(publicSale3Minted <= publicSale3Supply, "Public sale limit reached");
 
         _safeMint(msg.sender, _mintAmount);
     }
@@ -222,6 +240,9 @@ contract NftPublicSale4 is NftPublicSale3 {
     uint256 public sale4NftPerAddressLimit = 3;
     uint256 public sale4PublicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
 
+    uint256 public publicSale4Supply = 1000;
+    uint256 public publicSale4Minted;
+
     function sale4PurchaseTokens(uint256 _mintAmount) public payable {
         require(block.timestamp > sale4PublicMintActiveTime, "the contract is paused");
         uint256 supply = totalSupply();
@@ -231,6 +252,9 @@ contract NftPublicSale4 is NftPublicSale3 {
         require(msg.value == sale4CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
         for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 4;
+
+        publicSale4Minted += _mintAmount;
+        require(publicSale4Minted <= publicSale4Supply, "Public sale limit reached");
 
         _safeMint(msg.sender, _mintAmount);
     }
