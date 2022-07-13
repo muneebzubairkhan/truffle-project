@@ -113,7 +113,7 @@ module.exports = {
     //   skipDryRun: true
     // }
   },
-  plugins: ["truffle-plugin-verify", "eth-gas-reporter"],
+  plugins: ["truffle-plugin-verify"],
   api_keys: {
     etherscan: ETHERSCAN_KEY,
     snowtrace: AVAX_SCAN_KEY,
@@ -135,8 +135,7 @@ module.exports = {
     },
   },
   mocha: {
-    reporter: "eth-gas-reporter",
-    gasReporter: { noColors: true, outputFile: "./okok.txt" },
+    // reporter: "eth-gas-reporter",
   },
 };
 
