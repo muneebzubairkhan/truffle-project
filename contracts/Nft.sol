@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // import "erc721a@3.3.0/contracts/ERC721A.sol";
 // import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
@@ -70,9 +71,22 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     //  ONLY OWNER  //
     //////////////////
 
-    function withdraw() public payable onlyOwner {
-        (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
-        require(success);
+    function withdraw() external onlyOwner {
+        uint256 balance = address(this).balance;
+
+        payable(msg.sender).transfer((balance * 0.60 ether) / 1 ether); // 60%
+        payable(msg.sender).transfer((balance * 0.30 ether) / 1 ether); // 30%
+        payable(msg.sender).transfer((balance * 0.05 ether) / 1 ether); // 05%
+        payable(msg.sender).transfer((balance * 0.05 ether) / 1 ether); // 05%
+    }
+
+    function withdrawERC20(IERC20 _erc20) external onlyOwner {
+        uint256 balance = _erc20.balanceOf(address(this));
+
+        _erc20.transfer(msg.sender, (balance * 0.60 ether) / 1 ether); // 60%
+        _erc20.transfer(msg.sender, (balance * 0.30 ether) / 1 ether); // 30%
+        _erc20.transfer(msg.sender, (balance * 0.05 ether) / 1 ether); // 05%
+        _erc20.transfer(msg.sender, (balance * 0.05 ether) / 1 ether); // 05%
     }
 
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
@@ -116,7 +130,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
 
 contract NftWhitelist1Sale is NftPublicSale {
     uint256 public whitelist1Supply = 400;
-    uint256 public whitelist1Minted = 0;
+    uint256 public whitelist1Minted;
 
     uint256 public whitelist1ActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
     uint256 public whitelist1MaxMint = 3;
@@ -164,7 +178,7 @@ contract NftWhitelist1Sale is NftPublicSale {
 
 contract NftWhitelist2Sale is NftWhitelist1Sale {
     uint256 public whitelist2Supply = 400;
-    uint256 public whitelist2Minted = 0;
+    uint256 public whitelist2Minted;
 
     uint256 public whitelist2ActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
     uint256 public whitelist2MaxMint = 3;
@@ -212,7 +226,7 @@ contract NftWhitelist2Sale is NftWhitelist1Sale {
 
 contract NftWhitelist3Sale is NftWhitelist2Sale {
     uint256 public whitelist3Supply = 400;
-    uint256 public whitelist3Minted = 0;
+    uint256 public whitelist3Minted;
 
     uint256 public whitelist3ActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
     uint256 public whitelist3MaxMint = 3;
@@ -260,7 +274,7 @@ contract NftWhitelist3Sale is NftWhitelist2Sale {
 
 contract NftWhitelist4Sale is NftWhitelist3Sale {
     uint256 public whitelist4Supply = 400;
-    uint256 public whitelist4Minted = 0;
+    uint256 public whitelist4Minted;
 
     uint256 public whitelist4ActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
     uint256 public whitelist4MaxMint = 3;
