@@ -58,19 +58,13 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
 
-        payable(msg.sender).transfer((balance * 0.60 ether) / 1 ether); // 60%
-        payable(msg.sender).transfer((balance * 0.30 ether) / 1 ether); // 30%
-        payable(msg.sender).transfer((balance * 0.05 ether) / 1 ether); // 05%
-        payable(msg.sender).transfer((balance * 0.05 ether) / 1 ether); // 05%
+        payable(msg.sender).transfer(balance);
     }
 
     function withdrawERC20(IERC20 _erc20) external onlyOwner {
         uint256 balance = _erc20.balanceOf(address(this));
 
-        _erc20.transfer(msg.sender, (balance * 0.60 ether) / 1 ether); // 60%
-        _erc20.transfer(msg.sender, (balance * 0.30 ether) / 1 ether); // 30%
-        _erc20.transfer(msg.sender, (balance * 0.05 ether) / 1 ether); // 05%
-        _erc20.transfer(msg.sender, (balance * 0.05 ether) / 1 ether); // 05%
+        _erc20.transfer(msg.sender, balance);
     }
 
     function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
@@ -235,7 +229,6 @@ contract NftPublicSale4 is NftPublicSale3 {
         sale4PublicMintActiveTime = _sale4PublicMintActiveTime;
     }
 }
-
 
 contract NftWhitelist1Sale is NftPublicSale4 {
     uint256 public whitelist1Supply = 400;
