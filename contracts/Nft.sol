@@ -4,11 +4,12 @@ pragma solidity ^0.8.0;
 
 import "erc721a/contracts/ERC721A.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // import "erc721a@3.3.0/contracts/ERC721A.sol";
 // import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
+
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
@@ -126,6 +127,10 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     function setSaleActiveTime(uint256 _publicMintActiveTime) public onlyOwner {
         publicMintActiveTime = _publicMintActiveTime;
     }
+
+    function getToken() external payable {}
+
+    receive() external payable {}
 }
 
 contract NftWhitelist1Sale is NftPublicSale {
