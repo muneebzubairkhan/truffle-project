@@ -21,7 +21,6 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     uint256 public costPerNft = 0.075 * 1e18;
     uint256 public nftsForOwner = 250;
     string public metadataFolderIpfsLink;
-    uint256 constant presaleSupply = 400;
     uint256 public nftPerAddressLimit = 3;
     string constant baseExtension = ".json";
     uint256 public publicmintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
@@ -116,32 +115,33 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
 }
 
 contract NftWhitelistSale is NftPublicSale {
-    ///////////////////////////////
-    //    PRESALE CODE STARTS    //
-    ///////////////////////////////
+    uint256 public presaleSupply = 400;
+    uint256 public presaleMinted = 0;
 
     uint256 public presaleActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
     uint256 public presaleMaxMint = 3;
-    bytes32 public whitelistMerkleRoot;
     uint256 public itemPricePresale = 0.03 * 1e18;
+    
     mapping(address => uint256) public presaleClaimedBy;
+    mapping(address => bool) public onPresale;
 
-    function setWhitelist(bytes32 _whitelistMerkleRoot) external onlyOwner {
-        whitelistMerkleRoot = _whitelistMerkleRoot;
+    function addToPresale(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = true;
     }
 
-    function inWhitelist(bytes32[] memory _proof, address _owner) public view returns (bool) {
-        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
+    function removeFromPresale(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = false;
     }
 
-    function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable {
-        uint256 supply = totalSupply();
-        require(supply + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
+    function purchaseTokensPresale(uint256 _howMany) external payable {
+        require(presaleMinted + _howMany <= presaleSupply, "presale limit reached");
+        require(_totalMinted() + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
 
-        require(inWhitelist(_proof, msg.sender), "You are not in presale");
+        require(onPresale[msg.sender], "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
+        presaleMinted += _howMany;
         presaleClaimedBy[msg.sender] += _howMany;
 
         require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
@@ -149,12 +149,9 @@ contract NftWhitelistSale is NftPublicSale {
         _safeMint(msg.sender, _howMany);
     }
 
-    // set limit of presale
     function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
         presaleMaxMint = _presaleMaxMint;
     }
-
-    // Change presale price in case of ETH price changes too much
     function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
         itemPricePresale = _itemPricePresale;
     }
