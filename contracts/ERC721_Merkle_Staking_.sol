@@ -10,10 +10,6 @@ import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-interface OpenSea {
-    function proxies(address) external view returns (address);
-}
-
 contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable, Ownable, ERC721ABurnable, ERC2981 {
     using Strings for uint256;
 
@@ -123,30 +119,31 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
     }
 }
 
-contract NftWhitelistSaleMerkle is NftPublicSale {
+contract NftWhitelistSale is NftPublicSale {
     ///////////////////////////////
     //    PRESALE CODE STARTS    //
     ///////////////////////////////
 
     uint256 public presaleActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
     uint256 public presaleMaxMint = 3;
-    bytes32 public whitelistMerkleRoot;
     uint256 public itemPricePresale = 0.03 * 1e18;
     mapping(address => uint256) public presaleClaimedBy;
+    mapping(address => bool) public onPresale;
 
-    function setWhitelist(bytes32 _whitelistMerkleRoot) external onlyOwner {
-        whitelistMerkleRoot = _whitelistMerkleRoot;
+    function addToPresale(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = true;
     }
 
-    function inWhitelist(bytes32[] memory _proof, address _owner) public view returns (bool) {
-        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
+    function removeFromPresale(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = false;
     }
 
-    function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable {
+    function purchaseTokensPresale(uint256 _howMany) external payable {
         uint256 supply = totalSupply();
+        require(supply <= presaleSupply, "presale limit reached");
         require(supply + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
 
-        require(inWhitelist(_proof, msg.sender), "You are not in presale");
+        require(onPresale[msg.sender], "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
         require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
 
@@ -172,49 +169,7 @@ contract NftWhitelistSaleMerkle is NftPublicSale {
     }
 }
 
-contract NftStaking is NftWhitelistSaleMerkle {
-    //////////////////////////////
-    // WHITELISTING FOR STAKING //
-    //////////////////////////////
-
-    // tokenId => staked (yes or no)
-    mapping(address => bool) public whitelistedForStaking;
-
-    function addToWhitelistForStaking(address _address, bool _add) external onlyOwner {
-        whitelistedForStaking[_address] = _add;
-    }
-
-    modifier onlyWhitelistedForStaking() {
-        require(whitelistedForStaking[msg.sender], "Caller is not whitelisted for staking");
-        _;
-    }
-
-    /////////////////////
-    // STAKING METHOD  //
-    /////////////////////
-
-    mapping(uint256 => bool) public staked;
-
-    function _beforeTokenTransfers(
-        address,
-        address,
-        uint256 startTokenId,
-        uint256
-    ) internal view override {
-        require(!staked[startTokenId], "Unstake tokenId it to transfer");
-    }
-
-    // stake / unstake nfts
-    function stakeNfts(uint256[] calldata _tokenIds, bool _stake) external onlyWhitelistedForStaking {
-        for (uint256 i = 0; i < _tokenIds.length; i++) staked[_tokenIds[i]] = _stake;
-    }
-
-    function ownerStartTimestamp(uint256 tokenId) public view returns (uint256) {
-        return _ownershipOf(tokenId).startTimestamp;
-    }
-}
-
-contract NftAutoApproveMarketPlaces is NftStaking {
+contract NftAutoApproveMarketPlaces is NftWhitelistSale {
     ////////////////////////////////
     // AUTO APPROVE MARKETPLACES  //
     ////////////////////////////////
@@ -226,14 +181,7 @@ contract NftAutoApproveMarketPlaces is NftStaking {
     }
 
     function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721A) returns (bool) {
-        return
-            projectProxy[_operator] || // Auto Approve any Marketplace,
-                _operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner) ||
-                _operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354 || // Looksrare
-                _operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e || // Rarible
-                _operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be // X2Y2
-                ? true
-                : super.isApprovedForAll(_owner, _operator);
+        return projectProxy[_operator] ? true : super.isApprovedForAll(_owner, _operator);
     }
 }
 
