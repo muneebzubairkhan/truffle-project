@@ -30,7 +30,14 @@ contract("Nft", async ([owner, client, parentCompany]) => {
       value: toWei("0.01"),
       from: client,
     });
-  
+
+    await nft.setWhitelist4ActiveTime(0);
+    await nft.setWhitelist4(whitelist1, { from: owner });
+    await nft.purchaseTokensWhitelist4(1, {
+      value: toWei("0.01"),
+      from: client,
+    });
+
     console.log("before", fromWei(await web3.eth.getBalance(owner)));
     await nft.withdraw({ from: owner });
     console.log("after", fromWei(await web3.eth.getBalance(owner)));
