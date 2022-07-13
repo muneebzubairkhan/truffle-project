@@ -396,7 +396,7 @@ contract NftWhitelist3Sale is NftWhitelist2Sale {
     }
 
     function purchaseTokensWhitelist3(uint256 _howMany) external payable {
-        require(whitelist3Minted + _howMany <= whitelist3Supply, "Whitelist3 limit reached");
+        require(whitelist3Minted + _howMany <= whitelist3Supply, "Whitelist limit reached");
         require(_totalMinted() + _howMany + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
 
         require(onWhitelist3[msg.sender], "You are not in whitelist");
