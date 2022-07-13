@@ -115,49 +115,49 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
 }
 
 contract NftWhitelistSale is NftPublicSale {
-    uint256 public presaleSupply = 400;
-    uint256 public presaleMinted = 0;
+    uint256 public whitelistSupply = 400;
+    uint256 public whitelistMinted = 0;
 
-    uint256 public presaleActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
-    uint256 public presaleMaxMint = 3;
-    uint256 public itemPricePresale = 0.03 * 1e18;
+    uint256 public whitelistActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/;
+    uint256 public whitelistMaxMint = 3;
+    uint256 public itemPriceWhitelist = 0.03 * 1e18;
     
-    mapping(address => uint256) public presaleClaimedBy;
-    mapping(address => bool) public onPresale;
+    mapping(address => uint256) public whitelistClaimedBy;
+    mapping(address => bool) public onWhitelist;
 
-    function addToPresale(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = true;
+    function addToWhitelist(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onWhitelist[addresses[i]] = true;
     }
 
-    function removeFromPresale(address[] calldata addresses) external onlyOwner {
-        for (uint256 i = 0; i < addresses.length; i++) onPresale[addresses[i]] = false;
+    function removeFromWhitelist(address[] calldata addresses) external onlyOwner {
+        for (uint256 i = 0; i < addresses.length; i++) onWhitelist[addresses[i]] = false;
     }
 
-    function purchaseTokensPresale(uint256 _howMany) external payable {
-        require(presaleMinted + _howMany <= presaleSupply, "presale limit reached");
+    function purchaseTokensWhitelist(uint256 _howMany) external payable {
+        require(whitelistMinted + _howMany <= whitelistSupply, "whitelist limit reached");
         require(_totalMinted() + _howMany + nftsForOwner <= maxSupply, "max NFT limit exceeded");
 
-        require(onPresale[msg.sender], "You are not in presale");
-        require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value >= _howMany * itemPricePresale, "Try to send more ETH");
+        require(onWhitelist[msg.sender], "You are not in whitelist");
+        require(block.timestamp > whitelistActiveTime, "Whitelist is not active");
+        require(msg.value >= _howMany * itemPriceWhitelist, "Try to send more ETH");
 
-        presaleMinted += _howMany;
-        presaleClaimedBy[msg.sender] += _howMany;
+        whitelistMinted += _howMany;
+        whitelistClaimedBy[msg.sender] += _howMany;
 
-        require(presaleClaimedBy[msg.sender] <= presaleMaxMint, "Purchase exceeds max allowed");
+        require(whitelistClaimedBy[msg.sender] <= whitelistMaxMint, "Purchase exceeds max allowed");
 
         _safeMint(msg.sender, _howMany);
     }
 
-    function setPresaleMaxMint(uint256 _presaleMaxMint) external onlyOwner {
-        presaleMaxMint = _presaleMaxMint;
+    function setWhitelistMaxMint(uint256 _whitelistMaxMint) external onlyOwner {
+        whitelistMaxMint = _whitelistMaxMint;
     }
-    function setPricePresale(uint256 _itemPricePresale) external onlyOwner {
-        itemPricePresale = _itemPricePresale;
+    function setPriceWhitelist(uint256 _itemPriceWhitelist) external onlyOwner {
+        itemPriceWhitelist = _itemPriceWhitelist;
     }
 
-    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
-        presaleActiveTime = _presaleActiveTime;
+    function setWhitelistActiveTime(uint256 _whitelistActiveTime) external onlyOwner {
+        whitelistActiveTime = _whitelistActiveTime;
     }
 }
 
