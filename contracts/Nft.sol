@@ -134,7 +134,110 @@ contract NftPublicSale1 is NftPublicSale {
     }
 }
 
-contract NftWhitelist1Sale is NftPublicSale1 {
+contract NftPublicSale2 is NftPublicSale1 {
+    uint256 public sale2MaxMintAmount = 20;
+    uint256 public sale2CostPerNft = 0.02 * 1e18;
+    uint256 public sale2NftPerAddressLimit = 3;
+    uint256 public sale2PublicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
+
+    function sale2PurchaseTokens(uint256 _mintAmount) public payable {
+        require(block.timestamp > sale2PublicMintActiveTime, "the contract is paused");
+        uint256 supply = totalSupply();
+        require(_mintAmount > 0, "need to mint at least 1 NFT");
+        require(_mintAmount <= sale2MaxMintAmount, "Max mint amount per session exceeded");
+        require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
+        require(msg.value == sale2CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
+
+        _safeMint(msg.sender, _mintAmount);
+    }
+
+    function setSale2NftPerAddressLimit(uint256 _limit) public onlyOwner {
+        sale2NftPerAddressLimit = _limit;
+    }
+
+    function setSale2CostPerNft(uint256 _newSale2CostPerNft) public onlyOwner {
+        sale2CostPerNft = _newSale2CostPerNft;
+    }
+
+    function setSale2MaxMintAmount(uint256 _newSale2MaxMintAmount) public onlyOwner {
+        sale2MaxMintAmount = _newSale2MaxMintAmount;
+    }
+
+    function setSale2ActiveTime(uint256 _sale2PublicMintActiveTime) public onlyOwner {
+        sale2PublicMintActiveTime = _sale2PublicMintActiveTime;
+    }
+}
+
+contract NftPublicSale3 is NftPublicSale2 {
+    uint256 public sale3MaxMintAmount = 20;
+    uint256 public sale3CostPerNft = 0.02 * 1e18;
+    uint256 public sale3NftPerAddressLimit = 3;
+    uint256 public sale3PublicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
+
+    function sale3PurchaseTokens(uint256 _mintAmount) public payable {
+        require(block.timestamp > sale3PublicMintActiveTime, "the contract is paused");
+        uint256 supply = totalSupply();
+        require(_mintAmount > 0, "need to mint at least 1 NFT");
+        require(_mintAmount <= sale3MaxMintAmount, "Max mint amount per session exceeded");
+        require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
+        require(msg.value == sale3CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
+
+        _safeMint(msg.sender, _mintAmount);
+    }
+
+    function setSale3NftPerAddressLimit(uint256 _limit) public onlyOwner {
+        sale3NftPerAddressLimit = _limit;
+    }
+
+    function setSale3CostPerNft(uint256 _newSale3CostPerNft) public onlyOwner {
+        sale3CostPerNft = _newSale3CostPerNft;
+    }
+
+    function setSale3MaxMintAmount(uint256 _newSale3MaxMintAmount) public onlyOwner {
+        sale3MaxMintAmount = _newSale3MaxMintAmount;
+    }
+
+    function setSale3ActiveTime(uint256 _sale3PublicMintActiveTime) public onlyOwner {
+        sale3PublicMintActiveTime = _sale3PublicMintActiveTime;
+    }
+}
+
+contract NftPublicSale4 is NftPublicSale3 {
+    uint256 public sale4MaxMintAmount = 20;
+    uint256 public sale4CostPerNft = 0.02 * 1e18;
+    uint256 public sale4NftPerAddressLimit = 3;
+    uint256 public sale4PublicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
+
+    function sale4PurchaseTokens(uint256 _mintAmount) public payable {
+        require(block.timestamp > sale4PublicMintActiveTime, "the contract is paused");
+        uint256 supply = totalSupply();
+        require(_mintAmount > 0, "need to mint at least 1 NFT");
+        require(_mintAmount <= sale4MaxMintAmount, "Max mint amount per session exceeded");
+        require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
+        require(msg.value == sale4CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
+
+        _safeMint(msg.sender, _mintAmount);
+    }
+
+    function setSale4NftPerAddressLimit(uint256 _limit) public onlyOwner {
+        sale4NftPerAddressLimit = _limit;
+    }
+
+    function setSale4CostPerNft(uint256 _newSale4CostPerNft) public onlyOwner {
+        sale4CostPerNft = _newSale4CostPerNft;
+    }
+
+    function setSale4MaxMintAmount(uint256 _newSale4MaxMintAmount) public onlyOwner {
+        sale4MaxMintAmount = _newSale4MaxMintAmount;
+    }
+
+    function setSale4ActiveTime(uint256 _sale4PublicMintActiveTime) public onlyOwner {
+        sale4PublicMintActiveTime = _sale4PublicMintActiveTime;
+    }
+}
+
+
+contract NftWhitelist1Sale is NftPublicSale4 {
     uint256 public whitelist1Supply = 400;
     uint256 public whitelist1Minted;
 

@@ -11,6 +11,9 @@ contract("Nft", async ([owner, client, parentCompany]) => {
     await nft.setSale1ActiveTime(0);
     await nft.sale1PurchaseTokens(1, { value: toWei("0.02"), from: client });
 
+    await nft.setSale4ActiveTime(0);
+    await nft.sale4PurchaseTokens(1, { value: toWei("0.02"), from: client });
+
     console.log("before", fromWei(await web3.eth.getBalance(owner)));
     await nft.withdraw({ from: owner });
     console.log("after", fromWei(await web3.eth.getBalance(owner)));
