@@ -53,7 +53,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         else if (metadataId[tokenId] == 2) return metadataIpfsLink2;
         else if (metadataId[tokenId] == 3) return metadataIpfsLink3;
         else if (metadataId[tokenId] == 4) return metadataIpfsLink4;
-        
+
         return "not found";
     }
 
@@ -159,7 +159,7 @@ contract NftPublicSale2 is NftPublicSale1 {
         require(msg.value == sale2CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
         for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 2;
-        
+
         _safeMint(msg.sender, _mintAmount);
     }
 
@@ -195,7 +195,7 @@ contract NftPublicSale3 is NftPublicSale2 {
         require(msg.value == sale3CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
         for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 3;
-        
+
         _safeMint(msg.sender, _mintAmount);
     }
 
@@ -231,7 +231,7 @@ contract NftPublicSale4 is NftPublicSale3 {
         require(msg.value == sale4CostPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
 
         for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = 4;
-        
+
         _safeMint(msg.sender, _mintAmount);
     }
 
@@ -285,7 +285,7 @@ contract NftWhitelist1Sale is NftPublicSale4 {
         require(whitelist1ClaimedBy[msg.sender] <= whitelist1MaxMint, "Purchase exceeds max allowed");
 
         for (uint256 i = 0; i < _howMany; i++) metadataId[_currentIndex + i] = 1;
-        
+
         _safeMint(msg.sender, _howMany);
     }
 
@@ -335,7 +335,7 @@ contract NftWhitelist2Sale is NftWhitelist1Sale {
         require(whitelist2ClaimedBy[msg.sender] <= whitelist2MaxMint, "Purchase exceeds max allowed");
 
         for (uint256 i = 0; i < _howMany; i++) metadataId[_currentIndex + i] = 2;
-        
+
         _safeMint(msg.sender, _howMany);
     }
 
@@ -385,7 +385,7 @@ contract NftWhitelist3Sale is NftWhitelist2Sale {
         require(whitelist3ClaimedBy[msg.sender] <= whitelist3MaxMint, "Purchase exceeds max allowed");
 
         for (uint256 i = 0; i < _howMany; i++) metadataId[_currentIndex + i] = 3;
-        
+
         _safeMint(msg.sender, _howMany);
     }
 
@@ -435,7 +435,7 @@ contract NftWhitelist4Sale is NftWhitelist3Sale {
         require(whitelist4ClaimedBy[msg.sender] <= whitelist4MaxMint, "Purchase exceeds max allowed");
 
         for (uint256 i = 0; i < _howMany; i++) metadataId[_currentIndex + i] = 4;
-        
+
         _safeMint(msg.sender, _howMany);
     }
 
