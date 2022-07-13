@@ -24,9 +24,9 @@ contract("Nft", async ([owner, client, parentCompany]) => {
       "0x989b691745F7B0139a429d2B36364668a01A39Cf",
     ];
 
-    await nft.setPresaleActiveTime(0);
+    await nft.setWhitelistActiveTime(0);
     await nft.setWhitelist(whitelist, { from: owner });
-    await nft.purchaseTokensPresale(1, client), {
+    await nft.purchaseTokensWhitelist(1, client), {
       value: toWei("0.03"),
       from: client,
     });
