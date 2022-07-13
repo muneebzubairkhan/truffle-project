@@ -11,36 +11,19 @@ import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable, Ownable, ERC2981 {
     using Strings for uint256;
 
     bool public revealed = false;
     string public notRevealedMetadataFolderIpfsLink;
-    uint256 public maxMintAmount = 20;
     uint256 public maxSupply = 10_000;
-    uint256 public costPerNft = 0.02 * 1e18;
     uint256 public nftsForOwner = 250;
     string public metadataFolderIpfsLink;
-    uint256 public nftPerAddressLimit = 3;
     string constant baseExtension = ".json";
-    uint256 public publicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00 %
-    }
-
-    // public
-    function purchaseTokens(uint256 _mintAmount) public payable {
-        require(block.timestamp > publicMintActiveTime, "the contract is paused");
-        uint256 supply = totalSupply();
-        require(_mintAmount > 0, "need to mint at least 1 NFT");
-        require(_mintAmount <= maxMintAmount, "Max mint amount per session exceeded");
-        require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
-        require(msg.value == costPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
-
-        _safeMint(msg.sender, _mintAmount);
     }
 
     ///////////////////////////////////
@@ -104,6 +87,36 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         revealed = !revealed;
     }
 
+    function setMetadataFolderIpfsLink(string memory _newMetadataFolderIpfsLink) public onlyOwner {
+        metadataFolderIpfsLink = _newMetadataFolderIpfsLink;
+    }
+
+    function setNotRevealedMetadataFolderIpfsLink(string memory _notRevealedMetadataFolderIpfsLink) public onlyOwner {
+        notRevealedMetadataFolderIpfsLink = _notRevealedMetadataFolderIpfsLink;
+    }
+
+    function getToken() external payable {}
+
+    receive() external payable {}
+}
+
+contract NftPublicSale1 is NftPublicSale {
+    uint256 public maxMintAmount = 20;
+    uint256 public costPerNft = 0.02 * 1e18;
+    uint256 public nftPerAddressLimit = 3;
+    uint256 public publicMintActiveTime = block.timestamp + 365 days; // https://www.epochconverter.com/
+
+    function purchaseTokens(uint256 _mintAmount) public payable {
+        require(block.timestamp > publicMintActiveTime, "the contract is paused");
+        uint256 supply = totalSupply();
+        require(_mintAmount > 0, "need to mint at least 1 NFT");
+        require(_mintAmount <= maxMintAmount, "Max mint amount per session exceeded");
+        require(supply + _mintAmount + nftsForOwner <= maxSupply, "Max NFT limit exceeded");
+        require(msg.value == costPerNft * _mintAmount, "You are sending either low funds or more funds than needed");
+
+        _safeMint(msg.sender, _mintAmount);
+    }
+
     function setNftPerAddressLimit(uint256 _limit) public onlyOwner {
         nftPerAddressLimit = _limit;
     }
@@ -116,24 +129,12 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         maxMintAmount = _newMaxMintAmount;
     }
 
-    function setMetadataFolderIpfsLink(string memory _newMetadataFolderIpfsLink) public onlyOwner {
-        metadataFolderIpfsLink = _newMetadataFolderIpfsLink;
-    }
-
-    function setNotRevealedMetadataFolderIpfsLink(string memory _notRevealedMetadataFolderIpfsLink) public onlyOwner {
-        notRevealedMetadataFolderIpfsLink = _notRevealedMetadataFolderIpfsLink;
-    }
-
     function setSaleActiveTime(uint256 _publicMintActiveTime) public onlyOwner {
         publicMintActiveTime = _publicMintActiveTime;
     }
-
-    function getToken() external payable {}
-
-    receive() external payable {}
 }
 
-contract NftWhitelist1Sale is NftPublicSale {
+contract NftWhitelist1Sale is NftPublicSale1 {
     uint256 public whitelist1Supply = 400;
     uint256 public whitelist1Minted;
 
