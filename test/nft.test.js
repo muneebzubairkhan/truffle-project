@@ -6,6 +6,7 @@ contract("Nft", async ([owner, client, parentCompany]) => {
   it("deploy smart contract", async () => {
     //
     let nft = await Nft.new({ from: owner });
+
     console.log(owner === (await nft.owner()));
 
     await nft.setSale1ActiveTime(0);
