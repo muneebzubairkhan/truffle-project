@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.0;
 
-// import "erc721a/contracts/ERC721A.sol";
-// import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+import "erc721a/contracts/ERC721A.sol";
+import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 
-import "erc721a@3.3.0/contracts/ERC721A.sol";
-import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
+// import "erc721a@3.3.0/contracts/ERC721A.sol";
+// import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -69,8 +69,12 @@ contract NftPublicSale is ERC721A("fof", "gog"), ERC721AQueryable, Ownable, ERC2
         _erc20.transfer(msg.sender, balance);
     }
 
-    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany, uint option1to4) external onlyOwner {
-        require(option1to4 >=1 && option1to4 <= 4, "option should be 1 to 4");
+    function giftNft(
+        address[] calldata _sendNftsTo,
+        uint256 _howMany,
+        uint256 option1to4
+    ) external onlyOwner {
+        require(option1to4 >= 1 && option1to4 <= 4, "option should be 1 to 4");
         uint256 _mintAmount = _sendNftsTo.length * _howMany;
         nftsForOwner -= _mintAmount;
 
@@ -83,15 +87,19 @@ contract NftPublicSale is ERC721A("fof", "gog"), ERC721AQueryable, Ownable, ERC2
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
 
-    function setMetadataFolderIpfsLink(
-        string memory _metadata1,
-        string memory _metadata2,
-        string memory _metadata3,
-        string memory _metadata4
-    ) public onlyOwner {
+    function setMetadata1FolderIpfsLink(string memory _metadata1) public onlyOwner {
         metadataIpfsLink1 = _metadata1;
+    }
+
+    function setMetadata2FolderIpfsLink(string memory _metadata2) public onlyOwner {
         metadataIpfsLink2 = _metadata2;
+    }
+
+    function setMetadata3FolderIpfsLink(string memory _metadata3) public onlyOwner {
         metadataIpfsLink3 = _metadata3;
+    }
+
+    function setMetadata4FolderIpfsLink(string memory _metadata4) public onlyOwner {
         metadataIpfsLink4 = _metadata4;
     }
 
