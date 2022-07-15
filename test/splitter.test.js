@@ -23,10 +23,18 @@ contract("Nft", async ([owner, client, parentCompany]) => {
       from: owner,
       to: weth9.address,
       value: "100",
-    //   gas: 25000,
+      //   gas: 25000,
     });
     await weth9.transfer(splitter.address, "100");
 
-    splitter.withdrawERC20();
+    console.log(
+      "erc20 bal before ",
+      "" + (await weth9.balanceOf(splitter.address))
+    );
+    await splitter.withdrawERC20(weth9.address);
+    console.log(
+      "erc20 bal after ",
+      "" + (await weth9.balanceOf(splitter.address))
+    );
   });
 });
