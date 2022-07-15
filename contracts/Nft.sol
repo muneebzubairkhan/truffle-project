@@ -2,26 +2,26 @@
 
 pragma solidity ^0.8.0;
 
-import "erc721a/contracts/ERC721A.sol";
-import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+// import "erc721a/contracts/ERC721A.sol";
+// import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 
-// import "erc721a@3.3.0/contracts/ERC721A.sol";
-// import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
+import "erc721a@3.3.0/contracts/ERC721A.sol";
+import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
-contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable, Ownable, ERC2981 {
+contract NftPublicSale is ERC721A("fof", "gog"), ERC721AQueryable, Ownable, ERC2981 {
     using Strings for uint256;
 
     uint256 public maxSupply = 4000;
     uint256 public nftsForOwner = 100;
 
-    string public metadataIpfsLink1 = "https://ipfs.io/ipfs/1.json";
-    string public metadataIpfsLink2 = "https://ipfs.io/ipfs/2.json";
-    string public metadataIpfsLink3 = "https://ipfs.io/ipfs/3.json";
-    string public metadataIpfsLink4 = "https://ipfs.io/ipfs/4.json";
+    string public metadataIpfsLink1 = "https://gateway.moralisipfs.com/ipfs/Qmec26jwKZPB5Wn9sgL7kJ2z1AbfSR8ckacjveyn4BceGj/50.json";
+    string public metadataIpfsLink2 = "https://angryfalcon.pixelartcollection.com/2.json";
+    string public metadataIpfsLink3 = "https://gateway.moralisipfs.com/ipfs/QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/30";
+    string public metadataIpfsLink4 = "https://gateway.moralisipfs.com/ipfs/QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/40";
 
     // id minted => meta data id
     mapping(uint256 => uint256) public metadataId;
@@ -69,8 +69,12 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         _erc20.transfer(msg.sender, balance);
     }
 
-    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
-        nftsForOwner -= _sendNftsTo.length * _howMany;
+    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany, uint option1to4) external onlyOwner {
+        require(option1to4 >=1 && option1to4 <= 4, "option should be 1 to 4");
+        uint256 _mintAmount = _sendNftsTo.length * _howMany;
+        nftsForOwner -= _mintAmount;
+
+        for (uint256 i = 0; i < _mintAmount; i++) metadataId[_currentIndex + i] = option1to4;
 
         for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
     }
