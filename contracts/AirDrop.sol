@@ -9,12 +9,15 @@ contract AirDrop is Ownable {
     uint256 fromBlock;
     uint256 toBlock;
 
+    mapping(uint256 => address) public rewardWinner;
+
     function getFromToBlock() external view returns (uint256, uint256) {
         return (fromBlock, toBlock);
     }
 
     function airdropERC20(
         IERC20 _token,
+        uint256[] calldata _tokenIds,
         address[] calldata _to,
         uint256[] calldata _values,
         uint256 _fromBlock,
@@ -24,7 +27,13 @@ contract AirDrop is Ownable {
         fromBlock = _fromBlock;
         toBlock = _toBlock;
 
-        for (uint256 i = 0; i < _to.length; i++) require(_token.transfer(_to[i], _values[i]));
+        for (uint256 i = 0; i < _to.length; i++) {
+            address winner = rewardWinner[_tokenIds[i]];
+
+            if (winner == address(0)) rewardWinner[_tokenIds[i]] = _to[i];
+
+            require(_token.transfer(rewardWinner[_tokenIds[i]], _values[i]));
+        }
     }
 
     function withdrawAllWETH() external onlyOwner {
