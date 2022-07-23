@@ -1,3 +1,7 @@
+// OS Seaport Add
+// OS Old Remove
+// version fix in remix
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
@@ -40,6 +44,7 @@ contract NftPublicSale is ERC721A("DysfunctionalDogs", "DDs"), ERC721AQueryable,
         uint256 supply = totalSupply();
         require(_mintAmount > 0, "need to mint at least 1 NFT");
         require(_mintAmount <= maxMintAmount, "max mint amount per session exceeded");
+        require(_numberMinted(msg.sender) <= nftPerAddressLimit, "max mint amount per session exceeded");
         require(supply + _mintAmount + nftsForOwner <= maxSupply, "max NFT limit exceeded");
         require(msg.value >= costPerNft * _mintAmount, "insufficient funds");
 
