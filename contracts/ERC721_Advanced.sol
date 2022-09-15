@@ -30,29 +30,32 @@ contract CryptoKingsClub is ERC721A("CryptoKingsClub", "BS"), ERC721AQueryable, 
     uint256 public itemPrice = 0.12 ether;
     uint256 public constant maxSupply = 4999;
     uint256 public saleActiveTime = type(uint256).max;
-    string public baseURI = "ipfs://QmNQnbjuesfcSMzcDShxZU1oGQjXaQWvYXchNYWHeieonh/";
+    string public imagesFolder = "ipfs://QmNQnbjuesfcSMzcDShxZU1oGQjXaQWvYXchNYWHeieonh/";
 
     // Whitelist
     bytes32 public whitelistMerkleRoot;
     uint256 public itemPriceWhitelist = 0.09 ether;
     uint256 public whitelistActiveTime = type(uint256).max;
 
+    // Per Wallet Limit
+    uint256 public maxKingsPerWallet = 2;
+
     // Auto Approve Marketplaces
-    mapping(address => bool) public projectProxy;
+    mapping(address => bool) public approvedProxy;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseKings(uint256 _howMany) external payable nonReentrant {
-        _safeMint(msg.sender, _howMany);
+    function purchaseKings(uint256 _qty) external payable nonReentrant {
+        _safeMint(msg.sender, _qty);
 
         require(totalSupply() <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
-        require(_howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
-        require(msg.value == _howMany * itemPrice, "Try to send exact amount of ETH");
+        require(msg.value == _qty * itemPrice, "Try to send exact amount of ETH");
+        require(_numberMinted(msg.sender) <= maxKingsPerWallet, "max kings per wallet reached");
     }
 
     /// @notice Owner can withdraw from here
@@ -64,6 +67,10 @@ contract CryptoKingsClub is ERC721A("CryptoKingsClub", "BS"), ERC721AQueryable, 
     function setPrice(uint256 _newPrice) external onlyOwner {
         itemPrice = _newPrice;
     }
+   
+    function setMaxKingsPerWallet(uint256 _maxKingsPerWallet) external onlyOwner {
+        maxKingsPerWallet = _maxKingsPerWallet;
+    }
 
     /// @notice set sale active time
     function setSaleActiveTime(uint256 _saleActiveTime) external onlyOwner {
@@ -71,13 +78,13 @@ contract CryptoKingsClub is ERC721A("CryptoKingsClub", "BS"), ERC721AQueryable, 
     }
 
     /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
-    function setBaseURI(string memory __baseURI) external onlyOwner {
-        baseURI = __baseURI;
+    function setImagesFolder(string memory __imagesFolder) external onlyOwner {
+        imagesFolder = __imagesFolder;
     }
 
     /// @notice Send NFTs to a list of addresses
-    function giftNft(address[] calldata _sendNftsTo, uint256 _howMany) external onlyOwner {
-        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _howMany);
+    function giftNft(address[] calldata _sendNftsTo, uint256 _qty) external onlyOwner {
+        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _qty);
         require(totalSupply() <= maxSupply, "Try minting less");
     }
 
@@ -86,7 +93,7 @@ contract CryptoKingsClub is ERC721A("CryptoKingsClub", "BS"), ERC721AQueryable, 
     ////////////////////
 
     function _baseURI() internal view override returns (string memory) {
-        return baseURI;
+        return imagesFolder;
     }
 
     function _startTokenId() internal pure override returns (uint256) {
@@ -109,27 +116,27 @@ contract CryptoKingsClub is ERC721A("CryptoKingsClub", "BS"), ERC721AQueryable, 
     // AUTO APPROVE MARKETPLACES //
     ///////////////////////////////
 
-    function flipProxyState(address proxyAddress) external onlyOwner {
-        projectProxy[proxyAddress] = !projectProxy[proxyAddress];
+    function autoApproveMarketplace(address _marketplace) external onlyOwner {
+        approvedProxy[_marketplace] = !approvedProxy[_marketplace];
     }
 
     function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721) returns (bool) {
-        return projectProxy[_operator] ? true : super.isApprovedForAll(_owner, _operator);
+        return approvedProxy[_operator] ? true : super.isApprovedForAll(_owner, _operator);
     }
 
     ////////////////
     // Whitelist  //
     ////////////////
 
-    function purchaseKingsWhitelist(uint256 _howMany, bytes32[] calldata _proof) external payable nonReentrant {
-        _safeMint(msg.sender, _howMany);
+    function purchaseKingsWhitelist(uint256 _qty, bytes32[] calldata _proof) external payable nonReentrant {
+        _safeMint(msg.sender, _qty);
 
         require(totalSupply() <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
-        require(_howMany <= 50, "Mint min 1, max 50");
         require(inWhitelist(msg.sender, _proof), "You are not in whitelist");
         require(block.timestamp > whitelistActiveTime, "Whitelist is not active");
-        require(msg.value == _howMany * itemPriceWhitelist, "Try to send exact amount of ETH");
+        require(msg.value == _qty * itemPriceWhitelist, "Try to send exact amount of ETH");
+        require(_numberMinted(msg.sender) <= maxKingsPerWallet, "max kings per wallet reached");
     }
 
     function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {
