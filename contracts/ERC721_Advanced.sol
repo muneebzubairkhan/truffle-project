@@ -1,37 +1,32 @@
-// Boredsone is The First Metaverse Theme Park!
+// Crypto Kings Club
+// 10,000 Kings are Invading the Metaverse to takeover their throne as the rightful rulers
 
-// Website:    https://boredsone.com/
-// OpenSea:    https://opensea.io/collection/boredsone/
-// Discord:    https://discord.com/invite/boredsone
-// Instagram:  https://www.instagram.com/boredsone/
-// Twitter:    https://twitter.com/Boredsone
-// Youtube:    https://www.youtube.com/watch?v=fmKltVVaVeI
-
-// 88888888ba                                                 88
-// 88      "8b                                                88
-// 88      ,8P                                                88
-// 88aaaaaa8P'   ,adPPYba,   8b,dPPYba,   ,adPPYba,   ,adPPYb,88  ,adPPYba,   ,adPPYba,   8b,dPPYba,    ,adPPYba,
-// 88""""""8b,  a8"     "8a  88P'   "Y8  a8P_____88  a8"    `Y88  I8[    ""  a8"     "8a  88P'   `"8a  a8P_____88
-// 88      `8b  8b       d8  88          8PP"""""""  8b       88   `"Y8ba,   8b       d8  88       88  8PP"""""""
-// 88      a8P  "8a,   ,a8"  88          "8b,   ,aa  "8a,   ,d88  aa    ]8I  "8a,   ,a8"  88       88  "8b,   ,aa
-// 88888888P"    `"YbbdP"'   88           `"Ybbd8"'   `"8bbdP"Y8  `"YbbdP"'   `"YbbdP"'   88       88   `"Ybbd8"'
+// Website:
+// OpenSea:
+// Discord:
+// Instagram:
+// Twitter:
+// Youtube:
 
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+
+import "erc721a/contracts/ERC721A.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "erc721a/contracts/ERC721A.sol";
+// import "erc721a@3.3.0/contracts/ERC721A.sol";
+// import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
+// import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 
 contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
     string baseURI = "ipfs://QmNQnbjuesfcSMzcDShxZU1oGQjXaQWvYXchNYWHeieonh/";
-    uint256 saleActiveTime = 1650297600;
-
+    uint256 saleActiveTime = type(uint256).max;
     uint256 constant maxSupply = 4999;
     uint256 itemPrice = 0.12 ether;
 
@@ -47,7 +42,7 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurna
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany <= 50, "Mint min 1, max 50");
         require(block.timestamp > saleActiveTime, "Sale is not active");
-        require(msg.value == _howMany * itemPrice, "Try to send more ETH");
+        require(msg.value == _howMany * itemPrice, "Try to send exact amount of ETH");
     }
 
     /// @notice Owner can withdraw from here
@@ -77,7 +72,7 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurna
     }
 
     ////////////////////
-    // HELPER METHOD  //
+    // SYSTEM METHODS //
     ////////////////////
 
     function _baseURI() internal view override returns (string memory) {
@@ -88,13 +83,8 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurna
         return 1;
     }
 
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721A, ERC2981) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC165, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
-    }
-
-    function burn(uint256 tokenId) public override {
-        super._burn(tokenId);
-        _resetTokenRoyalty(tokenId);
     }
 
     function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) external onlyOwner {
@@ -115,15 +105,8 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurna
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
     }
 
-    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
-        return
-            projectProxy[_operator] || // Auto Approve any Marketplace,
-                _operator == OpenSea(0xa5409ec958C83C3f309868babACA7c86DCB077c1).proxies(_owner) ||
-                _operator == 0xF849de01B080aDC3A814FaBE1E2087475cF2E354 || // Looksrare
-                _operator == 0xf42aa99F011A1fA7CDA90E5E98b277E306BcA83e || // Rarible
-                _operator == 0x4feE7B061C97C9c496b01DbcE9CDb10c02f0a0Be // X2Y2
-                ? true
-                : super.isApprovedForAll(_owner, _operator);
+    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721) returns (bool) {
+        return projectProxy[_operator] ? true : super.isApprovedForAll(_owner, _operator);
     }
 
     //////////////
@@ -142,7 +125,7 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurna
         require(_howMany <= 50, "Mint min 1, max 50");
         require(inWhitelist(msg.sender, _proof), "You are not in presale");
         require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value == _howMany * itemPricePresale, "Try to send more ETH");
+        require(msg.value == _howMany * itemPricePresale, "Try to send exact amount of ETH");
     }
 
     function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {

@@ -10,6 +10,8 @@
   "selectedNetwork": "fuji",
   "allContracts": "Migrations Boredsone",
   "scripts": {
+    "npm i": "npm i",
+    "npm start": "npm start",
     "start": "truffle migrate --reset --network development",
     "____": "_____",
     "testRegular": "nodemon --exec \"truffle test\" --ext \".test.js .sol\"",
