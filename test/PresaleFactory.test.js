@@ -3,7 +3,7 @@ const { MerkleTree } = require("merkletreejs");
 const keccak256 = require("keccak256");
 const { toChecksumAddress } = require("web3-utils");
 
-const Nft = artifacts.require("Boredsone");
+const Nft = artifacts.require("CryptoKingsClub");
 
 contract("Nft", async ([owner, client, parentCompany]) => {
   it("deploy smart contract", async () => {
@@ -11,7 +11,7 @@ contract("Nft", async ([owner, client, parentCompany]) => {
     let nft = await Nft.new({ from: owner });
     console.log(owner === (await nft.owner()));
     await nft.setSaleActiveTime(0);
-    await nft.purchaseTokens(1, { value: toWei("0.12"), from: client });
+    await nft.purchaseKings(1, { value: toWei("0.12"), from: client });
     console.log(fromWei(await web3.eth.getBalance(owner)));
     await nft.withdraw({ from: owner });
     console.log(fromWei(await web3.eth.getBalance(owner)));
@@ -30,16 +30,14 @@ contract("Nft", async ([owner, client, parentCompany]) => {
       sortPairs: true,
     });
 
-    await nft.setPresaleActiveTime(0);
+    await nft.setWhitelistActiveTime(0);
     await nft.setWhitelist(tree.getHexRoot(), { from: owner });
-    await nft.purchaseTokensPresale(1, tree.getHexProof(keccak256(client)), {
+    await nft.purchaseKingsWhitelist(1, tree.getHexProof(keccak256(client)), {
       value: toWei("0.09"),
       from: client,
     });
     console.log(fromWei(await web3.eth.getBalance(owner)));
     await nft.withdraw({ from: owner });
     console.log(fromWei(await web3.eth.getBalance(owner)));
-
   });
 });
-
