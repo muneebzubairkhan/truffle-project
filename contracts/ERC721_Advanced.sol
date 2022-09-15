@@ -1,6 +1,9 @@
 // Crypto Kings Club
 // 10,000 Kings are Invading the Metaverse to takeover their throne as the rightful rulers
 
+// goerli 0x36d956b990810C8928909E322A0685f8734D5461
+// https://testnets.opensea.io/assets/goerli/0x36d956b990810C8928909E322A0685f8734D5461/2
+
 // Website:
 // OpenSea:
 // Discord:
