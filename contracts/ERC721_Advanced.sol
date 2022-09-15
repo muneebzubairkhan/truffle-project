@@ -27,14 +27,14 @@ import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 
 contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQueryable, ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
     // Main Sale
-    uint256 public itemPrice = 0.12 ether;
-    uint256 public constant maxSupply = 4999;
+    uint256 public kingPrice = 0.50 ether;
+    uint256 public constant maxSupply = 10000;
     uint256 public saleActiveTime = type(uint256).max;
     string public imagesFolder;
 
     // Whitelist
     bytes32 public whitelistMerkleRoot;
-    uint256 public itemPriceWhitelist = 0.09 ether;
+    uint256 public kingPriceWhitelist = 0.25 ether;
     uint256 public whitelistActiveTime = type(uint256).max;
 
     // Per Wallet Limit
@@ -45,6 +45,7 @@ contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQuer
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
+        autoApproveMarketplace(0x1E0049783F008A0085193E00003D00cd54003c71); // OpenSea
     }
 
     /// @notice Purchase multiple NFTs at once
@@ -54,7 +55,7 @@ contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQuer
         require(totalSupply() <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(block.timestamp > saleActiveTime, "Sale is not active");
-        require(msg.value == _qty * itemPrice, "Try to send exact amount of ETH");
+        require(msg.value == _qty * kingPrice, "Try to send exact amount of ETH");
         require(_numberMinted(msg.sender) <= maxKingsPerWallet, "max kings per wallet reached");
     }
 
@@ -64,10 +65,10 @@ contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQuer
     }
 
     /// @notice Change price in case of ETH price changes too much
-    function setPrice(uint256 _newPrice) external onlyOwner {
-        itemPrice = _newPrice;
+    function setKingPrice(uint256 _newKingPrice) external onlyOwner {
+        kingPrice = _newKingPrice;
     }
-   
+
     function setMaxKingsPerWallet(uint256 _maxKingsPerWallet) external onlyOwner {
         maxKingsPerWallet = _maxKingsPerWallet;
     }
@@ -116,7 +117,7 @@ contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQuer
     // AUTO APPROVE MARKETPLACES //
     ///////////////////////////////
 
-    function autoApproveMarketplace(address _marketplace) external onlyOwner {
+    function autoApproveMarketplace(address _marketplace) public onlyOwner {
         approvedProxy[_marketplace] = !approvedProxy[_marketplace];
     }
 
@@ -135,7 +136,7 @@ contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQuer
         require(tx.origin == msg.sender, "The caller is a contract");
         require(inWhitelist(msg.sender, _proof), "You are not in whitelist");
         require(block.timestamp > whitelistActiveTime, "Whitelist is not active");
-        require(msg.value == _qty * itemPriceWhitelist, "Try to send exact amount of ETH");
+        require(msg.value == _qty * kingPriceWhitelist, "Try to send exact amount of ETH");
         require(_numberMinted(msg.sender) <= maxKingsPerWallet, "max kings per wallet reached");
     }
 
@@ -147,8 +148,8 @@ contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQuer
         whitelistActiveTime = _whitelistActiveTime;
     }
 
-    function setWhitelistItemPrice(uint256 _itemPriceWhitelist) external onlyOwner {
-        itemPriceWhitelist = _itemPriceWhitelist;
+    function setWhitelistKingPrice(uint256 _kingPriceWhitelist) external onlyOwner {
+        kingPriceWhitelist = _kingPriceWhitelist;
     }
 
     function setWhitelist(bytes32 _whitelistMerkleRoot) external onlyOwner {
