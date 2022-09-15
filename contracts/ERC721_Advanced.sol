@@ -30,7 +30,7 @@ contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQuer
     uint256 public itemPrice = 0.12 ether;
     uint256 public constant maxSupply = 4999;
     uint256 public saleActiveTime = type(uint256).max;
-    string public imagesFolder = "ipfs://QmNQnbjuesfcSMzcDShxZU1oGQjXaQWvYXchNYWHeieonh/";
+    string public imagesFolder;
 
     // Whitelist
     bytes32 public whitelistMerkleRoot;
