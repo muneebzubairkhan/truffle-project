@@ -25,7 +25,7 @@ import "erc721a/contracts/extensions/ERC721AQueryable.sol";
 // import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
 // import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 
-contract CryptoKingsClub is ERC721A("CryptoKingsClub", "BS"), ERC721AQueryable, ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
+contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQueryable, ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
     // Main Sale
     uint256 public itemPrice = 0.12 ether;
     uint256 public constant maxSupply = 4999;
