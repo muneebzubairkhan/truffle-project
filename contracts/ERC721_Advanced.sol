@@ -20,22 +20,32 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "erc721a/contracts/ERC721A.sol";
 import "erc721a/contracts/extensions/ERC721ABurnable.sol";
 import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+
 // import "erc721a@3.3.0/contracts/ERC721A.sol";
 // import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
 // import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 
-contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
-    string baseURI = "ipfs://QmNQnbjuesfcSMzcDShxZU1oGQjXaQWvYXchNYWHeieonh/";
-    uint256 saleActiveTime = type(uint256).max;
-    uint256 constant maxSupply = 4999;
-    uint256 itemPrice = 0.12 ether;
+contract CryptoKingsClub is ERC721A("CryptoKingsClub", "BS"), ERC721AQueryable, ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
+    // Main Sale
+    uint256 public itemPrice = 0.12 ether;
+    uint256 public constant maxSupply = 4999;
+    uint256 public saleActiveTime = type(uint256).max;
+    string public baseURI = "ipfs://QmNQnbjuesfcSMzcDShxZU1oGQjXaQWvYXchNYWHeieonh/";
+
+    // Whitelist
+    bytes32 public whitelistMerkleRoot;
+    uint256 public itemPriceWhitelist = 0.09 ether;
+    uint256 public whitelistActiveTime = type(uint256).max;
+
+    // Auto Approve Marketplaces
+    mapping(address => bool) public projectProxy;
 
     constructor() {
         _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
     }
 
     /// @notice Purchase multiple NFTs at once
-    function purchaseTokens(uint256 _howMany) external payable nonReentrant {
+    function purchaseKings(uint256 _howMany) external payable nonReentrant {
         _safeMint(msg.sender, _howMany);
 
         require(totalSupply() <= maxSupply, "Try mint less");
@@ -91,15 +101,13 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurna
         _setDefaultRoyalty(_receiver, _feeNumerator);
     }
 
-    function receiveCoin() external payable {}
-
     receive() external payable {}
+
+    function receiveCoin() external payable {}
 
     ///////////////////////////////
     // AUTO APPROVE MARKETPLACES //
     ///////////////////////////////
-
-    mapping(address => bool) projectProxy;
 
     function flipProxyState(address proxyAddress) external onlyOwner {
         projectProxy[proxyAddress] = !projectProxy[proxyAddress];
@@ -109,42 +117,34 @@ contract Boredsone is ERC721A("Boredsone", "BS"), ERC721AQueryable, ERC721ABurna
         return projectProxy[_operator] ? true : super.isApprovedForAll(_owner, _operator);
     }
 
-    //////////////
-    // Presale  //
-    //////////////
+    ////////////////
+    // Whitelist  //
+    ////////////////
 
-    uint256 presaleActiveTime = 1650297600;
-    uint256 itemPricePresale = 0.09 ether;
-    bytes32 whitelistMerkleRoot;
-
-    function purchaseTokensPresale(uint256 _howMany, bytes32[] calldata _proof) external payable nonReentrant {
+    function purchaseKingsWhitelist(uint256 _howMany, bytes32[] calldata _proof) external payable nonReentrant {
         _safeMint(msg.sender, _howMany);
 
         require(totalSupply() <= maxSupply, "Try mint less");
         require(tx.origin == msg.sender, "The caller is a contract");
         require(_howMany <= 50, "Mint min 1, max 50");
-        require(inWhitelist(msg.sender, _proof), "You are not in presale");
-        require(block.timestamp > presaleActiveTime, "Presale is not active");
-        require(msg.value == _howMany * itemPricePresale, "Try to send exact amount of ETH");
+        require(inWhitelist(msg.sender, _proof), "You are not in whitelist");
+        require(block.timestamp > whitelistActiveTime, "Whitelist is not active");
+        require(msg.value == _howMany * itemPriceWhitelist, "Try to send exact amount of ETH");
     }
 
     function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {
         return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
     }
 
-    function setPresaleActiveTime(uint256 _presaleActiveTime) external onlyOwner {
-        presaleActiveTime = _presaleActiveTime;
+    function setWhitelistActiveTime(uint256 _whitelistActiveTime) external onlyOwner {
+        whitelistActiveTime = _whitelistActiveTime;
     }
 
-    function setPresaleItemPrice(uint256 _itemPricePresale) external onlyOwner {
-        itemPricePresale = _itemPricePresale;
+    function setWhitelistItemPrice(uint256 _itemPriceWhitelist) external onlyOwner {
+        itemPriceWhitelist = _itemPriceWhitelist;
     }
 
     function setWhitelist(bytes32 _whitelistMerkleRoot) external onlyOwner {
         whitelistMerkleRoot = _whitelistMerkleRoot;
     }
-}
-
-interface OpenSea {
-    function proxies(address) external view returns (address);
 }
