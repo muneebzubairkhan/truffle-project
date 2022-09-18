@@ -1,16 +1,6 @@
 // Crypto Kings Club
 // 10,000 Kings are Invading the Metaverse to takeover their throne as the rightful rulers
 
-// goerli 0x36d956b990810C8928909E322A0685f8734D5461
-// https://testnets.opensea.io/assets/goerli/0x36d956b990810C8928909E322A0685f8734D5461/2
-
-// Website:
-// OpenSea:
-// Discord:
-// Instagram:
-// Twitter:
-// Youtube:
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
@@ -20,17 +10,13 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
-import "erc721a/contracts/ERC721A.sol";
-import "erc721a/contracts/extensions/ERC721ABurnable.sol";
-import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+import "erc721a@3.3.0/contracts/ERC721A.sol";
+import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
+import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
 
-// import "erc721a@3.3.0/contracts/ERC721A.sol";
-// import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
-// import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
-
-contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQueryable, ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
+contract CryptoKingsClub is ERC721A("Crypto Kings Club", "CKC"), ERC721AQueryable, ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
     // Main Sale
-    uint256 public kingPrice = 0.50 ether;
+    uint256 public kingPrice = 0.35 ether;
     uint256 public constant maxSupply = 10000;
     uint256 public saleActiveTime = type(uint256).max;
     string public imagesFolder;
@@ -47,7 +33,7 @@ contract CryptoKingsClub is ERC721A("IIIIIIIIIIII", "IIIIIIIIIIII"), ERC721AQuer
     mapping(address => bool) public approvedProxy;
 
     constructor() {
-        _setDefaultRoyalty(msg.sender, 10_00); // 10.00%
+        _setDefaultRoyalty(msg.sender, 5_00); // 5.00%
         autoApproveMarketplace(0x1E0049783F008A0085193E00003D00cd54003c71); // OpenSea
     }
 
