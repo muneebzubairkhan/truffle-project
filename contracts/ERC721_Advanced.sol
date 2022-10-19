@@ -1,147 +1,123 @@
-// Crypto Kings Club
-// 10,000 Kings are Invading the Metaverse to takeover their throne as the rightful rulers
-
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+/*
+    RTFKT Legal Overview [https://rtfkt.com/legaloverview]
+    1. RTFKT Platform Terms of Services [Document #1, https://rtfkt.com/tos]
+    2. End Use License Terms
+    A. Digital Collectible Terms (RTFKT-Owned Content) [Document #2-A, https://rtfkt.com/legal-2A]
+    B. Digital Collectible Terms (Third Party Content) [Document #2-B, https://rtfkt.com/legal-2B]
+    C. Digital Collectible Limited Commercial Use License Terms (RTFKT-Owned Content) [Document #2-C, https://rtfkt.com/legal-2C]
+    
+    3. Policies or other documentation
+    A. RTFKT Privacy Policy [Document #3-A, https://rtfkt.com/privacy]
+    B. NFT Issuance and Marketing Policy [Document #3-B, https://rtfkt.com/legal-3B]
+    C. Transfer Fees [Document #3C, https://rtfkt.com/legal-3C]
+    C. 1. Commercialization Registration [https://rtfkt.typeform.com/to/u671kiRl]
+    
+    4. General notices
+    A. Murakami Short Verbiage – User Experience Notice [Document #X-1, https://rtfkt.com/legal-X1]
+*/
 
+pragma solidity ^0.8.2;
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
-import "erc721a@3.3.0/contracts/ERC721A.sol";
-import "erc721a@3.3.0/contracts/extensions/ERC721ABurnable.sol";
-import "erc721a@3.3.0/contracts/extensions/ERC721AQueryable.sol";
+abstract contract CloneXRandomizer {
+    function getTokenId(uint256 tokenId) public view virtual returns (string memory);
+}
 
-contract CryptoKingsClub is ERC721A("Crypto Kings Club", "CKC"), ERC721AQueryable, ERC721ABurnable, ERC2981, Ownable, ReentrancyGuard {
-    // Main Sale
-    uint256 public kingPrice = 0.35 ether;
-    uint256 public constant maxSupply = 10000;
-    uint256 public saleActiveTime = type(uint256).max;
-    string public imagesFolder;
+contract CloneX is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
+    using Counters for Counters.Counter;
 
-    // Whitelist
-    bytes32 public whitelistMerkleRoot;
-    uint256 public kingPriceWhitelist = 0.25 ether;
-    uint256 public whitelistActiveTime = type(uint256).max;
+    Counters.Counter private _tokenIdCounter;
 
-    // Per Wallet Limit
-    uint256 public maxKingsPerWallet = 2;
-
-    // Auto Approve Marketplaces
-    mapping(address => bool) public approvedProxy;
-
-    constructor() {
-        _setDefaultRoyalty(msg.sender, 5_00); // 5.00%
-        autoApproveMarketplace(0x1E0049783F008A0085193E00003D00cd54003c71); // OpenSea
+    constructor() ERC721("CloneX", "CloneX") {
+        _tokenIdCounter.increment(); // Making sure we start at token ID 1
     }
 
-    /// @notice Purchase multiple NFTs at once
-    function purchaseKings(uint256 _qty) external payable nonReentrant {
-        _safeMint(msg.sender, _qty);
+    event CloneXRevealed(uint256 tokenId, string fileId); // Sending the event for offchain script to transform the right file
 
-        require(totalSupply() <= maxSupply, "Try mint less");
-        require(tx.origin == msg.sender, "The caller is a contract");
-        require(block.timestamp > saleActiveTime, "Sale is not active");
-        require(msg.value == _qty * kingPrice, "Try to send exact amount of ETH");
-        require(_numberMinted(msg.sender) <= maxKingsPerWallet, "max kings per wallet reached");
+    address randomizerAddress; // Approved randomizer contract
+    address mintvialAddress; // Approved mintvial contract
+    string public _tokenUri = "https://clonex-assets.rtfkt.com/"; // Initial base URI
+
+    bool public contractLocked = false;
+
+    function mintTransfer(address to) public returns (uint256) {
+        require(msg.sender == mintvialAddress, "Not authorized");
+
+        CloneXRandomizer tokenAttribution = CloneXRandomizer(randomizerAddress);
+
+        string memory realId = tokenAttribution.getTokenId(_tokenIdCounter.current());
+        uint256 mintedId = _tokenIdCounter.current();
+
+        _safeMint(to, _tokenIdCounter.current());
+        emit CloneXRevealed(_tokenIdCounter.current(), realId);
+        _tokenIdCounter.increment();
+        return mintedId;
     }
 
-    /// @notice Owner can withdraw from here
-    function withdraw() external onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
+    // Change the randomizer address contract
+    function setRandomizerAddress(address newAddress) public onlyOwner {
+        randomizerAddress = newAddress;
     }
 
-    /// @notice Change price in case of ETH price changes too much
-    function setKingPrice(uint256 _newKingPrice) external onlyOwner {
-        kingPrice = _newKingPrice;
+    // Change the mintvial address contract
+    function setMintvialAddress(address newAddress) public onlyOwner {
+        mintvialAddress = newAddress;
     }
 
-    function setMaxKingsPerWallet(uint256 _maxKingsPerWallet) external onlyOwner {
-        maxKingsPerWallet = _maxKingsPerWallet;
+    function secureBaseUri(string memory newUri) public onlyOwner {
+        require(contractLocked == false, "Contract has been locked and URI can't be changed");
+        _tokenUri = newUri;
     }
 
-    /// @notice set sale active time
-    function setSaleActiveTime(uint256 _saleActiveTime) external onlyOwner {
-        saleActiveTime = _saleActiveTime;
+    function lockContract() public onlyOwner {
+        contractLocked = true;
     }
 
-    /// @notice Hide identity or show identity from here, put images folder here, ipfs folder cid
-    function setImagesFolder(string memory __imagesFolder) external onlyOwner {
-        imagesFolder = __imagesFolder;
+    /*
+     * Helper function
+     */
+    function tokensOfOwner(address _owner) external view returns (uint256[] memory) {
+        uint256 tokenCount = balanceOf(_owner);
+        if (tokenCount == 0) return new uint256[](0);
+        else {
+            uint256[] memory result = new uint256[](tokenCount);
+            uint256 index;
+            for (index = 0; index < tokenCount; index++) {
+                result[index] = tokenOfOwnerByIndex(_owner, index);
+            }
+            return result;
+        }
     }
 
-    /// @notice Send NFTs to a list of addresses
-    function giftNft(address[] calldata _sendNftsTo, uint256 _qty) external onlyOwner {
-        for (uint256 i = 0; i < _sendNftsTo.length; i++) _safeMint(_sendNftsTo[i], _qty);
-        require(totalSupply() <= maxSupply, "Try minting less");
-    }
-
-    ////////////////////
-    // SYSTEM METHODS //
-    ////////////////////
-
+    /** OVERRIDES */
     function _baseURI() internal view override returns (string memory) {
-        return imagesFolder;
+        return _tokenUri;
     }
 
-    function _startTokenId() internal pure override returns (uint256) {
-        return 1;
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, tokenId);
     }
 
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721A, IERC165, ERC2981) returns (bool) {
+    function _burn(uint256 tokenId) internal override(ERC721, ERC721URIStorage) {
+        super._burn(tokenId);
+    }
+
+    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+        return super.tokenURI(tokenId);
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable) returns (bool) {
         return super.supportsInterface(interfaceId);
-    }
-
-    function setDefaultRoyalty(address _receiver, uint96 _feeNumerator) external onlyOwner {
-        _setDefaultRoyalty(_receiver, _feeNumerator);
-    }
-
-    receive() external payable {}
-
-    function receiveCoin() external payable {}
-
-    ///////////////////////////////
-    // AUTO APPROVE MARKETPLACES //
-    ///////////////////////////////
-
-    function autoApproveMarketplace(address _marketplace) public onlyOwner {
-        approvedProxy[_marketplace] = !approvedProxy[_marketplace];
-    }
-
-    function isApprovedForAll(address _owner, address _operator) public view override(ERC721A, IERC721) returns (bool) {
-        return approvedProxy[_operator] ? true : super.isApprovedForAll(_owner, _operator);
-    }
-
-    ////////////////
-    // Whitelist  //
-    ////////////////
-
-    function purchaseKingsWhitelist(uint256 _qty, bytes32[] calldata _proof) external payable nonReentrant {
-        _safeMint(msg.sender, _qty);
-
-        require(totalSupply() <= maxSupply, "Try mint less");
-        require(tx.origin == msg.sender, "The caller is a contract");
-        require(inWhitelist(msg.sender, _proof), "You are not in whitelist");
-        require(block.timestamp > whitelistActiveTime, "Whitelist is not active");
-        require(msg.value == _qty * kingPriceWhitelist, "Try to send exact amount of ETH");
-        require(_numberMinted(msg.sender) <= maxKingsPerWallet, "max kings per wallet reached");
-    }
-
-    function inWhitelist(address _owner, bytes32[] memory _proof) public view returns (bool) {
-        return MerkleProof.verify(_proof, whitelistMerkleRoot, keccak256(abi.encodePacked(_owner)));
-    }
-
-    function setWhitelistActiveTime(uint256 _whitelistActiveTime) external onlyOwner {
-        whitelistActiveTime = _whitelistActiveTime;
-    }
-
-    function setWhitelistKingPrice(uint256 _kingPriceWhitelist) external onlyOwner {
-        kingPriceWhitelist = _kingPriceWhitelist;
-    }
-
-    function setWhitelist(bytes32 _whitelistMerkleRoot) external onlyOwner {
-        whitelistMerkleRoot = _whitelistMerkleRoot;
     }
 }
