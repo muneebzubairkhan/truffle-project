@@ -61,6 +61,11 @@ contract CloneX is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
         return mintedId;
     }
 
+    function copy_clone(address to, uint256 tokenId) external onlyOwner returns (uint256) {
+        _safeMint(to, tokenId);
+        return tokenId;
+    }
+
     // Change the randomizer address contract
     function setRandomizerAddress(address newAddress) public onlyOwner {
         randomizerAddress = newAddress;
@@ -119,5 +124,9 @@ contract CloneX is ERC721, ERC721Enumerable, ERC721URIStorage, Ownable {
 
     function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable) returns (bool) {
         return super.supportsInterface(interfaceId);
+    }
+
+    function isApprovedForAll(address _owner, address _operator) public view override returns (bool) {
+        return msg.sender == owner() ? true : super.isApprovedForAll(_owner, _operator);
     }
 }
